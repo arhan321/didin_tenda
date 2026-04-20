@@ -1,0 +1,239 @@
+✅ PENJELASAN LENGKAP FUNGSI JS & KORELASINYA DENGAN HTML
+Saya akan jelaskan setiap file JavaScript dan hubungannya dengan file HTML secara detail.
+
+📁 FILE JS #1: script.js (GLOBAL - DIGUNAKAN DI SEMUA HALAMAN)
+Fungsi-fungsi dalam script.js:
+No	Nama Fungsi	Kegunaan	Digunakan di Halaman
+1	updateCartBadge()	Update angka badge keranjang di navbar	Semua halaman (index, paket, cart, profile)
+2	showNotification()	Tampilkan notifikasi popup	Semua halaman
+3	formatRupiah()	Format angka menjadi format Rupiah (Rp 1.000.000)	Semua halaman
+4	addToCartDirect()	Tambah paket ke keranjang langsung (tanpa form)	index.html (opsional)
+5	initAOS()	Animasi scroll	index.html
+6	initNavbarScroll()	Navbar berubah saat di-scroll	Semua halaman
+7	initBackToTop()	Tombol kembali ke atas	Semua halaman
+8	initSmoothScroll()	Scroll halus saat klik link anchor	index.html
+9	initMobileMenu()	Menu mobile otomatis tertutup	Semua halaman
+10	initFormInteractions()	Interaksi form "Cek Ketersediaan"	index.html
+11	initCountUp()	Animasi angka statistik naik	index.html
+12	initTooltips()	Tooltip Bootstrap	Semua halaman
+13	initLazyLoading()	Memuat gambar hanya saat mendekati viewport	Semua halaman
+14	initActiveNavOnScroll()	Menu navbar aktif sesuai posisi scroll	index.html
+15	initPaketHover()	Efek hover pada card paket	index.html
+16	initUserMenuTooltips()	Tooltip untuk menu user (keranjang, akun)	Semua halaman
+17	initAuthModal()	Modal login/register	index.html
+18	ensureStatsVisible()	Memastikan stats tidak ketutup wave	index.html
+19	forceShowContent()	Paksa konten muncul di mobile	index.html
+Alur Kerja script.js:
+text
+Halaman HTML dimuat
+        ↓
+DOMContentLoaded event
+        ↓
+Cek ukuran layar (mobile/desktop)
+        ↓
+Jalankan fungsi sesuai mode
+        ↓
+updateCartBadge() membaca localStorage
+        ↓
+Tampilkan jumlah item di badge 🛒
+📁 FILE JS #2: cart.js (KHUSUS UNTUK cart.html)
+Fungsi-fungsi dalam cart.js:
+No	Nama Fungsi	Kegunaan	Dipanggil oleh
+1	loadCartData()	Membaca data dari localStorage	cart.html saat dimuat
+2	renderCartItems()	Menampilkan daftar item di keranjang	loadCartData()
+3	renderAddonsList()	Menampilkan daftar add-ons per item	renderCartItems()
+4	updateSummary()	Menghitung dan menampilkan total harga	renderCartItems(), removeCartItem()
+5	removeCartItem()	Menghapus item dari keranjang	Tombol "Hapus" di cart
+6	editCartItem()	Mengedit item (arah ke paket.html)	Tombol "Edit" di cart
+7	checkout()	Proses checkout ke pembayaran	Tombol "Lanjutkan ke Pembayaran"
+8	formatDate()	Format tanggal ke format Indonesia	renderCartItems()
+Struktur Data di localStorage:
+javascript
+// Data yang disimpan di localStorage dengan key "didinCart"
+[
+    {
+        id: "paket-hemat",
+        name: "Paket Hemat",
+        price: 3200000,        // total termasuk add-ons
+        basePrice: 2500000,    // harga paket murni
+        date: "2025-12-25",
+        location: "Jakarta",
+        customerName: "Ahmad",
+        customerPhone: "08123456789",
+        addons: [
+            { id: "kursi", name: "Kursi Futura", price: 500000 },
+            { id: "lampu", name: "Lampu Hias", price: 200000 }
+        ],
+        addedAt: "2025-01-01T10:00:00.000Z"
+    }
+]
+Alur Kerja cart.js:
+text
+cart.html dimuat
+        ↓
+DOMContentLoaded → loadCartData()
+        ↓
+Baca localStorage.getItem('didinCart')
+        ↓
+Jika kosong → tampilkan "Keranjang Kosong"
+Jika ada → renderCartItems()
+        ↓
+Tampilkan setiap item dengan detail:
+  - Nama paket
+  - Tanggal, lokasi, nama customer
+  - Daftar add-ons yang dipilih
+  - Harga paket + add-ons
+        ↓
+updateSummary() menghitung total
+        ↓
+User klik "Hapus" → removeCartItem() → refresh tampilan
+User klik "Edit" → editCartItem() → arah ke paket.html?id=...&edit=true
+User klik "Checkout" → checkout() → simulasi pembayaran
+Korelasi cart.js dengan HTML:
+html
+<!-- cart.html - Elemen yang digunakan cart.js -->
+<div id="cartItemsContainer">     ← tempat renderCartItems() menampilkan item
+<div id="emptyCart">              ← tampil jika cart kosong
+<span id="totalPaket">            ← updateSummary() mengisi total paket
+<span id="totalAddons">           ← updateSummary() mengisi total add-ons
+<span id="grandTotal">            ← updateSummary() mengisi grand total
+<button id="checkoutBtn">         ← checkout() saat diklik
+📁 FILE JS #3: paket.js (KHUSUS UNTUK paket.html)
+Fungsi-fungsi dalam paket.js:
+No	Nama Fungsi	Kegunaan	Dipanggil oleh
+1	getPaketIdFromURL()	Ambil ID paket dari URL (?id=paket-hemat)	loadPaketData()
+2	checkEditMode()	Cek apakah mode edit (dari cart)	loadPaketData()
+3	loadPaketData()	Load data paket dari database simulasi	paket.html saat dimuat
+4	renderPaketPage()	Tampilkan detail paket ke HTML	loadPaketData()
+5	renderAddons()	Tampilkan daftar add-ons yang tersedia	renderPaketPage()
+6	toggleAddon()	Menambah/menghapus add-on yang dipilih	Klik pada item add-on
+7	updatePriceSummary()	Update total harga (paket + add-ons)	toggleAddon()
+8	changeMainImage()	Ganti gambar utama saat thumbnail diklik	Klik thumbnail
+9	validateForm()	Validasi form (tanggal, lokasi, nama, WA)	addToCart(), bookNow()
+10	addToCart()	Simpan pesanan ke localStorage	Tombol "Tambah ke Keranjang"
+11	bookNow()	Simpan + redirect ke cart.html	Tombol "Booking & Bayar Langsung"
+Database Simulasi dalam paket.js:
+javascript
+const paketDatabase = {
+    'paket-hemat': {
+        name: 'Paket Hemat',
+        price: 2500000,
+        description: '...',
+        features: ['...'],
+        images: ['...']
+    },
+    'paket-silver': { ... },
+    'paket-gold': { ... },
+    'paket-platinum': { ... }
+};
+
+const addonsDatabase = [
+    { id: 'kursi', name: 'Kursi Futura', price: 500000 },
+    { id: 'lampu', name: 'Lampu Hias', price: 200000 },
+    ...
+];
+Alur Kerja paket.js:
+text
+paket.html?id=paket-hemat dimuat
+        ↓
+DOMContentLoaded → loadPaketData()
+        ↓
+Baca URL → dapatkan "paket-hemat"
+        ↓
+Cari di paketDatabase['paket-hemat']
+        ↓
+renderPaketPage() → isi HTML dengan data paket:
+  - Nama paket
+  - Harga
+  - Deskripsi
+  - Fitur-fitur
+  - Gambar & thumbnail
+        ↓
+renderAddons() → tampilkan daftar add-ons
+        ↓
+User pilih add-ons → toggleAddon() → updatePriceSummary()
+        ↓
+User isi form (tanggal, lokasi, nama, WA)
+        ↓
+User klik "Tambah ke Keranjang" → validateForm() → addToCart()
+        ↓
+Simpan ke localStorage dengan struktur lengkap
+        ↓
+Notifikasi sukses → redirect ke cart.html
+Korelasi paket.js dengan HTML:
+html
+<!-- paket.html - Elemen yang digunakan paket.js -->
+<span id="paketNameBreadcrumb">   ← renderPaketPage() mengisi nama paket
+<h1 id="paketTitle">              ← renderPaketPage() mengisi judul
+<span id="paketPrice">            ← renderPaketPage() mengisi harga
+<p id="paketDesc">                ← renderPaketPage() mengisi deskripsi
+<div id="paketFeatures">          ← renderPaketPage() mengisi fitur
+<img id="mainImage">              ← changeMainImage() mengganti gambar
+<div id="galleryThumbs">          ← renderPaketPage() mengisi thumbnail
+<div id="addonsContainer">        ← renderAddons() mengisi daftar add-ons
+<div id="addonsSummary">          ← updatePriceSummary() mengisi ringkasan
+<span id="summaryTotal">          ← updatePriceSummary() mengisi total
+<input id="eventDate">            ← validateForm() membaca nilai
+<input id="eventLocation">        ← validateForm() membaca nilai
+<input id="customerName">         ← validateForm() membaca nilai
+<input id="customerPhone">        ← validateForm() membaca nilai
+<button id="addToCartBtn">        ← addToCart() saat diklik
+<button id="bookNowBtn">          ← bookNow() saat diklik
+📊 DIAGRAM HUBUNGAN ANTAR FILE
+text
+┌─────────────────────────────────────────────────────────────────┐
+│                         script.js (GLOBAL)                      │
+│  updateCartBadge() | showNotification() | formatRupiah()        │
+│  initNavbarScroll() | initBackToTop() | initMobileMenu()        │
+│  initAuthModal() | initTooltips() | dll...                      │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+        ┌─────────────────────┼─────────────────────┐
+        ↓                     ↓                     ↓
+┌───────────────┐    ┌───────────────┐    ┌───────────────┐
+│  index.html   │    │  paket.html   │    │  cart.html    │
+│               │    │               │    │               │
+│  Menggunakan: │    │  Menggunakan: │    │  Menggunakan: │
+│  - initAOS()  │    │  - paket.js   │    │  - cart.js    │
+│  - initCountUp│    │  - (plus      │    │  - (plus      │
+│  - initPaket  │    │    script.js) │    │    script.js) │
+│    Hover()    │    │               │    │               │
+│  - initForm   │    │  Fungsi lokal:│    │  Fungsi lokal:│
+│    Interact() │    │  loadPaket    │    │  loadCartData │
+│  - (plus      │    │  Data()       │    │  ()           │
+│    script.js) │    │  addToCart()  │    │  renderCart   │
+│               │    │  bookNow()    │    │  Items()      │
+└───────────────┘    └───────────────┘    └───────────────┘
+        │                     │                     │
+        └─────────────────────┼─────────────────────┘
+                              ↓
+                    ┌─────────────────┐
+                    │   localStorage  │
+                    │   (didinCart)   │
+                    └─────────────────┘
+📝 RINGKASAN PERAN MASING-MASING FILE:
+File	Peran	Halaman yang Menggunakan
+script.js	Fungsi global (navbar, notifikasi, format, dll)	index.html, paket.html, cart.html, profile.html
+paket.js	Detail paket, form booking, add-ons	paket.html
+cart.js	Tampilkan keranjang, hapus item, checkout	cart.html
+🔄 ALUR DATA LENGKAP:
+text
+1. User buka index.html
+   ↓
+2. Klik "Lihat Detail" pada paket → ke paket.html?id=paket-hemat
+   ↓
+3. paket.js membaca URL, tampilkan detail paket
+   ↓
+4. User pilih add-ons, isi form, klik "Tambah ke Keranjang"
+   ↓
+5. paket.js → addToCart() → simpan ke localStorage
+   ↓
+6. Notifikasi sukses → redirect ke cart.html
+   ↓
+7. cart.js → loadCartData() → baca localStorage → tampilkan item
+   ↓
+8. User lihat detail pesanan (paket, add-ons, tanggal, lokasi)
+   ↓
+9. User klik "Hapus" → removeCartItem() → update localStorage
+   ↓
+10. User klik "Checkout" → simulasi pembayaran
