@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'site_title' => 'TRI ASTRA PERSADA',
+    'site_title' => 'DIDIN TENDA',
 
     'frontend' => [
         // 'about'                 => [

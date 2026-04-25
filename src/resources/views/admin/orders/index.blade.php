@@ -221,7 +221,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Set zoom ke 85%
-            document.body.style.zoom = "85%";
+           // document.body.style.zoom = "85%";
     
             // Nonaktifkan deteksi bahasa otomatis dengan menetapkan bahasa secara manual
             document.documentElement.lang = "en"; // Atur bahasa menjadi bahasa Inggris (atau bahasa lain yang diinginkan)

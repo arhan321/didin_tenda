@@ -31,15 +31,7 @@
                             </div>
                         </div>
                 
-                        <!-- Additional Container -->
-                        @if($canViewCharts)
-                        <div class="col-md-6">
-                            <div class="cloud-info">
-                                <p>Apakah kamu ingin ke Cloud Tri Astra Persada?</p>
-                                <a href="https://cloud.triastrapersada.com" class="fancy-link" target="_blank">Klik ini</a>
-                            </div>
-                        </div>
-                        @endif
+
                         
                         <style>
                             .fancy-link {
@@ -76,7 +68,7 @@
 
     @if($canViewCharts)
     <div class="row my-0.5">
-        <div class="col-lg-3 col-md-6 mb-4">
+        {{-- <div class="col-lg-3 col-md-6 mb-4">
             <div class="card p-4 shadow-sm" style="border-left: 5px solid #5A67D8;">
                 <div class="card-body d-flex justify-content-between align-items-center">
                     <div class="text-left">
@@ -86,7 +78,7 @@
                     <i class="bi bi-person-circle" style="font-size: 2.5rem; color: lightgray;"></i>
                 </div>
             </div>
-        </div>
+        </div> --}}
         <div class="col-lg-3 col-md-6 mb-4">
             <div class="card p-4 shadow-sm" style="border-left: 5px solid #48BB78;">
                 <div class="card-body d-flex justify-content-between align-items-center">
@@ -109,7 +101,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-lg-3 col-md-6 mb-4">
+        {{-- <div class="col-lg-3 col-md-6 mb-4">
             <div class="card p-4 shadow-sm" style="border-left: 5px solid #ECC94B;">
                 <div class="card-body d-flex justify-content-between align-items-center">
                     <div class="text-left">
@@ -119,7 +111,7 @@
                     <i class="bi bi-people-fill" style="font-size: 2.5rem; color: lightgray;"></i>
                 </div>
             </div>
-        </div>
+        </div> --}}
     </div>
     
     <!-- Chart Section -->

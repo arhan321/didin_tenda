@@ -16,10 +16,10 @@ class HomeController extends Controller
 {
     public function index(Montlyincome $chart, OrderByMonth $chart2)
     {
-        $totalClients = Client::count(); 
+        // $totalClients = Client::count(); 
         $totalorders = Order::count();
         $totalproducts = Product::count();
-        $totalemployee = Karyawan::count();
+        // $totalemployee = Karyawan::count();
         $totalordersbarang = OrdersBarang::count();
 
         // Cek email pengguna yang sedang login
@@ -33,10 +33,10 @@ class HomeController extends Controller
         return view('home', [
             'chart' => $canViewCharts ? $chart->build() : null, // Jika tidak bisa, kirim null
             'chart2' => $canViewCharts ? $chart2->build() : null, // Jika tidak bisa, kirim null
-            'totalClients' => $canViewCharts ? $totalClients : null, // Jika tidak bisa, kirim null
+            // 'totalClients' => $canViewCharts ? $totalClients : null, // Jika tidak bisa, kirim null
             'totalorders' => $canViewCharts ? $totalorders : null, // Jika tidak bisa, kirim null
             'totalproducts' => $canViewCharts ? $totalproducts : null, // Jika tidak bisa, kirim null
-            'totalemployee' => $canViewCharts ? $totalemployee : null, // Jika tidak bisa, kirim null
+            // 'totalemployee' => $canViewCharts ? $totalemployee : null, // Jika tidak bisa, kirim null
             'canViewCharts' => $canViewCharts // Kirim flag ini ke view untuk logika tampilan
             
         ]);
