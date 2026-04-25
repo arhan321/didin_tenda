@@ -16,7 +16,7 @@
             </a>
         </li>
         @can('user_management_access')
-            <li class="c-sidebar-nav-dropdown {{ request()->is("admin/permissions*") ? "c-show" : "" }} {{ request()->is("admin/roles*") ? "c-show" : "" }} {{ request()->is("admin/users*") ? "c-show" : "" }}">
+            <li class="c-sidebar-nav-dropdown {{ request()->is("admin/permissions*") ? "c-show" : "" }} {{ request()->is("admin/roles*") ? "c-show" : "" }} {{ request()->is("admin/users*") ? "c-show" : "" }} {{ request()->is("admin/tests*") ? "c-show" : "" }}">
                 <a class="c-sidebar-nav-dropdown-toggle" href="#">
                     <i class="fa-fw fas fa-users c-sidebar-nav-icon">
 
@@ -51,6 +51,16 @@
 
                                 </i>
                                 {{ trans('cruds.user.title') }}
+                            </a>
+                        </li>
+                    @endcan
+                    @can('test_access')
+                        <li class="c-sidebar-nav-item">
+                            <a href="{{ route("admin.tests.index") }}" class="c-sidebar-nav-link {{ request()->is("admin/tests") || request()->is("admin/tests/*") ? "c-active" : "" }}">
+                                <i class="fa-fw fas fa-user c-sidebar-nav-icon">
+
+                                </i>
+                                test
                             </a>
                         </li>
                     @endcan

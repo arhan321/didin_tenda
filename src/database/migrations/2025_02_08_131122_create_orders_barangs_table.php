@@ -14,12 +14,12 @@ return new class extends Migration
         Schema::create('orders_barangs', function (Blueprint $table) {
             $table->id();
             // $table->string('nama_pemesan');
-            $table->unsignedBigInteger('client_id')->nullable();
-            $table->foreign('client_id')->references('id')->on('clients');
-            $table->unsignedBigInteger('alamat_id')->nullable();
-            $table->foreign('alamat_id')->references('id')->on('clients');
-            $table->unsignedBigInteger('cabang_id')->nullable();
-            $table->foreign('cabang_id')->references('id')->on('clients');
+            // $table->unsignedBigInteger('client_id')->nullable();
+            // $table->foreign('client_id')->references('id')->on('clients');
+            // $table->unsignedBigInteger('alamat_id')->nullable();
+            // $table->foreign('alamat_id')->references('id')->on('clients');
+            // $table->unsignedBigInteger('cabang_id')->nullable();
+            // $table->foreign('cabang_id')->references('id')->on('clients');
             $table->json('product');
             $table->biginteger('price');
             // $table->time('jam_pesan')->nullable();

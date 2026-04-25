@@ -171,7 +171,11 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::post('invoicedgpros/ckmedia', 'InvoicedgproController@storeCKEditorImages')->name('invoicedgpros.storeCKEditorImages');
     Route::resource('invoicedgpros', 'InvoicedgproController');
 
-
+    // cetakinvoicedgpro
+    Route::delete('tests/destroy', 'TestController@massDestroy')->name('tests.massDestroy');
+    Route::post('tests/media', 'TestController@storeMedia')->name('tests.storeMedia');
+    Route::post('tests/ckmedia', 'TestController@storeCKEditorImages')->name('tests.storeCKEditorImages');
+    Route::resource('tests', 'TestController');
 });
 Route::group(['prefix' => 'profile', 'as' => 'profile.', 'namespace' => 'Auth', 'middleware' => ['auth']], function () {
     // Change password

@@ -68,10 +68,10 @@ class OrderController extends Controller
         $defaultStatusBayar = 'Belum bayar';
 
         // Ambil daftar clients sebagai objek lengkap, bukan pluck
-        $clients = Client::all();  // Ambil data lengkap client
+        // $clients = Client::all();  // Ambil data lengkap client
 
         // Ambil data stock outstanding dari monitoring
-        $monitoringStock = Monitoring::all()->pluck('stock_outstanding', 'product_id'); // Mengambil stock dari monitoring berdasarkan product_id
+        // $monitoringStock = Monitoring::all()->pluck('stock_outstanding', 'product_id'); // Mengambil stock dari monitoring berdasarkan product_id
 
         return view('admin.orders.create', compact(
             'products',

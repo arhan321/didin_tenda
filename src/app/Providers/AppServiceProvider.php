@@ -25,8 +25,9 @@ class AppServiceProvider extends ServiceProvider
         //   \Illuminate\Support\Facades\URL::forceScheme('https');
         //   DeliveryOrder::observe(DeliveryOrderObserver::class);
 
-          DB::listen(function ($query) {
-            logger($query->sql);
-        });
+        //   DB::listen(function ($query) {
+        //     logger($query->sql);
+        // });
+        \Illuminate\Support\Facades\URL::forceScheme('https');
     }
 }
