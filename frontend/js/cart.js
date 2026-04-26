@@ -1,7 +1,7 @@
 /**
  * CART.JS - Halaman Keranjang Booking
  * Menampilkan item yang sudah ditambahkan dari halaman detail paket
- * Termasuk add-ons yang dipilih dan ongkir
+ * Termasuk add-ons yang dipilih dan paket custom
  */
 
 // Variabel global
@@ -43,9 +43,12 @@ function renderCartItems() {
         // Format tanggal
         const formattedDate = item.date ? formatDate(item.date) : 'Belum dipilih';
         
+        // Cek apakah ini paket custom
+        const isCustom = item.isCustom === true;
+        
         // Hitung total add-ons
         const totalAddons = item.addons && item.addons.length > 0 
-            ? item.addons.reduce((sum, addon) => sum + addon.price, 0) 
+            ? item.addons.reduce((sum, addon) => sum + (addon.totalPrice || addon.price), 0) 
             : 0;
         
         // Data ongkir
@@ -53,14 +56,15 @@ function renderCartItems() {
         const distance = item.distance || 0;
         totalShippingFee += shippingFee;
         
-        // Tampilan ongkir per item
+        // Tampilan ongkir
         const shippingDisplay = shippingFee === 0 ? 'GRATIS' : formatRupiah(shippingFee);
         const distanceDisplay = distance > 0 ? `${distance.toFixed(1)} km` : 'Belum dihitung';
         
+        // START CARD ITEM
         html += `
             <div class="cart-item" data-index="${index}">
                 <div class="cart-item-info">
-                    <h4>${item.name}</h4>
+                    <h4>${item.name} ${isCustom ? '<span class="badge-custom">Custom</span>' : ''}</h4>
                     
                     <!-- Detail tanggal dan lokasi -->
                     <div class="cart-item-details">
@@ -85,16 +89,63 @@ function renderCartItems() {
                             <span>📱 ${item.customerPhone || 'No. WA belum diisi'}</span>
                         </div>
                     </div>
-                    
-                    <!-- DAFTAR ADD-ONS -->
-                    <div class="cart-item-addons">
-                        <div class="addons-header">
-                            <i class="bi bi-plus-circle"></i> Add-ons yang dipilih:
-                        </div>
-                        ${renderAddonsList(item.addons)}
+        `;
+        
+        // ===== JIKA PAKET CUSTOM: TAMPILKAN DETAIL CUSTOM ITEMS =====
+        if (isCustom && item.customItems && item.customItems.length > 0) {
+            html += `
+                <div class="cart-item-custom">
+                    <div class="custom-header">
+                        <i class="bi bi-pencil-square"></i> Item Pilihan (Custom):
                     </div>
-                    
-                    <!-- Tombol Aksi -->
+                    <ul class="custom-list">
+            `;
+            item.customItems.forEach(custom => {
+                const unitText = custom.unit === 'pcs' ? `${custom.quantity} pcs` : `${custom.quantity} meter`;
+                html += `
+                    <li>
+                        <i class="bi bi-check-circle-fill text-primary"></i>
+                        <span class="custom-name">${custom.name}</span>
+                        <span class="custom-qty">(${unitText})</span>
+                        <span class="custom-price">${formatRupiah(custom.totalPrice)}</span>
+                    </li>
+                `;
+            });
+            html += `
+                    </ul>
+                </div>
+            `;
+        }
+        
+        // ===== TAMPILKAN ADD-ONS =====
+        if (item.addons && item.addons.length > 0) {
+            html += `
+                <div class="cart-item-addons">
+                    <div class="addons-header">
+                        <i class="bi bi-plus-circle"></i> Add-ons yang dipilih:
+                    </div>
+                    <ul class="addons-list">
+            `;
+            item.addons.forEach(addon => {
+                const qty = addon.quantity || 1;
+                const qtyText = qty > 1 ? ` (${qty} pcs)` : '';
+                const totalPrice = addon.totalPrice || (addon.price * qty);
+                html += `
+                        <li>
+                            <i class="bi bi-check-circle-fill"></i>
+                            <span>${addon.name}${qtyText}</span>
+                            <span class="addon-price-cart">${formatRupiah(totalPrice)}</span>
+                        </li>
+                `;
+            });
+            html += `
+                    </ul>
+                </div>
+            `;
+        }
+        
+        // Tombol Aksi
+        html += `
                     <div class="cart-item-actions">
                         <button class="btn-edit" onclick="editCartItem(${index})">
                             <i class="bi bi-pencil"></i> Edit
@@ -110,23 +161,47 @@ function renderCartItems() {
                         <span class="label">Harga Paket:</span>
                         <span class="value">${formatRupiah(item.basePrice || item.price)}</span>
                     </div>
-                    ${totalAddons > 0 ? `
-                    <div class="price-detail addons-price">
-                        <span class="label">+ Add-ons:</span>
-                        <span class="value">${formatRupiah(totalAddons)}</span>
-                    </div>
-                    ` : ''}
-                    ${shippingFee > 0 ? `
-                    <div class="price-detail shipping-price">
-                        <span class="label">🚚 Ongkir:</span>
-                        <span class="value">${formatRupiah(shippingFee)}</span>
-                    </div>
-                    ` : shippingFee === 0 && distance > 0 ? `
-                    <div class="price-detail shipping-price">
-                        <span class="label">🚚 Ongkir:</span>
-                        <span class="value text-success">GRATIS</span>
-                    </div>
-                    ` : ''}
+        `;
+        
+        // Tampilkan total custom items (untuk paket custom)
+        if (isCustom && item.customItems && item.customItems.length > 0) {
+            const subtotalCustom = item.customItems.reduce((sum, c) => sum + c.totalPrice, 0);
+            html += `
+                <div class="price-detail custom-price">
+                    <span class="label">+ Custom Item:</span>
+                    <span class="value">${formatRupiah(subtotalCustom)}</span>
+                </div>
+            `;
+        }
+        
+        // Tampilkan add-ons
+        if (totalAddons > 0) {
+            html += `
+                <div class="price-detail addons-price">
+                    <span class="label">+ Add-ons:</span>
+                    <span class="value">${formatRupiah(totalAddons)}</span>
+                </div>
+            `;
+        }
+        
+        // Tampilkan ongkir
+        if (shippingFee > 0) {
+            html += `
+                <div class="price-detail shipping-price">
+                    <span class="label">🚚 Ongkir:</span>
+                    <span class="value">${formatRupiah(shippingFee)}</span>
+                </div>
+            `;
+        } else if (shippingFee === 0 && distance > 0) {
+            html += `
+                <div class="price-detail shipping-price">
+                    <span class="label">🚚 Ongkir:</span>
+                    <span class="value text-success">GRATIS</span>
+                </div>
+            `;
+        }
+        
+        html += `
                     <div class="price-divider"></div>
                     <div class="price-total">
                         <span class="label">Total:</span>
@@ -141,8 +216,29 @@ function renderCartItems() {
     updateSummary(totalShippingFee);
 }
 
+// ===== EDIT ITEM CART (ARAHKAN KE HALAMAN YANG TEPAT) =====
+function editCartItem(index) {
+    const item = currentCart[index];
+    if (!item) {
+        showNotification('⚠️ Gagal mengedit item', 'warning');
+        return;
+    }
+    
+    // Simpan data untuk diedit
+    sessionStorage.setItem('editCartItem', JSON.stringify(item));
+    sessionStorage.setItem('editCartIndex', index);
+    
+    // Cek apakah ini paket custom
+    if (item.isCustom === true || item.id === 'paket-custom') {
+        // Arahkan ke halaman paket custom
+        window.location.href = 'paket-custom.html?edit=true';
+    } else {
+        // Arahkan ke halaman detail paket biasa
+        window.location.href = `paket.html?id=${item.id}&edit=true`;
+    }
+}
+
 // ===== RENDER DAFTAR ADD-ONS =====
-// ===== RENDER DAFTAR ADD-ONS DI CART =====
 function renderAddonsList(addons) {
     if (!addons || addons.length === 0) {
         return '<div class="no-addons">Tidak ada add-ons yang dipilih</div>';
@@ -152,7 +248,7 @@ function renderAddonsList(addons) {
     addons.forEach(addon => {
         const qty = addon.quantity || 1;
         const qtyText = qty > 1 ? ` (${qty} pcs)` : '';
-        const totalPrice = (addon.price || addon.totalPrice) || (addon.price * qty);
+        const totalPrice = addon.totalPrice || (addon.price * qty);
         html += `
             <li>
                 <i class="bi bi-check-circle-fill"></i>
@@ -173,7 +269,7 @@ function updateSummary(totalShippingFeeFromItems = null) {
     // Total semua add-ons
     const totalAddons = currentCart.reduce((sum, item) => {
         if (item.addons && item.addons.length > 0) {
-            return sum + item.addons.reduce((s, addon) => s + addon.price, 0);
+            return sum + item.addons.reduce((s, addon) => s + (addon.totalPrice || addon.price), 0);
         }
         return sum;
     }, 0);
@@ -222,18 +318,6 @@ function removeCartItem(index) {
         loadCartData();
         updateCartBadge();
         showNotification('✅ Paket dihapus dari keranjang', 'success');
-    }
-}
-
-// ===== EDIT ITEM CART =====
-function editCartItem(index) {
-    const item = currentCart[index];
-    if (item && item.id) {
-        sessionStorage.setItem('editCartItem', JSON.stringify(item));
-        sessionStorage.setItem('editCartIndex', index);
-        window.location.href = `paket.html?id=${item.id}&edit=true`;
-    } else {
-        showNotification('⚠️ Gagal mengedit item', 'warning');
     }
 }
 
