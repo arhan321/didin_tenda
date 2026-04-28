@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\BookingController;
 use App\Http\Controllers\FrontendController;
 
 /*
@@ -11,19 +12,18 @@ use App\Http\Controllers\FrontendController;
 */
 
 Route::get('/', [FrontendController::class, 'home'])->name('frontend.index');
-
 Route::get('/paket-custom', [FrontendController::class, 'paket'])->name('frontend.paket-custom');
-
-Route::get('/cart', [FrontendController::class, 'cart'])->name('frontend.cart');
-
 Route::get('/history', [FrontendController::class, 'history'])->name('frontend.history');
-
 Route::get('/paket', [FrontendController::class, 'detail_paket'])->name('frontend.paket');
-
 Route::get('/pesanan', [FrontendController::class, 'pesanan'])->name('frontend.pesanan');
 
-Route::get('/profile', [FrontendController::class, 'profile'])->name('frontend.profile');
-
+Route::get('/cart', [BookingController::class, 'index'])->name('frontend.cart');
+Route::post('/cart/add', [BookingController::class, 'add'])->name('frontend.cart.add');
+Route::delete('/cart/{key}', [BookingController::class, 'remove'])->name('frontend.cart.remove');
+Route::delete('/cart', [BookingController::class, 'clear'])->name('frontend.cart.clear');
+Route::post('/checkout', [BookingController::class, 'checkout'])->name('frontend.checkout');
+Route::post('/quick-check', [BookingController::class, 'quickCheck'])->name('frontend.quick-check');
+Route::get('/cart-count', [BookingController::class, 'count'])->name('frontend.cart.count');
 
 /*
 |--------------------------------------------------------------------------
@@ -65,7 +65,6 @@ Route::post('/profile/update-password', [FrontendController::class, 'updatePassw
 
 Auth::routes(['register' => false]);
 
-
 /*
 |--------------------------------------------------------------------------
 | Redirect /home
@@ -79,7 +78,6 @@ Route::get('/home', function () {
 
     return redirect()->route('admin.home');
 });
-
 
 /*
 |--------------------------------------------------------------------------
@@ -95,37 +93,30 @@ Route::group([
 ], function () {
     Route::get('/', 'HomeController@index')->name('home');
 
-    // Permissions
     Route::delete('permissions/destroy', 'PermissionsController@massDestroy')->name('permissions.massDestroy');
     Route::resource('permissions', 'PermissionsController');
 
-    // Roles
     Route::delete('roles/destroy', 'RolesController@massDestroy')->name('roles.massDestroy');
     Route::resource('roles', 'RolesController');
 
-    // Users
     Route::delete('users/destroy', 'UsersController@massDestroy')->name('users.massDestroy');
     Route::resource('users', 'UsersController');
 
-    // Vendors
     Route::delete('vendors/destroy', 'VendorController@massDestroy')->name('vendors.massDestroy');
     Route::post('vendors/media', 'VendorController@storeMedia')->name('vendors.storeMedia');
     Route::post('vendors/ckmedia', 'VendorController@storeCKEditorImages')->name('vendors.storeCKEditorImages');
     Route::resource('vendors', 'VendorController');
 
-    // Homes
     Route::delete('homes/destroy', 'HomefController@massDestroy')->name('homes.massDestroy');
     Route::post('homes/media', 'HomefController@storeMedia')->name('homes.storeMedia');
     Route::post('homes/ckmedia', 'HomefController@storeCKEditorImages')->name('homes.storeCKEditorImages');
     Route::resource('homes', 'HomefController');
 
-    // Tests
     Route::delete('tests/destroy', 'TestController@massDestroy')->name('tests.massDestroy');
     Route::post('tests/media', 'TestController@storeMedia')->name('tests.storeMedia');
     Route::post('tests/ckmedia', 'TestController@storeCKEditorImages')->name('tests.storeCKEditorImages');
     Route::resource('tests', 'TestController');
 });
-
 
 /*
 |--------------------------------------------------------------------------

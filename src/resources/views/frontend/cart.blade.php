@@ -3,15 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Keranjang Booking - Didin Tenda Decoration</title>
-    
-    <!-- Bootstrap 5 CSS -->
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    
-    <!-- Custom CSS -->
+
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
     <link rel="stylesheet" href="{{ asset('css/cart.css') }}">
 </head>
@@ -51,7 +48,9 @@
                 <div class="d-flex ms-lg-3">
                     <a href="{{ route('frontend.cart') }}" class="user-menu-link active" data-bs-toggle="tooltip" title="Keranjang Booking">
                         <i class="bi bi-cart3"></i>
-                        <span class="menu-badge" id="cartCount">0</span>
+                        <span class="menu-badge" id="cartCount" data-server-cart-count="{{ $cartCount ?? count($cart ?? []) }}">
+                            {{ $cartCount ?? count($cart ?? []) }}
+                        </span>
                     </a>
 
                     <a href="{{ route('frontend.pesanan') }}" class="user-menu-link" data-bs-toggle="tooltip" title="Pesanan Saya">
@@ -78,14 +77,205 @@
                 <p>Review pesanan Anda sebelum melanjutkan ke pembayaran</p>
             </div>
 
+            @if(session('success'))
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+
+            @if(session('error'))
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    {{ session('error') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+
+            @if($errors->any())
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <ul class="mb-0">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+
             <div class="row g-4">
                 <!-- KOLOM KIRI: Daftar Item -->
                 <div class="col-lg-7">
-                    <div class="cart-items-container" id="cartItemsContainer">
-                        <!-- Item akan diisi oleh JavaScript -->
+                    <div class="cart-items-container" id="cartItemsContainer" style="{{ count($cart ?? []) === 0 ? 'display: none;' : '' }}">
+                        @foreach(($cart ?? []) as $key => $item)
+                            @php
+                                $packageName = $item['package']['name'] ?? ($item['name'] ?? 'Paket');
+                                $eventDate = $item['event_date'] ?? ($item['date'] ?? null);
+                                $eventDateFormatted = $eventDate ? \Carbon\Carbon::parse($eventDate)->translatedFormat('d F Y') : 'Belum dipilih';
+                                $locationName = $item['event_location_name'] ?? ($item['location'] ?? 'Lokasi belum diisi');
+                                $distanceKm = (float) ($item['distance_km'] ?? ($item['distance'] ?? 0));
+                                $shippingFee = (int) ($item['shipping_fee'] ?? ($item['shippingFee'] ?? 0));
+                                $customerName = $item['customer_name'] ?? ($item['customerName'] ?? 'Nama belum diisi');
+                                $customerPhone = $item['customer_phone'] ?? ($item['customerPhone'] ?? 'No. WA belum diisi');
+                                $subtotalPackage = (int) ($item['subtotal_package'] ?? ($item['basePrice'] ?? ($item['price'] ?? 0)));
+                                $subtotalCustom = (int) ($item['subtotal_custom'] ?? 0);
+                                $subtotalAddons = (int) ($item['subtotal_addons'] ?? 0);
+                                $totalPrice = (int) ($item['total_price'] ?? ($item['price'] ?? 0));
+                                $addons = $item['addons'] ?? [];
+                                $customItems = $item['custom_items'] ?? ($item['customItems'] ?? []);
+                                $isCustom = ($item['order_type'] ?? '') === 'custom' || ($item['isCustom'] ?? false) === true;
+                            @endphp
+
+                            <div class="cart-item" data-index="{{ $loop->index }}">
+                                <div class="cart-item-info">
+                                    <h4>
+                                        {{ $packageName }}
+                                        @if($isCustom)
+                                            <span class="badge-custom">Custom</span>
+                                        @endif
+                                    </h4>
+
+                                    <!-- Detail tanggal dan lokasi -->
+                                    <div class="cart-item-details">
+                                        <div class="detail-row">
+                                            <i class="bi bi-calendar"></i>
+                                            <span>📅 {{ $eventDateFormatted }}</span>
+                                        </div>
+                                        <div class="detail-row">
+                                            <i class="bi bi-geo-alt"></i>
+                                            <span>📍 {{ $locationName }}</span>
+                                        </div>
+                                        <div class="detail-row">
+                                            <i class="bi bi-truck"></i>
+                                            <span>
+                                                🚚 Jarak: {{ number_format($distanceKm, 1) }} km |
+                                                Ongkir: {{ $shippingFee > 0 ? 'Rp ' . number_format($shippingFee, 0, ',', '.') : 'GRATIS' }}
+                                            </span>
+                                        </div>
+                                        <div class="detail-row">
+                                            <i class="bi bi-person"></i>
+                                            <span>👤 {{ $customerName }}</span>
+                                        </div>
+                                        <div class="detail-row">
+                                            <i class="bi bi-whatsapp"></i>
+                                            <span>📱 {{ $customerPhone }}</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Detail paket custom jika ada -->
+                                    @if($isCustom && count($customItems) > 0)
+                                        <div class="cart-item-custom">
+                                            <div class="custom-header">
+                                                <i class="bi bi-pencil-square"></i> Item Pilihan (Custom):
+                                            </div>
+                                            <ul class="custom-list">
+                                                @foreach($customItems as $custom)
+                                                    @php
+                                                        $customName = $custom['name'] ?? '-';
+                                                        $customQty = $custom['quantity'] ?? 1;
+                                                        $customUnit = $custom['unit'] ?? 'item';
+                                                        $customTotal = (int) ($custom['total_price'] ?? ($custom['totalPrice'] ?? 0));
+                                                    @endphp
+                                                    <li>
+                                                        <i class="bi bi-check-circle-fill text-primary"></i>
+                                                        <span class="custom-name">{{ $customName }}</span>
+                                                        <span class="custom-qty">({{ $customQty }} {{ $customUnit }})</span>
+                                                        <span class="custom-price">Rp {{ number_format($customTotal, 0, ',', '.') }}</span>
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        </div>
+                                    @endif
+
+                                    <!-- Tampilkan add-ons -->
+                                    @if(count($addons) > 0)
+                                        <div class="cart-item-addons">
+                                            <div class="addons-header">
+                                                <i class="bi bi-plus-circle"></i> Add-ons yang dipilih:
+                                            </div>
+                                            <ul class="addons-list">
+                                                @foreach($addons as $addon)
+                                                    @php
+                                                        $addonName = $addon['name'] ?? '-';
+                                                        $addonQty = $addon['quantity'] ?? 1;
+                                                        $addonUnit = $addon['unit'] ?? 'pcs';
+                                                        $addonTotal = (int) ($addon['total_price'] ?? ($addon['totalPrice'] ?? ($addon['price'] ?? 0)));
+                                                    @endphp
+                                                    <li>
+                                                        <i class="bi bi-check-circle-fill"></i>
+                                                        <span>
+                                                            {{ $addonName }}
+                                                            @if($addonQty > 1)
+                                                                ({{ $addonQty }} {{ $addonUnit }})
+                                                            @endif
+                                                        </span>
+                                                        <span class="addon-price-cart">Rp {{ number_format($addonTotal, 0, ',', '.') }}</span>
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        </div>
+                                    @endif
+
+                                    <!-- Tombol Aksi -->
+                                    <div class="cart-item-actions">
+                                        @if(($item['package']['slug'] ?? null))
+                                            <a class="btn-edit" href="{{ route('frontend.paket', ['id' => $item['package']['slug']]) }}">
+                                                <i class="bi bi-pencil"></i> Edit
+                                            </a>
+                                        @endif
+
+                                        <form action="{{ route('frontend.cart.remove', $key) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn-remove" onclick="return confirm('Hapus item ini dari keranjang?')">
+                                                <i class="bi bi-trash"></i> Hapus
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+
+                                <div class="cart-item-price">
+                                    <div class="price-detail">
+                                        <span class="label">Harga Paket:</span>
+                                        <span class="value">Rp {{ number_format($subtotalPackage, 0, ',', '.') }}</span>
+                                    </div>
+
+                                    @if($isCustom && $subtotalCustom > 0)
+                                        <div class="price-detail custom-price">
+                                            <span class="label">+ Custom Item:</span>
+                                            <span class="value">Rp {{ number_format($subtotalCustom, 0, ',', '.') }}</span>
+                                        </div>
+                                    @endif
+
+                                    @if($subtotalAddons > 0)
+                                        <div class="price-detail addons-price">
+                                            <span class="label">+ Add-ons:</span>
+                                            <span class="value">Rp {{ number_format($subtotalAddons, 0, ',', '.') }}</span>
+                                        </div>
+                                    @endif
+
+                                    @if($shippingFee > 0)
+                                        <div class="price-detail shipping-price">
+                                            <span class="label">🚚 Ongkir:</span>
+                                            <span class="value">Rp {{ number_format($shippingFee, 0, ',', '.') }}</span>
+                                        </div>
+                                    @elseif($distanceKm > 0)
+                                        <div class="price-detail shipping-price">
+                                            <span class="label">🚚 Ongkir:</span>
+                                            <span class="value text-success">GRATIS</span>
+                                        </div>
+                                    @endif
+
+                                    <div class="price-divider"></div>
+                                    <div class="price-total">
+                                        <span class="label">Total:</span>
+                                        <span class="value">Rp {{ number_format($totalPrice, 0, ',', '.') }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
 
-                    <div class="empty-cart" id="emptyCart" style="display: none;">
+                    <div class="empty-cart" id="emptyCart" style="{{ count($cart ?? []) > 0 ? 'display: none;' : '' }}">
                         <i class="bi bi-cart-x"></i>
                         <h3>Keranjang Kosong</h3>
                         <p>Belum ada paket yang dipilih. Yuk booking dekorasi impian Anda!</p>
@@ -97,236 +287,75 @@
                 <div class="col-lg-5">
                     <div class="cart-summary">
                         <h4><i class="bi bi-receipt"></i> Ringkasan Pesanan</h4>
-                        
+
                         <div class="summary-row">
                             <span>Total Harga Paket</span>
-                            <span id="totalPaket">Rp 0</span>
+                            <span id="totalPaket">Rp {{ number_format($totals['subtotal_package'] ?? 0, 0, ',', '.') }}</span>
                         </div>
-                        
+
                         <div class="summary-row">
                             <span>Total Add-ons</span>
-                            <span id="totalAddons">Rp 0</span>
+                            <span id="totalAddons">Rp {{ number_format($totals['subtotal_addons'] ?? 0, 0, ',', '.') }}</span>
                         </div>
-                        
+
                         <!-- BARIS ONGKIR -->
-                        <div class="summary-row" id="cartShippingRow" style="display: none;">
+                        <div class="summary-row" id="cartShippingRow" style="{{ ($totals['shipping_fee'] ?? 0) > 0 ? '' : 'display: none;' }}">
                             <span>🚚 Biaya Pengiriman</span>
-                            <span id="cartShippingFee">Rp 0</span>
+                            <span id="cartShippingFee">Rp {{ number_format($totals['shipping_fee'] ?? 0, 0, ',', '.') }}</span>
                         </div>
-                        
+
                         <div class="summary-divider"></div>
-                        
+
                         <div class="summary-row total">
                             <span>Total Pembayaran</span>
-                            <span id="grandTotal">Rp 0</span>
+                            <span id="grandTotal">Rp {{ number_format($totals['grand_total'] ?? 0, 0, ',', '.') }}</span>
                         </div>
-                        
+
                         <div class="payment-note">
                             <i class="bi bi-shield-check"></i>
                             <small>Pembayaran 100% di awal via Midtrans (QRIS, Transfer Bank, E-Wallet)</small>
                         </div>
-                        
-                        <button class="btn-checkout w-100" id="checkoutBtn">
-                            Lanjutkan ke Pembayaran <i class="bi bi-arrow-right"></i>
-                        </button>
-                        
-                        <a href="{{ route('frontend.index') }}#paket" class="btn-back-shopping">
-                            <i class="bi bi-arrow-left"></i> Kembali Belanja
-                        </a>
+
+                        @if(count($cart ?? []) > 0)
+                            <form action="{{ route('frontend.checkout') }}" method="POST">
+                                @csrf
+                                <button type="submit" class="btn btn-primary w-100 mt-3">
+                                    Lanjutkan ke Pembayaran <i class="bi bi-arrow-right"></i>
+                                </button>
+                            </form>
+
+                            <form action="{{ route('frontend.cart.clear') }}" method="POST" class="mt-2">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-link text-danger w-100" onclick="return confirm('Kosongkan semua isi keranjang?')">
+                                    Kosongkan Keranjang
+                                </button>
+                            </form>
+                        @else
+                            <button type="button" class="btn btn-primary w-100 mt-3" disabled>
+                                Lanjutkan ke Pembayaran <i class="bi bi-arrow-right"></i>
+                            </button>
+                        @endif
+
+                        <div class="text-center mt-3">
+                            <a href="{{ route('frontend.index') }}#paket" class="text-muted text-decoration-none">
+                                ← Kembali Belanja
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- ==================== MODAL ADD-ONS ==================== -->
-    <div class="modal fade" id="addonsModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">
-                        <i class="bi bi-plus-circle"></i> Tambah Add-ons
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-
-                <div class="modal-body">
-                    <p class="text-muted mb-3">Pilih perlengkapan tambahan untuk acara Anda</p>
-                    
-                    <div class="addons-option" data-addon-id="kursi" data-addon-name="Kursi Futura Tambahan" data-addon-price="500000">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="addon_kursi">
-                            <label class="form-check-label" for="addon_kursi">
-                                <div>
-                                    <strong>Kursi Futura Tambahan</strong>
-                                    <small class="d-block text-muted">+50 kursi futura</small>
-                                </div>
-                                <span class="addon-price">+Rp 500.000</span>
-                            </label>
-                        </div>
-                    </div>
-                    
-                    <div class="addons-option" data-addon-id="lampu" data-addon-name="Lampu Hias" data-addon-price="200000">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="addon_lampu">
-                            <label class="form-check-label" for="addon_lampu">
-                                <div>
-                                    <strong>Lampu Hias</strong>
-                                    <small class="d-block text-muted">Dekorasi lampu hias 10 titik</small>
-                                </div>
-                                <span class="addon-price">+Rp 200.000</span>
-                            </label>
-                        </div>
-                    </div>
-                    
-                    <div class="addons-option" data-addon-id="karpet" data-addon-name="Karpet Merah" data-addon-price="300000">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="addon_karpet">
-                            <label class="form-check-label" for="addon_karpet">
-                                <div>
-                                    <strong>Karpet Merah</strong>
-                                    <small class="d-block text-muted">Karpet merah premium 5x2 meter</small>
-                                </div>
-                                <span class="addon-price">+Rp 300.000</span>
-                            </label>
-                        </div>
-                    </div>
-                    
-                    <div class="addons-option" data-addon-id="panggung" data-addon-name="Panggung" data-addon-price="800000">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="addon_panggung">
-                            <label class="form-check-label" for="addon_panggung">
-                                <div>
-                                    <strong>Panggung</strong>
-                                    <small class="d-block text-muted">Panggung ukuran 4x4 meter</small>
-                                </div>
-                                <span class="addon-price">+Rp 800.000</span>
-                            </label>
-                        </div>
-                    </div>
-                    
-                    <div class="addons-option" data-addon-id="blower" data-addon-name="Kipas Blower" data-addon-price="150000">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="addon_blower">
-                            <label class="form-check-label" for="addon_blower">
-                                <div>
-                                    <strong>Kipas Blower</strong>
-                                    <small class="d-block text-muted">Pendingin udara outdoor</small>
-                                </div>
-                                <span class="addon-price">+Rp 150.000</span>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="button" class="btn btn-primary" id="saveAddonsBtn">Simpan Add-ons</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ==================== FOOTER ==================== -->
-    <footer id="kontak" class="footer-section">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-4 mb-4 mb-lg-0">
-                    <h4>Didin Tenda Decoration</h4>
-
-                    <p class="footer-address">
-                        <i class="bi bi-geo-alt-fill"></i>
-                        Jl. Ki Mas Laeng Kp. Katomas, Tigaraksa, Kab. Tangerang, Banten
-                    </p>
-
-                    <p>
-                        <i class="bi bi-telephone-fill"></i>
-                        <a href="tel:088289258764">0882-8925-8764</a>
-                    </p>
-
-                    <p>
-                        <i class="bi bi-envelope-fill"></i>
-                        <a href="mailto:info@didintenda.com">info@didintenda.com</a>
-                    </p>
-                </div>
-
-                <div class="col-lg-2 col-md-6 mb-4 mb-md-0">
-                    <h5>Menu Cepat</h5>
-                    <ul class="footer-links">
-                        <li>
-                            <a href="{{ route('frontend.index') }}#beranda">Beranda</a>
-                        </li>
-                        <li>
-                            <a href="{{ route('frontend.index') }}#paket">Paket</a>
-                        </li>
-                        <li>
-                            <a href="{{ route('frontend.index') }}#galeri">Galeri</a>
-                        </li>
-                        <li>
-                            <a href="{{ route('frontend.index') }}#kontak">Kontak</a>
-                        </li>
-                        <li>
-                            <a href="{{ route('frontend.pesanan') }}">Pesanan</a>
-                        </li>
-                        <li>
-                            <a href="{{ route('frontend.history') }}">History</a>
-                        </li>
-                    </ul>
-                </div>
-
-                <div class="col-lg-3 col-md-6 mb-4 mb-md-0">
-                    <h5>Layanan</h5>
-                    <ul class="footer-links">
-                        <li>
-                            <a href="{{ route('frontend.index') }}#paket">Sewa Tenda</a>
-                        </li>
-                        <li>
-                            <a href="{{ route('frontend.index') }}#paket">Dekorasi Pernikahan</a>
-                        </li>
-                        <li>
-                            <a href="{{ route('frontend.index') }}#paket">Sewa Kursi</a>
-                        </li>
-                        <li>
-                            <a href="{{ route('frontend.index') }}#paket">Rigging & Lighting</a>
-                        </li>
-                    </ul>
-                </div>
-
-                <div class="col-lg-3">
-                    <h5>Metode Pembayaran</h5>
-
-                    <div class="payment-methods">
-                        <img src="https://placehold.co/60x40/2c3e50/white?text=BCA" alt="BCA" class="payment-logo">
-                        <img src="https://placehold.co/60x40/2c3e50/white?text=QRIS" alt="QRIS" class="payment-logo">
-                        <img src="https://placehold.co/60x40/2c3e50/white?text=GoPay" alt="GoPay" class="payment-logo">
-                    </div>
-                </div>
-            </div>
-
-            <hr class="footer-hr">
-
-            <div class="row">
-                <div class="col-md-6 text-center text-md-start">
-                    <p class="copyright">© 2026 Didin Tenda Decoration. All rights reserved.</p>
-                </div>
-
-                <div class="col-md-6 text-center text-md-end">
-                    <p class="developer">Developed for Tugas Akhir - Muhamad Darlan (20220803005)</p>
-                </div>
-            </div>
-        </div>
-    </footer>
-
-    <!-- BACK TO TOP BUTTON -->
+    <!-- BACK TO TOP -->
     <button id="backToTop" class="back-to-top" title="Kembali ke atas">
         <i class="bi bi-arrow-up"></i>
     </button>
 
-    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ asset('js/script.js') }}?v={{ time() }}"></script>
 
-    <!-- Custom JS -->
-    <script src="{{ asset('js/cart.js') }}"></script>
-    <script src="{{ asset('js/script.js') }}"></script>
+    <!-- cart.js lama tidak dipakai karena cart sudah server-rendered dari Laravel session -->
 </body>
 </html>

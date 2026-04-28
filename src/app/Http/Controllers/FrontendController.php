@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Addon;
+use App\Models\Package;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
@@ -12,7 +14,29 @@ class FrontendController extends Controller
 {
     public function home()
     {
-        return view('frontend.index');
+        $packages = Package::with([
+                'items' => function ($query) {
+                    $query->where('is_active', true)
+                        ->orderBy('sort_order');
+                }
+            ])
+            ->where('type', 'fixed')
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->get();
+
+        $customPackage = Package::where('type', 'custom')
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->first();
+
+        $cartCount = count(session('booking_cart', []));
+
+        return view('frontend.index', compact(
+            'packages',
+            'customPackage',
+            'cartCount'
+        ));
     }
 
     public function paket()
@@ -30,10 +54,39 @@ class FrontendController extends Controller
         return view('frontend.history');
     }
 
-    public function detail_paket()
-    {
-        return view('frontend.paket');
+public function detail_paket(Request $request)
+{
+    $slug = $request->query('id');
+
+    if (! $slug) {
+        return redirect()
+            ->route('frontend.index')
+            ->with('error', 'Paket tidak ditemukan.');
     }
+
+    $package = Package::with([
+            'items' => function ($query) {
+                $query->where('is_active', true)
+                    ->orderBy('sort_order');
+            }
+        ])
+        ->where('slug', $slug)
+        ->where('type', 'fixed')
+        ->where('is_active', true)
+        ->firstOrFail();
+
+    $addons = Addon::where('is_active', true)
+        ->orderBy('sort_order')
+        ->get();
+
+    $cartCount = count(session('booking_cart', []));
+
+    return view('frontend.paket', compact(
+        'package',
+        'addons',
+        'cartCount'
+    ));
+}
 
     public function pesanan()
     {
