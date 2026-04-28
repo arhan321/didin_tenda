@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Hash;
 use Carbon\Carbon;
+use App\Models\Order;
+use App\Models\Review;
 use DateTimeInterface;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -36,6 +38,11 @@ class User extends Authenticatable
         'google_id',
         'email_verified_at',
         'password',
+        'phone',
+        'whatsapp',
+        'kota',
+        'kode_pos',
+        'alamat',
         'remember_token',
         'created_at',
         'updated_at',
@@ -77,5 +84,30 @@ class User extends Authenticatable
     public function roles()
     {
         return $this->belongsToMany(Role::class);
+    }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    public function isAdmin()
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isOwner()
+    {
+        return $this->role === 'owner';
+    }
+
+    public function isCustomer()
+    {
+        return $this->role === 'customer';
     }
 }

@@ -4,7 +4,11 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\FrontendController;
 
-// ==================== FRONTEND ROUTES ====================
+/*
+|--------------------------------------------------------------------------
+| Frontend Routes
+|--------------------------------------------------------------------------
+*/
 
 Route::get('/', [FrontendController::class, 'home'])->name('frontend.index');
 
@@ -20,9 +24,53 @@ Route::get('/pesanan', [FrontendController::class, 'pesanan'])->name('frontend.p
 
 Route::get('/profile', [FrontendController::class, 'profile'])->name('frontend.profile');
 
-// ==================== AUTH ROUTES ====================
+
+/*
+|--------------------------------------------------------------------------
+| Frontend Auth Routes
+|--------------------------------------------------------------------------
+*/
+
+Route::post('/frontend-login', [FrontendController::class, 'login'])
+    ->middleware('guest')
+    ->name('frontend.login');
+
+Route::post('/frontend-register', [FrontendController::class, 'register'])
+    ->middleware('guest')
+    ->name('frontend.register');
+
+Route::post('/frontend-logout', [FrontendController::class, 'logout'])
+    ->middleware('auth')
+    ->name('frontend.logout');
+
+Route::get('/profile', [FrontendController::class, 'profile'])
+    ->middleware('auth')
+    ->name('frontend.profile');
+
+Route::post('/profile/update', [FrontendController::class, 'updateProfile'])
+    ->middleware('auth')
+    ->name('frontend.profile.update');
+
+Route::post('/profile/update-password', [FrontendController::class, 'updatePassword'])
+    ->middleware('auth')
+    ->name('frontend.profile.updatePassword');
+
+/*
+|--------------------------------------------------------------------------
+| Laravel Auth Routes
+|--------------------------------------------------------------------------
+| Tetap dipakai untuk fitur forgot password.
+| Register Laravel default dimatikan karena register memakai modal custom.
+*/
 
 Auth::routes(['register' => false]);
+
+
+/*
+|--------------------------------------------------------------------------
+| Redirect /home
+|--------------------------------------------------------------------------
+*/
 
 Route::get('/home', function () {
     if (session('status')) {
@@ -33,7 +81,11 @@ Route::get('/home', function () {
 });
 
 
-// ==================== ADMIN ROUTES ====================
+/*
+|--------------------------------------------------------------------------
+| Admin Routes
+|--------------------------------------------------------------------------
+*/
 
 Route::group([
     'prefix' => 'admin',
@@ -75,7 +127,11 @@ Route::group([
 });
 
 
-// ==================== PROFILE ROUTES ADMIN/AUTH ====================
+/*
+|--------------------------------------------------------------------------
+| Profile Password Routes
+|--------------------------------------------------------------------------
+*/
 
 Route::group([
     'prefix' => 'profile',
@@ -87,6 +143,6 @@ Route::group([
         Route::get('password', 'ChangePasswordController@edit')->name('password.edit');
         Route::post('password', 'ChangePasswordController@update')->name('password.update');
         Route::post('profile', 'ChangePasswordController@updateProfile')->name('password.updateProfile');
-        Route::post('profile/destroy', 'ChangePasswordController@destroy')->name('password.destroyProfile');
+        Route::post('profile/destroy', 'ChangePasswordController@destroyProfile')->name('password.destroyProfile');
     }
 });
