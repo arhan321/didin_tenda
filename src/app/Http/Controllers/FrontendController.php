@@ -333,6 +333,9 @@ public function detail_paket(Request $request)
             'invoiceUrl' => route('frontend.invoice.download', $order->id),
             'paymentUrl' => route('frontend.midtrans.pay', $order->id),
             'paymentCheckUrl' => route('frontend.midtrans.check-status', $order->id),
+            'rating' => $order->review?->rating,
+            'review' => $order->review?->review,
+            'reviewUrl' => route('frontend.review.store', $order->id),
 
             'items' => [
                 [

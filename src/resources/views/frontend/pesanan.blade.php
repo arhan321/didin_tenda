@@ -131,7 +131,10 @@
                 <i class="bi bi-info-circle-fill"></i>
                 <div>
                     <strong>Data Pesanan Real</strong><br>
-                    <small>Pesanan ditampilkan dari database sesuai akun yang sedang login. Pembayaran menggunakan Midtrans Snap.</small>
+                    <small>
+                        Pesanan ditampilkan dari database sesuai akun yang sedang login.
+                        Pembayaran menggunakan Midtrans Snap dan review bisa diberikan setelah pesanan selesai.
+                    </small>
                 </div>
             </div>
 
@@ -179,13 +182,17 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">
-                        <i class="bi bi-star-fill"></i> Beri Rating & Review
+                        <i class="bi bi-star-fill text-warning"></i> Beri Rating & Review
                     </h5>
 
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
 
                 <div class="modal-body">
+                    <p class="text-muted small mb-3">
+                        Pilih rating dan tuliskan pengalaman Anda menggunakan layanan Didin Tenda Decoration.
+                    </p>
+
                     <div class="rating-stars">
                         <i class="bi bi-star" data-rating="1"></i>
                         <i class="bi bi-star" data-rating="2"></i>
@@ -194,12 +201,19 @@
                         <i class="bi bi-star" data-rating="5"></i>
                     </div>
 
-                    <textarea class="form-control mt-3" rows="3" placeholder="Tulis review Anda..."></textarea>
+                    <textarea
+                        id="reviewText"
+                        class="form-control mt-3"
+                        rows="4"
+                        placeholder="Tulis review Anda..."
+                    ></textarea>
                 </div>
 
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="button" class="btn btn-primary" id="submitRatingBtn">Kirim Rating</button>
+                    <button type="button" class="btn btn-primary" id="submitRatingBtn">
+                        <i class="bi bi-send"></i> Kirim Rating
+                    </button>
                 </div>
             </div>
         </div>
@@ -284,6 +298,11 @@
                         <img src="https://placehold.co/60x40/2c3e50/white?text=QRIS" alt="QRIS" class="payment-logo">
                         <img src="https://placehold.co/60x40/2c3e50/white?text=GoPay" alt="GoPay" class="payment-logo">
                     </div>
+
+                    <p class="mt-3 small text-white-50">
+                        <i class="bi bi-shield-check"></i>
+                        Transaksi aman via Midtrans
+                    </p>
                 </div>
             </div>
 
@@ -306,6 +325,7 @@
         <i class="bi bi-arrow-up"></i>
     </button>
 
+    <!-- ==================== DATA DARI LARAVEL ==================== -->
     <script>
         window.DIDIN_ORDERS = @json($ordersForJs ?? []);
 

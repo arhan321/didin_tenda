@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\FrontendController;
@@ -69,6 +70,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/pesanan/{order}/check-status', [MidtransPaymentController::class, 'checkStatus'])
         ->name('frontend.midtrans.check-status');
 });
+
+Route::post('/pesanan/{order}/review', [ReviewController::class, 'store'])
+    ->middleware('auth')
+    ->name('frontend.review.store');
 
 // Notification/callback Midtrans lewat web.php
 Route::post('/midtrans/notification', [MidtransPaymentController::class, 'notification'])

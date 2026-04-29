@@ -11,6 +11,7 @@
  * - Invoice PDF
  * - Midtrans Snap popup
  * - Check Status pembayaran via POST ke Laravel
+ * - Review pesanan selesai via POST ke Laravel
  *
  * Tidak memakai localStorage.
  * Tidak membuat data demo.
@@ -20,6 +21,7 @@ let allOrders = [];
 let currentFilter = 'all';
 let currentSearch = '';
 let currentRatingOrderId = null;
+let currentSelectedRating = 0;
 
 document.addEventListener('DOMContentLoaded', function () {
     loadOrders();
@@ -165,6 +167,13 @@ function renderOrderCard(order) {
                     <i class="bi bi-credit-card"></i>
                     <span>💳 Pembayaran: ${escapeHtml(paymentStatusLabel(order.paymentStatus))}</span>
                 </div>
+
+                ${order.rating ? `
+                    <div class="detail-item">
+                        <i class="bi bi-star-fill"></i>
+                        <span>⭐ Rating: ${renderStarsText(order.rating)}</span>
+                    </div>
+                ` : ''}
             </div>
 
             ${renderAddonsHtml(addons)}
@@ -224,9 +233,22 @@ function renderAddonsHtml(addons) {
 function renderActionButtons(order) {
     const orderId = escapeAttribute(order.orderId);
     const paymentStatus = String(order.paymentStatus || '').toLowerCase();
+
     const isPaid = paymentStatus === 'paid';
     const isCancelled = order.statusCode === 'cancelled';
     const isCompleted = order.statusCode === 'completed';
+
+    const ratingButton = isCompleted
+        ? `
+            <button class="action-btn action-btn-outline" onclick="openRatingModal('${orderId}')">
+                <i class="bi bi-star-fill"></i> ${order.rating ? 'Edit Rating' : 'Beri Rating'}
+            </button>
+        `
+        : `
+            <button class="action-btn action-btn-outline" onclick="notifyPesanan('Rating hanya bisa diberikan setelah pesanan selesai.', 'warning')">
+                <i class="bi bi-star-fill"></i> Beri Rating
+            </button>
+        `;
 
     if (!isPaid && !isCancelled && !isCompleted) {
         return `
@@ -258,6 +280,8 @@ function renderActionButtons(order) {
                 <i class="bi bi-arrow-repeat"></i> Check Status
             </button>
 
+            ${ratingButton}
+
             <button class="action-btn action-btn-warning" onclick="contactAdmin('${orderId}')">
                 <i class="bi bi-whatsapp"></i> Hubungi Admin
             </button>
@@ -270,9 +294,7 @@ function renderActionButtons(order) {
                 <i class="bi bi-download"></i> Invoice
             </button>
 
-            <button class="action-btn action-btn-outline" onclick="openRatingModal('${orderId}')">
-                <i class="bi bi-star-fill"></i> Beri Rating
-            </button>
+            ${ratingButton}
 
             <button class="action-btn action-btn-warning" onclick="contactAdmin('${orderId}')">
                 <i class="bi bi-whatsapp"></i> Hubungi Admin
@@ -331,6 +353,26 @@ function viewOrderDetail(orderId) {
                     `;
                 }).join('')}
             </ul>
+        `
+        : '';
+
+    const reviewHtml = order.rating
+        ? `
+            <hr>
+            <div class="review-detail-box">
+                <p class="mb-1">
+                    <strong><i class="bi bi-star-fill text-warning"></i> Rating:</strong>
+                    ${renderStarsHtml(order.rating)}
+                    <span class="ms-1">(${Number(order.rating)}/5)</span>
+                </p>
+
+                ${order.review ? `
+                    <p class="mb-0">
+                        <strong>Review:</strong><br>
+                        ${escapeHtml(order.review)}
+                    </p>
+                ` : ''}
+            </div>
         `
         : '';
 
@@ -407,7 +449,8 @@ function viewOrderDetail(orderId) {
         ${addonsHtml}
 
         ${order.notes ? `<hr><p><strong>Catatan:</strong><br>${escapeHtml(order.notes)}</p>` : ''}
-        ${order.review ? `<hr><p><strong><i class="bi bi-star-fill text-warning"></i> Review:</strong><br>${escapeHtml(order.review)}</p>` : ''}
+
+        ${reviewHtml}
     `;
 
     const modal = new bootstrap.Modal(document.getElementById('detailModal'));
@@ -454,9 +497,11 @@ async function showPaymentInfo(orderId, buttonElement = null) {
 
         if (data.already_paid) {
             notifyPesanan('Pesanan ini sudah lunas.', 'success');
+
             setTimeout(function () {
                 window.location.reload();
             }, 800);
+
             return;
         }
 
@@ -649,9 +694,12 @@ function reorder(orderId) {
     window.location.href = window.DIDIN_PESANAN_ROUTES?.paketIndex || '/#paket';
 }
 
-// ==================== RATING ====================
+// ==================== RATING / REVIEW ====================
 function openRatingModal(orderId) {
     currentRatingOrderId = orderId;
+    currentSelectedRating = 0;
+
+    const order = allOrders.find(item => item.orderId === orderId);
 
     document.querySelectorAll('#ratingModal .rating-stars i').forEach(star => {
         star.classList.remove('active');
@@ -662,30 +710,95 @@ function openRatingModal(orderId) {
     const textarea = document.querySelector('#ratingModal textarea');
 
     if (textarea) {
-        textarea.value = '';
+        textarea.value = order?.review || '';
+    }
+
+    if (order?.rating) {
+        currentSelectedRating = Number(order.rating);
+
+        document.querySelectorAll('#ratingModal .rating-stars i').forEach((star, index) => {
+            const active = index < currentSelectedRating;
+
+            star.classList.toggle('active', active);
+            star.classList.toggle('bi-star-fill', active);
+            star.classList.toggle('bi-star', !active);
+        });
     }
 
     const modal = new bootstrap.Modal(document.getElementById('ratingModal'));
     modal.show();
 }
 
-function submitRating() {
+async function submitRating() {
     if (!currentRatingOrderId) return;
 
-    const stars = document.querySelectorAll('#ratingModal .rating-stars i.active');
-    const rating = stars.length;
+    const order = allOrders.find(item => item.orderId === currentRatingOrderId);
 
-    if (rating === 0) {
+    if (!order) return;
+
+    if (!order.reviewUrl) {
+        notifyPesanan('URL review belum tersedia. Pastikan reviewUrl sudah dikirim dari FrontendController.', 'warning');
+        return;
+    }
+
+    if (order.statusCode !== 'completed') {
+        notifyPesanan('Review hanya bisa diberikan setelah pesanan selesai.', 'warning');
+        return;
+    }
+
+    if (currentSelectedRating < 1 || currentSelectedRating > 5) {
         notifyPesanan('Silakan pilih rating bintang terlebih dahulu.', 'warning');
         return;
     }
 
-    notifyPesanan('Fitur simpan rating ke database akan disambungkan di tahap berikutnya.', 'info');
+    const textarea = document.querySelector('#ratingModal textarea');
+    const reviewText = textarea ? textarea.value.trim() : '';
 
-    const modal = bootstrap.Modal.getInstance(document.getElementById('ratingModal'));
+    const submitBtn = document.getElementById('submitRatingBtn');
 
-    if (modal) {
-        modal.hide();
+    setButtonLoading(submitBtn, true, '<i class="bi bi-hourglass-split"></i> Mengirim...');
+
+    try {
+        const response = await fetch(order.reviewUrl, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': getCsrfTokenPesanan(),
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                rating: currentSelectedRating,
+                review: reviewText,
+            }),
+        });
+
+        const data = await safeReadJson(response);
+
+        if (!response.ok || !data.status) {
+            notifyPesanan(data.message || 'Gagal menyimpan review.', 'error');
+            return;
+        }
+
+        order.rating = Number(data.review?.rating || currentSelectedRating);
+        order.review = data.review?.review || reviewText;
+
+        notifyPesanan(data.message || 'Review berhasil disimpan. Terima kasih atas penilaian Anda.', 'success');
+
+        const modal = bootstrap.Modal.getInstance(document.getElementById('ratingModal'));
+
+        if (modal) {
+            modal.hide();
+        }
+
+        currentRatingOrderId = null;
+        currentSelectedRating = 0;
+
+        renderOrders();
+    } catch (error) {
+        console.error(error);
+        notifyPesanan('Terjadi kesalahan saat menyimpan review.', 'error');
+    } finally {
+        setButtonLoading(submitBtn, false);
     }
 }
 
@@ -695,6 +808,7 @@ function initRatingStars() {
     stars.forEach(star => {
         star.addEventListener('click', function () {
             const rating = Number(this.dataset.rating || 0);
+            currentSelectedRating = rating;
 
             stars.forEach((item, index) => {
                 const active = index < rating;
@@ -843,6 +957,25 @@ function paymentStatusLabel(paymentStatus) {
     };
 
     return labels[status] || paymentStatus || '-';
+}
+
+function renderStarsText(rating) {
+    const value = Number(rating || 0);
+    const filled = '★'.repeat(Math.max(0, Math.min(5, value)));
+    const empty = '☆'.repeat(Math.max(0, 5 - value));
+
+    return `${filled}${empty}`;
+}
+
+function renderStarsHtml(rating) {
+    const value = Number(rating || 0);
+    let html = '';
+
+    for (let i = 1; i <= 5; i++) {
+        html += `<i class="bi ${i <= value ? 'bi-star-fill text-warning' : 'bi-star text-muted'}"></i>`;
+    }
+
+    return html;
 }
 
 function formatDate(dateString) {
