@@ -16,7 +16,7 @@ use App\Http\Controllers\MidtransPaymentController;
 
 Route::get('/', [FrontendController::class, 'home'])->name('frontend.index');
 Route::get('/paket-custom', [FrontendController::class, 'paket'])->name('frontend.paket-custom');
-Route::get('/history', [FrontendController::class, 'history'])->name('frontend.history');
+// Route::get('/history', [FrontendController::class, 'history'])->name('frontend.history');
 Route::get('/paket', [FrontendController::class, 'detail_paket'])->name('frontend.paket');
 Route::get('/pesanan', [FrontendController::class, 'pesanan'])
     ->middleware('auth')
@@ -79,6 +79,9 @@ Route::post('/pesanan/{order}/review', [ReviewController::class, 'store'])
 Route::post('/midtrans/notification', [MidtransPaymentController::class, 'notification'])
     ->name('midtrans.notification');
     
+Route::get('/history', [FrontendController::class, 'history'])
+    ->middleware('auth')
+    ->name('frontend.history');
 /*
 |--------------------------------------------------------------------------
 | Laravel Auth Routes

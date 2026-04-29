@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
 
+
 class FrontendController extends Controller
 {
     public function home()
@@ -48,11 +49,6 @@ class FrontendController extends Controller
     public function cart()
     {
         return view('frontend.cart');
-    }
-
-    public function history()
-    {
-        return view('frontend.history');
     }
 
 public function detail_paket(Request $request)
@@ -424,5 +420,105 @@ private function getOrderStatusLabel(string $statusCode): string
         'cancelled' => 'Dibatalkan',
         default => 'Menunggu Pembayaran',
     };
+}
+
+public function history()
+{
+    if (! Auth::check()) {
+        return redirect()
+            ->route('frontend.index')
+            ->with('error', 'Silakan login terlebih dahulu untuk melihat history booking Anda.');
+    }
+
+    $orders = Order::with([
+            'package',
+            'items',
+            'addons',
+            'review',
+            'payment',
+        ])
+        ->where('user_id', Auth::id())
+        ->where(function ($query) {
+            $query->whereIn('status', ['completed', 'cancelled', 'expired'])
+                ->orWhereIn('payment_status', ['cancelled', 'expired', 'failed']);
+        })
+        ->latest()
+        ->get();
+
+    $historyForJs = $orders->map(function ($order) {
+        $firstItem = $order->items->first();
+
+        $packageName = $order->package?->name
+            ?? $firstItem?->name
+            ?? 'Paket';
+
+        $packageSlug = $order->package?->slug
+            ?? data_get($firstItem?->snapshot, 'slug')
+            ?? null;
+
+        $statusCode = $order->status === 'completed' ? 'completed' : 'cancelled';
+
+        $statusLabel = match ($order->status) {
+            'completed' => 'Selesai',
+            'expired' => 'Expired',
+            default => 'Dibatalkan',
+        };
+
+        return [
+            'id' => $order->id,
+            'orderId' => $order->invoice_number,
+            'invoiceUrl' => route('frontend.invoice.download', $order->id),
+
+            'orderDate' => optional($order->created_at)->toIso8601String(),
+            'status' => $statusLabel,
+            'statusCode' => $statusCode,
+            'paymentStatus' => $order->payment_status,
+
+            'items' => [
+                [
+                    'id' => $packageSlug,
+                    'name' => $packageName,
+                    'price' => (int) $order->total_price,
+                    'basePrice' => (int) $order->subtotal_package,
+                    'date' => optional($order->event_date)->format('Y-m-d'),
+                    'location' => $order->event_location_name,
+                    'fullAddress' => $order->event_address,
+                    'customerName' => $order->customer_name,
+                    'customerPhone' => $order->customer_phone,
+                    'customerEmail' => $order->customer_email,
+                    'shippingFee' => (int) $order->shipping_fee,
+                    'distance' => (float) $order->distance_km,
+
+                    'addons' => $order->addons->map(function ($addon) {
+                        return [
+                            'id' => $addon->addon_id,
+                            'name' => $addon->name,
+                            'detail' => $addon->detail,
+                            'unit' => $addon->unit,
+                            'quantity' => (int) $addon->quantity,
+                            'price' => (int) $addon->price,
+                            'totalPrice' => (int) $addon->total_price,
+                        ];
+                    })->values(),
+                ],
+            ],
+
+            'subtotalPackage' => (int) $order->subtotal_package,
+            'subtotalCustom' => (int) $order->subtotal_custom,
+            'subtotalAddons' => (int) $order->subtotal_addons,
+            'shippingFee' => (int) $order->shipping_fee,
+            'totalPrice' => (int) $order->total_price,
+
+            'cancelledReason' => $order->cancelled_reason,
+            'notes' => $order->notes,
+
+            'rating' => $order->review?->rating,
+            'review' => $order->review?->review,
+        ];
+    })->values();
+
+    $cartCount = count(session('booking_cart', []));
+
+    return view('frontend.history', compact('historyForJs', 'cartCount'));
 }
 }

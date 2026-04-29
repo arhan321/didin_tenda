@@ -1,259 +1,123 @@
 /**
  * HISTORY.JS - Halaman History Booking
- * Menampilkan riwayat pesanan yang sudah selesai atau dibatalkan
- * Data diambil dari localStorage "didinOrders" dengan filter status completed/cancelled
+ *
+ * Data history berasal dari Laravel database lewat:
+ * window.DIDIN_HISTORY
+ *
+ * Tidak memakai localStorage.
+ * Tidak membuat data demo.
  */
 
-// Variabel global
 let allHistory = [];
 let currentFilter = 'all';
 let currentSearch = '';
 
-// ===== LOAD DATA HISTORY DARI LOCALSTORAGE =====
+// ==================== INIT ====================
+document.addEventListener('DOMContentLoaded', function () {
+    loadHistory();
+    initFilters();
+    initBackToTop();
+});
+
+// ==================== LOAD DATA ====================
 function loadHistory() {
-    const savedOrders = localStorage.getItem('didinOrders');
-    
-    console.log('📦 History: Memuat data dari localStorage...');
-    
-    if (savedOrders && savedOrders !== '[]') {
-        const allOrders = JSON.parse(savedOrders);
-        // Filter hanya pesanan yang sudah selesai (completed) atau dibatalkan (cancelled)
-        allHistory = allOrders.filter(order => 
-            order.statusCode === 'completed' || order.statusCode === 'cancelled'
-        );
-        console.log(`✅ Memuat ${allHistory.length} riwayat pesanan`);
-    } else {
-        // Jika tidak ada data, buat data demo
-        console.log('⚠️ Tidak ada data, membuat data demo...');
-        allHistory = getDemoHistory();
-        // Simpan juga ke didinOrders agar konsisten
-        const existingOrders = localStorage.getItem('didinOrders');
-        const existing = existingOrders ? JSON.parse(existingOrders) : [];
-        const allOrders = [...allHistory, ...existing];
-        localStorage.setItem('didinOrders', JSON.stringify(allOrders));
-    }
-    
+    allHistory = Array.isArray(window.DIDIN_HISTORY) ? window.DIDIN_HISTORY : [];
+
     updateStats();
     renderHistory();
 }
 
-// ===== DATA DEMO UNTUK HISTORY =====
-function getDemoHistory() {
-    const today = new Date();
-    const lastMonth = new Date(today);
-    lastMonth.setMonth(today.getMonth() - 1);
-    const twoMonthsAgo = new Date(today);
-    twoMonthsAgo.setMonth(today.getMonth() - 2);
-    
-    return [
-        {
-            orderId: "INV/2025/001",
-            orderDate: lastMonth.toISOString(),
-            status: "Selesai",
-            statusCode: "completed",
-            items: [{
-                id: "paket-hemat",
-                name: "Paket Hemat",
-                price: 3200000,
-                basePrice: 2500000,
-                date: lastMonth.toISOString().split('T')[0],
-                location: "Gedung Serbaguna, Jakarta",
-                customerName: "Ahmad Fauzi",
-                customerPhone: "08123456789",
-                addons: [
-                    { id: "kursi", name: "Kursi Futura Tambahan (50 pcs)", price: 500000 },
-                    { id: "lampu", name: "Lampu Hias (5 titik)", price: 200000 }
-                ]
-            }],
-            totalPrice: 3200000,
-            rating: 5,
-            review: "Pelayanan sangat memuaskan! Dekorasi sesuai pesanan, tim tepat waktu. Terima kasih Didin Tenda!"
-        },
-        {
-            orderId: "INV/2025/002",
-            orderDate: twoMonthsAgo.toISOString(),
-            status: "Selesai",
-            statusCode: "completed",
-            items: [{
-                id: "paket-silver",
-                name: "Paket Silver",
-                price: 4500000,
-                basePrice: 4500000,
-                date: twoMonthsAgo.toISOString().split('T')[0],
-                location: "Balai Kartini, Jakarta Selatan",
-                customerName: "Siti Nurhaliza",
-                customerPhone: "081298765432",
-                addons: []
-            }],
-            totalPrice: 4500000,
-            rating: 4,
-            review: "Dekorasi bagus, tapi sedikit terlambat. Secara keseluruhan ok!"
-        },
-        {
-            orderId: "INV/2025/003",
-            orderDate: lastMonth.toISOString(),
-            status: "Dibatalkan",
-            statusCode: "cancelled",
-            items: [{
-                id: "paket-gold",
-                name: "Paket Gold",
-                price: 7500000,
-                basePrice: 7500000,
-                date: lastMonth.toISOString().split('T')[0],
-                location: "Kemang, Jakarta Selatan",
-                customerName: "Budi Santoso",
-                customerPhone: "08135557788",
-                addons: [
-                    { id: "panggung", name: "Panggung Portable", price: 800000 }
-                ]
-            }],
-            totalPrice: 8300000,
-            cancelledReason: "Perubahan jadwal acara"
-        }
-    ];
-}
-
-// ===== UPDATE STATISTIK =====
+// ==================== UPDATE STATISTIK ====================
 function updateStats() {
-    const completed = allHistory.filter(h => h.statusCode === 'completed').length;
-    const cancelled = allHistory.filter(h => h.statusCode === 'cancelled').length;
+    const completed = allHistory.filter(item => item.statusCode === 'completed').length;
+    const cancelled = allHistory.filter(item => item.statusCode === 'cancelled').length;
+
     const totalSpent = allHistory
-        .filter(h => h.statusCode === 'completed')
-        .reduce((sum, h) => sum + h.totalPrice, 0);
-    
-    document.getElementById('totalCompleted').textContent = completed;
-    document.getElementById('totalCancelled').textContent = cancelled;
-    document.getElementById('totalSpent').textContent = formatRupiah(totalSpent);
+        .filter(item => item.statusCode === 'completed')
+        .reduce((sum, item) => sum + Number(item.totalPrice || 0), 0);
+
+    setText('totalCompleted', completed);
+    setText('totalCancelled', cancelled);
+    setText('totalSpent', formatRupiah(totalSpent));
 }
 
-// ===== RENDER HISTORY =====
+// ==================== RENDER HISTORY ====================
 function renderHistory() {
     const container = document.getElementById('historyContainer');
     const emptyContainer = document.getElementById('emptyHistory');
-    
+
     if (!container) return;
-    
-    // Filter berdasarkan status
+
     let filteredHistory = [...allHistory];
-    
+
     if (currentFilter !== 'all') {
-        filteredHistory = filteredHistory.filter(h => 
-            h.statusCode === currentFilter
-        );
+        filteredHistory = filteredHistory.filter(item => item.statusCode === currentFilter);
     }
-    
-    // Search
+
     if (currentSearch) {
-        const searchLower = currentSearch.toLowerCase();
+        const keyword = currentSearch.toLowerCase();
+
         filteredHistory = filteredHistory.filter(order => {
-            const item = order.items[0];
-            return order.orderId.toLowerCase().includes(searchLower) ||
-                   item.name.toLowerCase().includes(searchLower) ||
-                   (item.location && item.location.toLowerCase().includes(searchLower));
+            const item = getFirstHistoryItem(order);
+
+            return String(order.orderId || '').toLowerCase().includes(keyword) ||
+                String(order.status || '').toLowerCase().includes(keyword) ||
+                String(order.paymentStatus || '').toLowerCase().includes(keyword) ||
+                String(item?.name || '').toLowerCase().includes(keyword) ||
+                String(item?.location || '').toLowerCase().includes(keyword) ||
+                String(item?.fullAddress || '').toLowerCase().includes(keyword) ||
+                String(item?.customerName || '').toLowerCase().includes(keyword) ||
+                String(item?.customerPhone || '').toLowerCase().includes(keyword);
         });
     }
-    
+
     if (filteredHistory.length === 0) {
-        if (container) container.style.display = 'none';
-        if (emptyContainer) emptyContainer.style.display = 'block';
+        container.style.display = 'none';
+
+        if (emptyContainer) {
+            emptyContainer.style.display = 'block';
+        }
+
         return;
     }
-    
-    if (container) {
-        container.style.display = 'block';
-        container.innerHTML = '';
+
+    container.style.display = 'block';
+    container.innerHTML = filteredHistory.map(order => renderHistoryCard(order)).join('');
+
+    if (emptyContainer) {
+        emptyContainer.style.display = 'none';
     }
-    if (emptyContainer) emptyContainer.style.display = 'none';
-    
-    let html = '';
-    filteredHistory.forEach(order => {
-        html += renderHistoryCard(order);
-    });
-    
-    container.innerHTML = html;
-    
-    // Update badge keranjang
-    updateCartBadge();
 }
 
-// ===== RENDER SATU CARD HISTORY =====
+// ==================== RENDER CARD ====================
 function renderHistoryCard(order) {
-    const item = order.items[0];
+    const item = getFirstHistoryItem(order);
+
     if (!item) return '';
-    
+
     const eventDate = item.date ? formatDate(item.date) : 'Belum ditentukan';
-    const orderDate = formatDate(order.orderDate);
-    const statusClass = order.statusCode === 'completed' ? 'status-completed' : 'status-cancelled';
-    const statusColor = order.statusCode === 'completed' ? '#28a745' : '#dc3545';
-    
-    // Hitung total add-ons
-    const totalAddons = item.addons && item.addons.length > 0 
-        ? item.addons.reduce((sum, a) => sum + a.price, 0) 
-        : 0;
-    
-    // Render add-ons list
-// Di dalam renderHistoryCard(), cari bagian addonsHtml
-let addonsHtml = '';
-if (item.addons && item.addons.length > 0) {
-    addonsHtml = `
-        <div class="history-addons">
-            <div class="addons-header">
-                <i class="bi bi-plus-circle"></i> Add-ons:
-            </div>
-            <ul class="addons-list">
-                ${item.addons.map(addon => {
-                    const qty = addon.quantity || 1;
-                    const qtyText = qty > 1 ? ` (${qty} pcs)` : '';
-                    const totalPrice = (addon.totalPrice) || (addon.price * qty);
-                    return `
-                        <li>
-                            <span>${addon.name}${qtyText}</span>
-                            <span class="addon-price">${formatRupiah(totalPrice)}</span>
-                        </li>
-                    `;
-                }).join('')}
-            </ul>
-        </div>
-    `;
-}
-    
-    // Render rating jika ada
-    let ratingHtml = '';
-    if (order.rating) {
-        let stars = '';
-        for (let i = 1; i <= 5; i++) {
-            stars += `<i class="bi ${i <= order.rating ? 'bi-star-fill' : 'bi-star'}"></i>`;
-        }
-        ratingHtml = `
-            <div class="rating-display">
-                <div class="rating-stars-display">${stars}</div>
-                <div class="rating-text">${order.review || 'Tidak ada komentar'}</div>
-            </div>
-        `;
-    }
-    
-    // Render cancelled reason jika ada
-    let cancelledHtml = '';
-    if (order.statusCode === 'cancelled' && order.cancelledReason) {
-        cancelledHtml = `
-            <div class="history-addons" style="background: rgba(220, 53, 69, 0.05); border-left: 3px solid #dc3545;">
-                <div class="addons-header" style="color: #dc3545;">
-                    <i class="bi bi-info-circle"></i> Alasan Pembatalan:
-                </div>
-                <div style="font-size: 0.85rem; color: var(--gray-700);">${order.cancelledReason}</div>
-            </div>
-        `;
-    }
-    
+    const orderDate = order.orderDate ? formatDate(order.orderDate) : '-';
+
+    const isCompleted = order.statusCode === 'completed';
+    const statusClass = isCompleted ? 'status-completed' : 'status-cancelled';
+    const statusColor = isCompleted ? '#28a745' : '#dc3545';
+
+    const addons = Array.isArray(item.addons) ? item.addons : [];
+    const totalAddons = Number(order.subtotalAddons || 0);
+    const shippingFee = Number(item.shippingFee || order.shippingFee || 0);
+    const distance = Number(item.distance || 0);
+
     return `
         <div class="history-card" style="--status-color: ${statusColor}">
-            <div class="history-status ${statusClass}">${order.status}</div>
+            <div class="history-status ${statusClass}">
+                ${escapeHtml(order.status || (isCompleted ? 'Selesai' : 'Dibatalkan'))}
+            </div>
             
             <div class="history-header-card">
                 <div class="history-title">
-                    <h3>${item.name}</h3>
+                    <h3>${escapeHtml(item.name || 'Paket')}</h3>
                     <div class="history-order-id">
-                        <i class="bi bi-upc-scan"></i> ${order.orderId}
+                        <i class="bi bi-upc-scan"></i> ${escapeHtml(order.orderId || '-')}
                     </div>
                 </div>
             </div>
@@ -263,171 +127,446 @@ if (item.addons && item.addons.length > 0) {
                     <i class="bi bi-calendar"></i>
                     <span>📅 ${eventDate}</span>
                 </div>
+
                 <div class="detail-item">
                     <i class="bi bi-geo-alt"></i>
-                    <span>📍 ${item.location || 'Lokasi tidak tersedia'}</span>
+                    <span>📍 ${escapeHtml(item.location || 'Lokasi tidak tersedia')}</span>
                 </div>
+
+                <div class="detail-item">
+                    <i class="bi bi-truck"></i>
+                    <span>
+                        🚚 Jarak:
+                        ${distance > 0 ? distance.toFixed(1) + ' km' : 'Belum dihitung'}
+                        |
+                        Ongkir:
+                        ${shippingFee === 0 ? 'GRATIS' : formatRupiah(shippingFee)}
+                    </span>
+                </div>
+
                 <div class="detail-item">
                     <i class="bi bi-person"></i>
-                    <span>👤 ${item.customerName || 'Nama tidak tersedia'}</span>
+                    <span>👤 ${escapeHtml(item.customerName || 'Nama tidak tersedia')}</span>
                 </div>
+
                 <div class="detail-item">
                     <i class="bi bi-calendar-check"></i>
                     <span>📆 Pesan: ${orderDate}</span>
                 </div>
-            </div>
-            
-            ${addonsHtml}
-            ${cancelledHtml}
-            ${ratingHtml}
-            
-            <div class="history-price">
-                <div class="price-total">
-                    💰 Total: ${formatRupiah(order.totalPrice)}
-                    ${totalAddons > 0 ? '<span>(termasuk add-ons)</span>' : ''}
+
+                <div class="detail-item">
+                    <i class="bi bi-credit-card"></i>
+                    <span>💳 Pembayaran: ${escapeHtml(paymentStatusLabel(order.paymentStatus))}</span>
                 </div>
             </div>
             
+            ${renderAddonsHtml(addons)}
+            ${renderCancelledReason(order)}
+            ${renderRatingHtml(order)}
+            
+            <div class="history-price">
+                <div class="price-total">
+                    💰 Total: ${formatRupiah(order.totalPrice || 0)}
+                    ${totalAddons > 0 ? '<span>(termasuk add-ons)</span>' : ''}
+                </div>
+
+                ${shippingFee > 0 ? `
+                    <div class="price-shipping">
+                        <small>✓ Sudah termasuk biaya pengiriman</small>
+                    </div>
+                ` : ''}
+            </div>
+            
             <div class="history-actions">
-                <button class="action-btn action-btn-outline" onclick="viewHistoryDetail('${order.orderId}')">
+                <button class="action-btn action-btn-outline" onclick="viewHistoryDetail('${escapeAttribute(order.orderId)}')">
                     <i class="bi bi-eye"></i> Detail
                 </button>
-                ${order.statusCode === 'completed' ? `
-                <button class="action-btn action-btn-primary" onclick="reorderHistory('${order.orderId}')">
-                    <i class="bi bi-arrow-repeat"></i> Pesan Lagi
+
+                <button class="action-btn action-btn-outline" onclick="viewInvoice('${escapeAttribute(order.orderId)}')">
+                    <i class="bi bi-download"></i> Invoice
                 </button>
+
+                ${isCompleted ? `
+                    <button class="action-btn action-btn-primary" onclick="reorderHistory('${escapeAttribute(order.orderId)}')">
+                        <i class="bi bi-arrow-repeat"></i> Pesan Lagi
+                    </button>
                 ` : ''}
             </div>
         </div>
     `;
 }
 
-// ===== LIHAT DETAIL HISTORY (MODAL) =====
+function renderAddonsHtml(addons) {
+    if (!addons || addons.length === 0) return '';
+
+    return `
+        <div class="history-addons">
+            <div class="addons-header">
+                <i class="bi bi-plus-circle"></i> Add-ons:
+            </div>
+
+            <ul class="addons-list">
+                ${addons.map(addon => {
+                    const quantity = Number(addon.quantity || 1);
+                    const unit = addon.unit || 'pcs';
+                    const qtyText = quantity > 1 ? ` (${quantity} ${unit})` : '';
+                    const totalPrice = Number(addon.totalPrice || addon.total_price || addon.price || 0);
+
+                    return `
+                        <li>
+                            <span>${escapeHtml(addon.name || 'Add-on')}${escapeHtml(qtyText)}</span>
+                            <span class="addon-price">${formatRupiah(totalPrice)}</span>
+                        </li>
+                    `;
+                }).join('')}
+            </ul>
+        </div>
+    `;
+}
+
+function renderRatingHtml(order) {
+    if (!order.rating) return '';
+
+    return `
+        <div class="rating-display">
+            <div class="rating-stars-display">
+                ${renderStarsHtml(order.rating)}
+            </div>
+            <div class="rating-text">
+                ${escapeHtml(order.review || 'Tidak ada komentar')}
+            </div>
+        </div>
+    `;
+}
+
+function renderCancelledReason(order) {
+    if (order.statusCode !== 'cancelled' || !order.cancelledReason) return '';
+
+    return `
+        <div class="history-addons" style="background: rgba(220, 53, 69, 0.05); border-left: 3px solid #dc3545;">
+            <div class="addons-header" style="color: #dc3545;">
+                <i class="bi bi-info-circle"></i> Alasan Pembatalan:
+            </div>
+            <div style="font-size: 0.85rem; color: var(--gray-700);">
+                ${escapeHtml(order.cancelledReason)}
+            </div>
+        </div>
+    `;
+}
+
+// ==================== DETAIL MODAL ====================
 function viewHistoryDetail(orderId) {
-    const order = allHistory.find(o => o.orderId === orderId);
+    const order = allHistory.find(item => item.orderId === orderId);
+
     if (!order) return;
-    
-    const item = order.items[0];
+
+    const item = getFirstHistoryItem(order);
     const modalBody = document.getElementById('detailModalBody');
-    
-    let addonsHtml = '';
-    if (item.addons && item.addons.length > 0) {
-        addonsHtml = `
+
+    if (!item || !modalBody) return;
+
+    const addons = Array.isArray(item.addons) ? item.addons : [];
+    const shippingFee = Number(item.shippingFee || order.shippingFee || 0);
+    const distance = Number(item.distance || 0);
+    const isCompleted = order.statusCode === 'completed';
+
+    const addonsHtml = addons.length > 0
+        ? `
             <h6 class="mt-3"><i class="bi bi-plus-circle"></i> Add-ons:</h6>
             <ul class="list-unstyled">
-                ${item.addons.map(addon => `
-                    <li class="d-flex justify-content-between mb-2">
-                        <span>${addon.name}</span>
-                        <span class="text-primary">${formatRupiah(addon.price)}</span>
-                    </li>
-                `).join('')}
+                ${addons.map(addon => {
+                    const quantity = Number(addon.quantity || 1);
+                    const unit = addon.unit || 'pcs';
+                    const totalPrice = Number(addon.totalPrice || addon.total_price || addon.price || 0);
+
+                    return `
+                        <li class="d-flex justify-content-between mb-2">
+                            <span>
+                                ${escapeHtml(addon.name || 'Add-on')}
+                                ${quantity > 1 ? `(${quantity} ${escapeHtml(unit)})` : ''}
+                            </span>
+                            <span class="text-primary">${formatRupiah(totalPrice)}</span>
+                        </li>
+                    `;
+                }).join('')}
             </ul>
-        `;
-    }
-    
-    let ratingHtml = '';
-    if (order.rating) {
-        let stars = '';
-        for (let i = 1; i <= 5; i++) {
-            stars += `<i class="bi ${i <= order.rating ? 'bi-star-fill' : 'bi-star'} text-warning"></i>`;
-        }
-        ratingHtml = `
+        `
+        : '';
+
+    const ratingHtml = order.rating
+        ? `
             <hr>
             <h6><i class="bi bi-star-fill text-warning"></i> Rating & Review:</h6>
-            <div class="mb-2">${stars}</div>
-            <p class="text-muted">${order.review || 'Tidak ada komentar'}</p>
-        `;
-    }
-    
+            <div class="mb-2">${renderStarsHtml(order.rating)}</div>
+            <p class="text-muted">${escapeHtml(order.review || 'Tidak ada komentar')}</p>
+        `
+        : '';
+
     modalBody.innerHTML = `
         <div class="row">
             <div class="col-md-6">
-                <p><strong><i class="bi bi-upc-scan"></i> Order ID</strong><br>${order.orderId}</p>
-                <p><strong><i class="bi bi-tag"></i> Paket</strong><br>${item.name}</p>
-                <p><strong><i class="bi bi-calendar"></i> Tanggal Acara</strong><br>${formatDate(item.date)}</p>
-                <p><strong><i class="bi bi-geo-alt"></i> Lokasi</strong><br>${item.location || 'Belum diisi'}</p>
-            </div>
-            <div class="col-md-6">
-                <p><strong><i class="bi bi-person"></i> Nama</strong><br>${item.customerName || 'Belum diisi'}</p>
-                <p><strong><i class="bi bi-whatsapp"></i> WhatsApp</strong><br>${item.customerPhone || 'Belum diisi'}</p>
-                <p><strong><i class="bi bi-clock-history"></i> Status</strong><br>
-                    <span class="badge ${order.statusCode === 'completed' ? 'bg-success' : 'bg-danger'}">${order.status}</span>
+                <p>
+                    <strong><i class="bi bi-upc-scan"></i> Invoice</strong><br>
+                    ${escapeHtml(order.orderId || '-')}
                 </p>
-                <p><strong><i class="bi bi-cash-stack"></i> Total</strong><br>
-                    <span class="text-primary fw-bold">${formatRupiah(order.totalPrice)}</span>
+
+                <p>
+                    <strong><i class="bi bi-tag"></i> Paket</strong><br>
+                    ${escapeHtml(item.name || 'Paket')}
+                </p>
+
+                <p>
+                    <strong><i class="bi bi-calendar"></i> Tanggal Acara</strong><br>
+                    ${formatDate(item.date)}
+                </p>
+
+                <p>
+                    <strong><i class="bi bi-geo-alt"></i> Lokasi</strong><br>
+                    ${escapeHtml(item.location || 'Belum diisi')}
+                </p>
+
+                <p>
+                    <strong><i class="bi bi-map"></i> Alamat Lengkap</strong><br>
+                    ${escapeHtml(item.fullAddress || 'Belum diisi')}
+                </p>
+
+                <p>
+                    <strong><i class="bi bi-truck"></i> Biaya Pengiriman</strong><br>
+                    ${shippingFee === 0 ? 'GRATIS' : formatRupiah(shippingFee)}
+                    ${distance > 0 ? `(Jarak: ${distance.toFixed(1)} km)` : ''}
+                </p>
+            </div>
+
+            <div class="col-md-6">
+                <p>
+                    <strong><i class="bi bi-person"></i> Nama</strong><br>
+                    ${escapeHtml(item.customerName || 'Belum diisi')}
+                </p>
+
+                <p>
+                    <strong><i class="bi bi-whatsapp"></i> WhatsApp</strong><br>
+                    ${escapeHtml(item.customerPhone || 'Belum diisi')}
+                </p>
+
+                <p>
+                    <strong><i class="bi bi-envelope"></i> Email</strong><br>
+                    ${escapeHtml(item.customerEmail || '-')}
+                </p>
+
+                <p>
+                    <strong><i class="bi bi-clock-history"></i> Status</strong><br>
+                    <span class="badge ${isCompleted ? 'bg-success' : 'bg-danger'}">
+                        ${escapeHtml(order.status || (isCompleted ? 'Selesai' : 'Dibatalkan'))}
+                    </span>
+                </p>
+
+                <p>
+                    <strong><i class="bi bi-credit-card"></i> Status Pembayaran</strong><br>
+                    ${escapeHtml(paymentStatusLabel(order.paymentStatus))}
+                </p>
+
+                <p>
+                    <strong><i class="bi bi-cash-stack"></i> Total</strong><br>
+                    <span class="text-primary fw-bold">${formatRupiah(order.totalPrice || 0)}</span>
                 </p>
             </div>
         </div>
+
         ${addonsHtml}
         ${ratingHtml}
-        ${order.cancelledReason ? `<hr><p><strong><i class="bi bi-info-circle text-danger"></i> Alasan Pembatalan:</strong><br>${order.cancelledReason}</p>` : ''}
+
+        ${order.cancelledReason ? `
+            <hr>
+            <p>
+                <strong><i class="bi bi-info-circle text-danger"></i> Alasan Pembatalan:</strong><br>
+                ${escapeHtml(order.cancelledReason)}
+            </p>
+        ` : ''}
+
+        ${order.notes ? `
+            <hr>
+            <p>
+                <strong>Catatan:</strong><br>
+                ${escapeHtml(order.notes)}
+            </p>
+        ` : ''}
     `;
-    
-    // Set tombol reorder di modal
+
     const reorderBtn = document.getElementById('reorderFromDetailBtn');
+    const invoiceBtn = document.getElementById('invoiceFromDetailBtn');
+
     if (reorderBtn) {
-        reorderBtn.onclick = () => reorderHistory(orderId);
+        reorderBtn.style.display = isCompleted ? 'inline-block' : 'none';
+        reorderBtn.onclick = function () {
+            reorderHistory(orderId);
+        };
     }
-    
+
+    if (invoiceBtn) {
+        invoiceBtn.onclick = function () {
+            viewInvoice(orderId);
+        };
+    }
+
     const modal = new bootstrap.Modal(document.getElementById('detailModal'));
     modal.show();
 }
 
-// ===== PESAN LAGI DARI HISTORY =====
+// ==================== ACTIONS ====================
+function viewInvoice(orderId) {
+    const order = allHistory.find(item => item.orderId === orderId);
+
+    if (!order) return;
+
+    if (!order.invoiceUrl) {
+        notifyHistory('Link invoice belum tersedia.', 'warning');
+        return;
+    }
+
+    window.open(order.invoiceUrl, '_blank');
+}
+
 function reorderHistory(orderId) {
-    const order = allHistory.find(o => o.orderId === orderId);
-    if (order) {
-        const item = order.items[0];
-        window.location.href = `paket.html?id=${item.id}`;
+    const order = allHistory.find(item => item.orderId === orderId);
+    const item = getFirstHistoryItem(order);
+
+    if (item?.id) {
+        window.location.href = `${window.DIDIN_HISTORY_ROUTES?.paketDetail || '/paket'}?id=${encodeURIComponent(item.id)}`;
+        return;
+    }
+
+    window.location.href = window.DIDIN_HISTORY_ROUTES?.paketIndex || '/#paket';
+}
+
+// ==================== FILTER & SEARCH ====================
+function initFilters() {
+    const filterButtons = document.querySelectorAll('.filter-btn');
+
+    filterButtons.forEach(button => {
+        button.addEventListener('click', function () {
+            filterButtons.forEach(item => item.classList.remove('active'));
+
+            this.classList.add('active');
+            currentFilter = this.dataset.filter || 'all';
+
+            renderHistory();
+        });
+    });
+
+    const searchInput = document.getElementById('searchInput');
+
+    if (searchInput) {
+        searchInput.addEventListener('input', function () {
+            currentSearch = this.value.trim();
+            renderHistory();
+        });
     }
 }
 
-// ===== FORMAT TANGGAL =====
+// ==================== BACK TO TOP ====================
+function initBackToTop() {
+    const backToTop = document.getElementById('backToTop');
+
+    if (!backToTop) return;
+
+    window.addEventListener('scroll', function () {
+        backToTop.classList.toggle('show', window.scrollY > 300);
+    });
+
+    backToTop.addEventListener('click', function () {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth',
+        });
+    });
+}
+
+// ==================== HELPERS ====================
+function getFirstHistoryItem(order) {
+    if (!order || !Array.isArray(order.items) || order.items.length === 0) {
+        return null;
+    }
+
+    return order.items[0];
+}
+
+function setText(id, value) {
+    const element = document.getElementById(id);
+
+    if (element) {
+        element.textContent = value;
+    }
+}
+
+function paymentStatusLabel(paymentStatus) {
+    const status = String(paymentStatus || '').toLowerCase();
+
+    const labels = {
+        unpaid: 'Belum Dibayar',
+        pending: 'Pending',
+        paid: 'Lunas',
+        expired: 'Expired',
+        failed: 'Gagal',
+        cancelled: 'Dibatalkan',
+        refunded: 'Refund',
+    };
+
+    return labels[status] || paymentStatus || '-';
+}
+
+function renderStarsHtml(rating) {
+    const value = Number(rating || 0);
+    let html = '';
+
+    for (let i = 1; i <= 5; i++) {
+        html += `<i class="bi ${i <= value ? 'bi-star-fill' : 'bi-star'}"></i>`;
+    }
+
+    return html;
+}
+
 function formatDate(dateString) {
     if (!dateString) return 'Belum ditentukan';
+
     const date = new Date(dateString);
+
+    if (Number.isNaN(date.getTime())) {
+        return dateString;
+    }
+
     return date.toLocaleDateString('id-ID', {
-        day: 'numeric',
+        day: '2-digit',
         month: 'long',
-        year: 'numeric'
+        year: 'numeric',
     });
 }
 
-// ===== FILTER & SEARCH =====
-function initFilters() {
-    const filterBtns = document.querySelectorAll('.filter-btn');
-    filterBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
-            filterBtns.forEach(b => b.classList.remove('active'));
-            this.classList.add('active');
-            currentFilter = this.getAttribute('data-filter');
-            renderHistory();
-        });
-    });
-    
-    const searchInput = document.getElementById('searchInput');
-    if (searchInput) {
-        searchInput.addEventListener('input', function() {
-            currentSearch = this.value;
-            renderHistory();
-        });
-    }
+function formatRupiah(number) {
+    return 'Rp ' + new Intl.NumberFormat('id-ID').format(Number(number || 0));
 }
 
-// ===== INITIALIZE =====
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 Halaman History dimuat...');
-    loadHistory();
-    initFilters();
-    
-    // Back to top
-    const backToTop = document.getElementById('backToTop');
-    if (backToTop) {
-        window.addEventListener('scroll', () => {
-            backToTop.classList.toggle('show', window.scrollY > 300);
-        });
-        backToTop.addEventListener('click', () => {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
+function escapeHtml(value) {
+    if (value === null || value === undefined) {
+        return '';
     }
-});
+
+    return String(value)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+}
+
+function escapeAttribute(value) {
+    return escapeHtml(value).replaceAll('`', '&#096;');
+}
+
+function notifyHistory(message, type = 'info') {
+    if (typeof window.showNotification === 'function') {
+        window.showNotification(message, type);
+        return;
+    }
+
+    alert(message);
+}

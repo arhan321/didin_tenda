@@ -54,7 +54,7 @@
                 <div class="d-flex ms-lg-3">
                     <a href="{{ route('frontend.cart') }}" class="user-menu-link" data-bs-toggle="tooltip" title="Keranjang Booking">
                         <i class="bi bi-cart3"></i>
-                        <span class="menu-badge" id="cartCount">0</span>
+                        <span class="menu-badge" id="cartCount">{{ $cartCount ?? 0 }}</span>
                     </a>
 
                     <a href="{{ route('frontend.pesanan') }}" class="user-menu-link" data-bs-toggle="tooltip" title="Pesanan Saya">
@@ -81,6 +81,18 @@
                 <h1><i class="bi bi-clock-history"></i> History Booking</h1>
                 <p>Riwayat lengkap semua pesanan dekorasi acara Anda</p>
             </div>
+
+            @if(session('success'))
+                <div class="alert alert-success mb-4">
+                    {{ session('success') }}
+                </div>
+            @endif
+
+            @if(session('error'))
+                <div class="alert alert-danger mb-4">
+                    {{ session('error') }}
+                </div>
+            @endif
 
             <!-- Filter & Search -->
             <div class="filter-section">
@@ -132,7 +144,7 @@
             <div id="emptyHistory" class="empty-history" style="display: none;">
                 <i class="bi bi-inbox"></i>
                 <h3>Belum Ada History</h3>
-                <p>Anda belum memiliki riwayat pesanan. Yuk booking dekorasi impian Anda!</p>
+                <p>Anda belum memiliki riwayat pesanan selesai atau dibatalkan.</p>
                 <a href="{{ route('frontend.index') }}#paket" class="btn btn-primary">Lihat Paket</a>
             </div>
         </div>
@@ -154,8 +166,13 @@
                 </div>
 
                 <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-primary" id="invoiceFromDetailBtn">
+                        <i class="bi bi-download"></i> Invoice
+                    </button>
+                    <button type="button" class="btn btn-primary" id="reorderFromDetailBtn">
+                        <i class="bi bi-arrow-repeat"></i> Pesan Lagi
+                    </button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                    <button type="button" class="btn btn-primary" id="reorderFromDetailBtn">Pesan Lagi</button>
                 </div>
             </div>
         </div>
@@ -249,12 +266,23 @@
         <i class="bi bi-arrow-up"></i>
     </button>
 
+    <script>
+        window.DIDIN_HISTORY = @json($historyForJs ?? []);
+        window.DIDIN_HISTORY_ROUTES = {
+            paketIndex: @json(route('frontend.index') . '#paket'),
+            paketDetail: @json(route('frontend.paket')),
+            cart: @json(route('frontend.cart')),
+            pesanan: @json(route('frontend.pesanan')),
+            history: @json(route('frontend.history')),
+        };
+    </script>
+
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 
     <!-- Custom JS -->
-    <script src="{{ asset('js/script.js') }}"></script>
-    <script src="{{ asset('js/history.js') }}"></script>
+    <script src="{{ asset('js/script.js') }}?v={{ time() }}"></script>
+    <script src="{{ asset('js/history.js') }}?v={{ time() }}"></script>
 </body>
 </html>
