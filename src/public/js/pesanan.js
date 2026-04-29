@@ -4,6 +4,14 @@
  * Data pesanan berasal dari Laravel database lewat:
  * window.DIDIN_ORDERS
  *
+ * Fitur:
+ * - Render pesanan dari database
+ * - Filter dan search pesanan
+ * - Detail pesanan
+ * - Invoice PDF
+ * - Midtrans Snap popup
+ * - Check Status pembayaran via POST ke Laravel
+ *
  * Tidak memakai localStorage.
  * Tidak membuat data demo.
  */
@@ -61,11 +69,11 @@ function renderOrders() {
             return String(order.orderId || '').toLowerCase().includes(keyword) ||
                 String(order.status || '').toLowerCase().includes(keyword) ||
                 String(order.paymentStatus || '').toLowerCase().includes(keyword) ||
-                String(item.name || '').toLowerCase().includes(keyword) ||
-                String(item.location || '').toLowerCase().includes(keyword) ||
-                String(item.fullAddress || '').toLowerCase().includes(keyword) ||
-                String(item.customerName || '').toLowerCase().includes(keyword) ||
-                String(item.customerPhone || '').toLowerCase().includes(keyword);
+                String(item?.name || '').toLowerCase().includes(keyword) ||
+                String(item?.location || '').toLowerCase().includes(keyword) ||
+                String(item?.fullAddress || '').toLowerCase().includes(keyword) ||
+                String(item?.customerName || '').toLowerCase().includes(keyword) ||
+                String(item?.customerPhone || '').toLowerCase().includes(keyword);
         });
     }
 
@@ -104,7 +112,7 @@ function renderOrderCard(order) {
     return `
         <div class="order-card" style="--status-color: ${statusInfo.color}">
             <div class="order-status ${statusInfo.class}">
-                ${escapeHtml(order.status || 'Menunggu Pembayaran')}
+                ${escapeHtml(order.status || statusLabelFromCode(order.statusCode))}
             </div>
 
             <div class="order-header">
@@ -151,6 +159,11 @@ function renderOrderCard(order) {
                 <div class="detail-item">
                     <i class="bi bi-calendar-check"></i>
                     <span>📆 Pesan: ${orderDate}</span>
+                </div>
+
+                <div class="detail-item">
+                    <i class="bi bi-credit-card"></i>
+                    <span>💳 Pembayaran: ${escapeHtml(paymentStatusLabel(order.paymentStatus))}</span>
                 </div>
             </div>
 
@@ -210,13 +223,21 @@ function renderAddonsHtml(addons) {
 
 function renderActionButtons(order) {
     const orderId = escapeAttribute(order.orderId);
+    const paymentStatus = String(order.paymentStatus || '').toLowerCase();
+    const isPaid = paymentStatus === 'paid';
+    const isCancelled = order.statusCode === 'cancelled';
+    const isCompleted = order.statusCode === 'completed';
 
-    if (order.statusCode === 'waiting_payment') {
+    if (!isPaid && !isCancelled && !isCompleted) {
         return `
-            <button class="action-btn action-btn-success" onclick="showPaymentInfo('${orderId}')">
+            <button class="action-btn action-btn-success" onclick="showPaymentInfo('${orderId}', this)">
                 <i class="bi bi-credit-card"></i> Lanjut Bayar
             </button>
 
+            <button class="action-btn action-btn-outline" onclick="checkPaymentStatus('${orderId}', false, this)">
+                <i class="bi bi-arrow-repeat"></i> Check Status
+            </button>
+
             <button class="action-btn action-btn-outline" onclick="viewInvoice('${orderId}')">
                 <i class="bi bi-download"></i> Invoice
             </button>
@@ -227,23 +248,23 @@ function renderActionButtons(order) {
         `;
     }
 
-    if (
-        order.statusCode === 'confirmed' ||
-        order.statusCode === 'processing' ||
-        order.statusCode === 'ongoing'
-    ) {
+    if (isPaid && !isCancelled && !isCompleted) {
         return `
             <button class="action-btn action-btn-outline" onclick="viewInvoice('${orderId}')">
                 <i class="bi bi-download"></i> Invoice
             </button>
 
+            <button class="action-btn action-btn-outline" onclick="checkPaymentStatus('${orderId}', false, this)">
+                <i class="bi bi-arrow-repeat"></i> Check Status
+            </button>
+
             <button class="action-btn action-btn-warning" onclick="contactAdmin('${orderId}')">
                 <i class="bi bi-whatsapp"></i> Hubungi Admin
             </button>
         `;
     }
 
-    if (order.statusCode === 'completed') {
+    if (isCompleted) {
         return `
             <button class="action-btn action-btn-outline" onclick="viewInvoice('${orderId}')">
                 <i class="bi bi-download"></i> Invoice
@@ -259,8 +280,12 @@ function renderActionButtons(order) {
         `;
     }
 
-    if (order.statusCode === 'cancelled') {
+    if (isCancelled) {
         return `
+            <button class="action-btn action-btn-outline" onclick="viewInvoice('${orderId}')">
+                <i class="bi bi-download"></i> Invoice
+            </button>
+
             <button class="action-btn action-btn-outline" onclick="reorder('${orderId}')">
                 <i class="bi bi-arrow-repeat"></i> Pesan Lagi
             </button>
@@ -361,15 +386,15 @@ function viewOrderDetail(orderId) {
                 </p>
 
                 <p>
-                    <strong><i class="bi bi-clock-history"></i> Status</strong><br>
+                    <strong><i class="bi bi-clock-history"></i> Status Pesanan</strong><br>
                     <span class="badge ${statusInfo.class}">
-                        ${escapeHtml(order.status || '-')}
+                        ${escapeHtml(order.status || statusLabelFromCode(order.statusCode))}
                     </span>
                 </p>
 
                 <p>
                     <strong><i class="bi bi-credit-card"></i> Status Pembayaran</strong><br>
-                    ${escapeHtml(order.paymentStatus || '-')}
+                    ${escapeHtml(paymentStatusLabel(order.paymentStatus))}
                 </p>
 
                 <p>
@@ -389,6 +414,196 @@ function viewOrderDetail(orderId) {
     modal.show();
 }
 
+// ==================== MIDTRANS PAYMENT ====================
+async function showPaymentInfo(orderId, buttonElement = null) {
+    const order = allOrders.find(item => item.orderId === orderId);
+
+    if (!order) return;
+
+    if (!order.paymentUrl) {
+        notifyPesanan('URL pembayaran belum tersedia. Pastikan paymentUrl sudah dikirim dari FrontendController.', 'warning');
+        return;
+    }
+
+    if (String(order.paymentStatus || '').toLowerCase() === 'paid') {
+        notifyPesanan('Pesanan ini sudah lunas.', 'success');
+        return;
+    }
+
+    setButtonLoading(buttonElement, true, '<i class="bi bi-hourglass-split"></i> Menyiapkan...');
+
+    try {
+        notifyPesanan('Mempersiapkan pembayaran Midtrans...', 'info');
+
+        const response = await fetch(order.paymentUrl, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': getCsrfTokenPesanan(),
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({}),
+        });
+
+        const data = await safeReadJson(response);
+
+        if (!response.ok || !data.status) {
+            notifyPesanan(data.message || 'Gagal membuat pembayaran.', 'error');
+            return;
+        }
+
+        if (data.already_paid) {
+            notifyPesanan('Pesanan ini sudah lunas.', 'success');
+            setTimeout(function () {
+                window.location.reload();
+            }, 800);
+            return;
+        }
+
+        if (!data.snap_token) {
+            notifyPesanan('Snap token tidak ditemukan dari server.', 'error');
+            return;
+        }
+
+        if (typeof window.snap === 'undefined') {
+            notifyPesanan('Snap Midtrans belum terbaca. Cek script Snap JS dan Client Key.', 'error');
+            return;
+        }
+
+        window.snap.pay(data.snap_token, {
+            onSuccess: function () {
+                notifyPesanan('Pembayaran berhasil. Mengecek status pembayaran...', 'success');
+                checkPaymentStatus(orderId, true);
+            },
+
+            onPending: function () {
+                notifyPesanan('Pembayaran masih pending. Klik Check Status setelah menyelesaikan pembayaran.', 'info');
+                checkPaymentStatus(orderId, false);
+            },
+
+            onError: function () {
+                notifyPesanan('Pembayaran gagal diproses. Mengecek status terakhir...', 'error');
+                checkPaymentStatus(orderId, false);
+            },
+
+            onClose: function () {
+                notifyPesanan('Popup pembayaran ditutup. Anda bisa klik Lanjut Bayar lagi atau Check Status.', 'info');
+            },
+        });
+    } catch (error) {
+        console.error(error);
+        notifyPesanan('Terjadi kesalahan saat membuka pembayaran.', 'error');
+    } finally {
+        setButtonLoading(buttonElement, false);
+    }
+}
+
+async function checkPaymentStatus(orderId, reloadIfPaid = false, buttonElement = null) {
+    const order = allOrders.find(item => item.orderId === orderId);
+
+    if (!order) return;
+
+    if (!order.paymentCheckUrl) {
+        notifyPesanan('URL check status belum tersedia. Pastikan paymentCheckUrl sudah dikirim dari FrontendController.', 'warning');
+        return;
+    }
+
+    setButtonLoading(buttonElement, true, '<i class="bi bi-hourglass-split"></i> Mengecek...');
+
+    try {
+        notifyPesanan('Mengecek status pembayaran...', 'info');
+
+        const response = await fetch(order.paymentCheckUrl, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': getCsrfTokenPesanan(),
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({}),
+        });
+
+        const data = await safeReadJson(response);
+
+        if (!response.ok || !data.status) {
+            notifyPesanan(data.message || 'Gagal mengecek status pembayaran.', 'error');
+            return;
+        }
+
+        syncOrderStatusFromCheckResponse(orderId, data);
+
+        if (data.payment_status === 'paid') {
+            notifyPesanan('Pembayaran sudah lunas. Status pesanan diperbarui.', 'success');
+
+            setTimeout(function () {
+                window.location.reload();
+            }, reloadIfPaid ? 500 : 900);
+
+            return;
+        }
+
+        if (data.payment_status === 'pending') {
+            notifyPesanan('Pembayaran masih pending. Selesaikan pembayaran lalu klik Check Status lagi.', 'info');
+
+            setTimeout(function () {
+                window.location.reload();
+            }, 900);
+
+            return;
+        }
+
+        if (data.payment_status === 'expired') {
+            notifyPesanan('Pembayaran sudah expired. Silakan hubungi admin atau booking ulang.', 'warning');
+
+            setTimeout(function () {
+                window.location.reload();
+            }, 900);
+
+            return;
+        }
+
+        if (data.payment_status === 'failed' || data.payment_status === 'cancelled') {
+            notifyPesanan('Pembayaran gagal atau dibatalkan.', 'error');
+
+            setTimeout(function () {
+                window.location.reload();
+            }, 900);
+
+            return;
+        }
+
+        notifyPesanan(`Status pembayaran saat ini: ${paymentStatusLabel(data.payment_status || 'pending')}.`, 'info');
+
+        setTimeout(function () {
+            window.location.reload();
+        }, 900);
+    } catch (error) {
+        console.error(error);
+        notifyPesanan('Terjadi kesalahan saat mengecek status pembayaran.', 'error');
+    } finally {
+        setButtonLoading(buttonElement, false);
+    }
+}
+
+function syncOrderStatusFromCheckResponse(orderId, data) {
+    const index = allOrders.findIndex(item => item.orderId === orderId);
+
+    if (index === -1) return;
+
+    const paymentStatus = data.payment_status || allOrders[index].paymentStatus;
+    const orderStatusRaw = data.order_status || allOrders[index].statusCode;
+
+    allOrders[index].paymentStatus = paymentStatus;
+    allOrders[index].statusCode = normalizeStatusCodeFromBackend(orderStatusRaw, paymentStatus);
+    allOrders[index].status = statusLabelFromCode(allOrders[index].statusCode);
+
+    renderOrders();
+}
+
+function getCsrfTokenPesanan() {
+    return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+}
+
 // ==================== ACTIONS ====================
 function contactAdmin(orderId) {
     const order = allOrders.find(item => item.orderId === orderId);
@@ -402,21 +617,11 @@ function contactAdmin(orderId) {
         `Invoice: ${order.orderId || '-'}\n` +
         `Paket: ${item?.name || '-'}\n` +
         `Tanggal Acara: ${item?.date || '-'}\n` +
-        `Lokasi: ${item?.location || '-'}\n\n` +
+        `Lokasi: ${item?.location || '-'}\n` +
+        `Status Pembayaran: ${paymentStatusLabel(order.paymentStatus)}\n\n` +
         `Terima kasih.`;
 
     window.open(`https://wa.me/6288289258764?text=${encodeURIComponent(message)}`, '_blank');
-}
-
-function showPaymentInfo(orderId) {
-    const order = allOrders.find(item => item.orderId === orderId);
-
-    if (!order) return;
-
-    notifyPesanan(
-        `Invoice ${order.orderId} masih menunggu pembayaran. Integrasi Midtrans bisa disambungkan di tahap berikutnya.`,
-        'info'
-    );
 }
 
 function viewInvoice(orderId) {
@@ -570,9 +775,74 @@ function getStatusInfo(statusCode) {
             color: '#dc3545',
             class: 'status-danger',
         },
+        expired: {
+            color: '#dc3545',
+            class: 'status-danger',
+        },
     };
 
     return statusMap[statusCode] || statusMap.waiting_payment;
+}
+
+function normalizeStatusCodeFromBackend(orderStatus, paymentStatus) {
+    const status = String(orderStatus || '').toLowerCase();
+    const payment = String(paymentStatus || '').toLowerCase();
+
+    if (status === 'cancelled' || payment === 'cancelled') {
+        return 'cancelled';
+    }
+
+    if (status === 'expired' || payment === 'expired') {
+        return 'cancelled';
+    }
+
+    if (status === 'completed') {
+        return 'completed';
+    }
+
+    if (status === 'ongoing') {
+        return 'ongoing';
+    }
+
+    if (status === 'processing' || status === 'processed') {
+        return 'processing';
+    }
+
+    if (status === 'confirmed' || payment === 'paid') {
+        return 'confirmed';
+    }
+
+    return 'waiting_payment';
+}
+
+function statusLabelFromCode(statusCode) {
+    const labels = {
+        waiting_payment: 'Menunggu Pembayaran',
+        confirmed: 'Dikonfirmasi',
+        processing: 'Pesanan Diproses',
+        ongoing: 'Pelaksanaan Acara',
+        completed: 'Selesai',
+        cancelled: 'Dibatalkan',
+        expired: 'Expired',
+    };
+
+    return labels[statusCode] || 'Menunggu Pembayaran';
+}
+
+function paymentStatusLabel(paymentStatus) {
+    const status = String(paymentStatus || '').toLowerCase();
+
+    const labels = {
+        unpaid: 'Belum Dibayar',
+        pending: 'Pending',
+        paid: 'Lunas',
+        expired: 'Expired',
+        failed: 'Gagal',
+        cancelled: 'Dibatalkan',
+        refunded: 'Refund',
+    };
+
+    return labels[status] || paymentStatus || '-';
 }
 
 function formatDate(dateString) {
@@ -619,4 +889,37 @@ function notifyPesanan(message, type = 'info') {
     }
 
     alert(message);
+}
+
+async function safeReadJson(response) {
+    try {
+        return await response.json();
+    } catch (error) {
+        return {
+            status: false,
+            message: 'Response server tidak valid.',
+        };
+    }
+}
+
+function setButtonLoading(buttonElement, isLoading, loadingHtml = null) {
+    if (!buttonElement) return;
+
+    if (isLoading) {
+        buttonElement.dataset.originalHtml = buttonElement.innerHTML;
+        buttonElement.disabled = true;
+
+        if (loadingHtml) {
+            buttonElement.innerHTML = loadingHtml;
+        }
+
+        return;
+    }
+
+    buttonElement.disabled = false;
+
+    if (buttonElement.dataset.originalHtml) {
+        buttonElement.innerHTML = buttonElement.dataset.originalHtml;
+        delete buttonElement.dataset.originalHtml;
+    }
 }

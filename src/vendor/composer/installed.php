@@ -605,9 +605,9 @@
             'dev_requirement' => false,
         ),
         'midtrans/midtrans-php' => array(
-            'pretty_version' => '2.6.1',
-            'version' => '2.6.1.0',
-            'reference' => '737ddabeb0c4d40316c4db132f9ef5c8f7a1b3a6',
+            'pretty_version' => '2.6.2',
+            'version' => '2.6.2.0',
+            'reference' => '8ed7fc58ff1ababe675da17acf8233f4028eb3be',
             'type' => 'library',
             'install_path' => __DIR__ . '/../midtrans/midtrans-php',
             'aliases' => array(),

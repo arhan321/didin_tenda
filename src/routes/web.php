@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\FrontendController;
+use App\Http\Controllers\MidtransPaymentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -61,6 +62,18 @@ Route::post('/profile/update-password', [FrontendController::class, 'updatePassw
     ->middleware('auth')
     ->name('frontend.profile.updatePassword');
 
+Route::middleware('auth')->group(function () {
+    Route::post('/pesanan/{order}/pay', [MidtransPaymentController::class, 'pay'])
+        ->name('frontend.midtrans.pay');
+
+    Route::post('/pesanan/{order}/check-status', [MidtransPaymentController::class, 'checkStatus'])
+        ->name('frontend.midtrans.check-status');
+});
+
+// Notification/callback Midtrans lewat web.php
+Route::post('/midtrans/notification', [MidtransPaymentController::class, 'notification'])
+    ->name('midtrans.notification');
+    
 /*
 |--------------------------------------------------------------------------
 | Laravel Auth Routes

@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
     <title>Pesanan Saya - Didin Tenda Decoration</title>
     
     <!-- Bootstrap 5 CSS -->
@@ -37,15 +39,19 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('frontend.index') }}#beranda">Beranda</a>
                     </li>
+
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('frontend.index') }}#paket">Paket</a>
                     </li>
+
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('frontend.index') }}#galeri">Galeri</a>
                     </li>
+
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('frontend.index') }}#testimoni">Testimoni</a>
                     </li>
+
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('frontend.index') }}#kontak">Kontak</a>
                     </li>
@@ -94,6 +100,17 @@
                 </div>
             @endif
 
+            @if($errors->any())
+                <div class="alert alert-danger mb-4">
+                    <strong>Terjadi kesalahan:</strong>
+                    <ul class="mb-0 mt-2">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
             <!-- Filter & Search -->
             <div class="filter-section">
                 <div class="filter-buttons">
@@ -114,7 +131,7 @@
                 <i class="bi bi-info-circle-fill"></i>
                 <div>
                     <strong>Data Pesanan Real</strong><br>
-                    <small>Pesanan ditampilkan dari database sesuai akun yang sedang login.</small>
+                    <small>Pesanan ditampilkan dari database sesuai akun yang sedang login. Pembayaran menggunakan Midtrans Snap.</small>
                 </div>
             </div>
 
@@ -141,6 +158,7 @@
                     <h5 class="modal-title">
                         <i class="bi bi-receipt"></i> Detail Pesanan
                     </h5>
+
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
 
@@ -163,6 +181,7 @@
                     <h5 class="modal-title">
                         <i class="bi bi-star-fill"></i> Beri Rating & Review
                     </h5>
+
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
 
@@ -211,19 +230,24 @@
 
                 <div class="col-lg-2 col-md-6 mb-4 mb-md-0">
                     <h5>Menu Cepat</h5>
+
                     <ul class="footer-links">
                         <li>
                             <a href="{{ route('frontend.index') }}#beranda">Beranda</a>
                         </li>
+
                         <li>
                             <a href="{{ route('frontend.index') }}#paket">Paket</a>
                         </li>
+
                         <li>
                             <a href="{{ route('frontend.index') }}#galeri">Galeri</a>
                         </li>
+
                         <li>
                             <a href="{{ route('frontend.pesanan') }}">Pesanan</a>
                         </li>
+
                         <li>
                             <a href="{{ route('frontend.history') }}">History</a>
                         </li>
@@ -232,16 +256,20 @@
 
                 <div class="col-lg-3 col-md-6 mb-4 mb-md-0">
                     <h5>Layanan</h5>
+
                     <ul class="footer-links">
                         <li>
                             <a href="{{ route('frontend.index') }}#paket">Sewa Tenda</a>
                         </li>
+
                         <li>
                             <a href="{{ route('frontend.index') }}#paket">Dekorasi Pernikahan</a>
                         </li>
+
                         <li>
                             <a href="{{ route('frontend.index') }}#paket">Sewa Kursi</a>
                         </li>
+
                         <li>
                             <a href="{{ route('frontend.index') }}#paket">Rigging & Lighting</a>
                         </li>
@@ -280,17 +308,29 @@
 
     <script>
         window.DIDIN_ORDERS = @json($ordersForJs ?? []);
+
         window.DIDIN_PESANAN_ROUTES = {
             paketIndex: @json(route('frontend.index') . '#paket'),
             cart: @json(route('frontend.cart')),
             pesanan: @json(route('frontend.pesanan')),
             history: @json(route('frontend.history')),
         };
+
+        window.DIDIN_MIDTRANS_CONFIG = {
+            isProduction: @json((bool) config('midtrans.is_production', false)),
+            clientKey: @json(config('midtrans.client_key')),
+        };
     </script>
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+    <!-- Midtrans Snap JS -->
+    <script
+        src="{{ config('midtrans.is_production') ? 'https://app.midtrans.com/snap/snap.js' : 'https://app.sandbox.midtrans.com/snap/snap.js' }}"
+        data-client-key="{{ config('midtrans.client_key') }}">
+    </script>
 
     <!-- Custom JS -->
     <script src="{{ asset('js/script.js') }}?v={{ time() }}"></script>

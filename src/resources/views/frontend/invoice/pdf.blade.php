@@ -208,7 +208,7 @@
         <table class="header-table">
             <tr>
                 <td style="width: 55%;">
-                    <div class="brand">Didin Tenda Decoration</div>
+                    <div class="brand">PT. Didin Tenda Decoration</div>
                     <div class="brand-sub">
                         Jl. Ki Mas Laeng Kp. Katomas, Tigaraksa,<br>
                         Kab. Tangerang, Banten<br>

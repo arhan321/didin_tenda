@@ -13,6 +13,7 @@ return new class extends Migration
 
             // Relasi ke pesanan
             $table->foreignId('order_id')
+                ->unique()
                 ->constrained('orders')
                 ->cascadeOnDelete();
 

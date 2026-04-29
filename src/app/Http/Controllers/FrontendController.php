@@ -331,6 +331,8 @@ public function detail_paket(Request $request)
             'statusCode' => $statusCode,
             'paymentStatus' => $order->payment_status,
             'invoiceUrl' => route('frontend.invoice.download', $order->id),
+            'paymentUrl' => route('frontend.midtrans.pay', $order->id),
+            'paymentCheckUrl' => route('frontend.midtrans.check-status', $order->id),
 
             'items' => [
                 [
