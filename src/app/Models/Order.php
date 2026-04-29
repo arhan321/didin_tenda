@@ -75,6 +75,7 @@ class Order extends Model
         'processed_at' => 'datetime',
         'completed_at' => 'datetime',
         'cancelled_at' => 'datetime',
+        'invoice_sent_at' => 'datetime',
     ];
 
     public function user()

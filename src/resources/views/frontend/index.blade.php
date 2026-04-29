@@ -44,7 +44,7 @@
                 <li class="nav-item"><a class="nav-link" href="{{ route('frontend.index') }}#galeri">Galeri</a></li>
                 <li class="nav-item"><a class="nav-link" href="{{ route('frontend.index') }}#testimoni">Testimoni</a></li>
                 <li class="nav-item"><a class="nav-link" href="{{ route('frontend.index') }}#faq">FAQ</a></li>
-                <li class="nav-item"><a class="nav-link" href="{{ route('frontend.index') }}#kontak">Kontak</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ route('frontend.index') }}#kontak">Booking !!</a></li>
             </ul>
 
             <div class="navbar-user-menu d-flex align-items-center ms-lg-3">

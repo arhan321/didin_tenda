@@ -63,6 +63,7 @@ return new class extends Migration
             $table->timestamp('processed_at')->nullable();
             $table->timestamp('completed_at')->nullable();
             $table->timestamp('cancelled_at')->nullable();
+            $table->timestamp('invoice_sent_at')->nullable()->after('confirmed_at');
 
             $table->text('cancelled_reason')->nullable();
             $table->text('notes')->nullable();

@@ -8,8 +8,11 @@ use App\Models\Order;
 use App\Models\Payment;
 use Midtrans\Transaction;
 use Illuminate\Http\Request;
+use App\Mail\InvoicePaidMail;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 
 class MidtransPaymentController extends Controller
 {
@@ -22,6 +25,8 @@ class MidtransPaymentController extends Controller
         $this->authorizeCustomerOrder($order);
 
         if ($order->payment_status === 'paid') {
+            $this->sendInvoiceEmailIfPaid($order);
+
             return response()->json([
                 'status' => true,
                 'already_paid' => true,
@@ -42,6 +47,12 @@ class MidtransPaymentController extends Controller
                 'message' => 'Snap token berhasil dibuat.',
             ]);
         } catch (\Throwable $error) {
+            Log::error('Gagal membuat pembayaran Midtrans.', [
+                'order_id' => $order->id,
+                'invoice_number' => $order->invoice_number,
+                'error' => $error->getMessage(),
+            ]);
+
             return response()->json([
                 'status' => false,
                 'message' => 'Gagal membuat pembayaran: ' . $error->getMessage(),
@@ -74,6 +85,12 @@ class MidtransPaymentController extends Controller
 
             $this->syncPaymentStatus($order, $payment, $statusData);
 
+            /*
+             * Kirim invoice email setelah status disinkronkan.
+             * Aman dipanggil berkali-kali karena dicegah oleh invoice_sent_at.
+             */
+            $this->sendInvoiceEmailIfPaid($order);
+
             $freshOrder = $order->fresh();
             $freshPayment = $payment->fresh();
 
@@ -91,6 +108,12 @@ class MidtransPaymentController extends Controller
                 ],
             ]);
         } catch (\Throwable $error) {
+            Log::error('Gagal mengecek status pembayaran Midtrans.', [
+                'order_id' => $order->id,
+                'invoice_number' => $order->invoice_number,
+                'error' => $error->getMessage(),
+            ]);
+
             return response()->json([
                 'status' => false,
                 'message' => 'Gagal mengecek status pembayaran: ' . $error->getMessage(),
@@ -100,7 +123,7 @@ class MidtransPaymentController extends Controller
 
     /**
      * Callback notification dari Midtrans.
-     * Nanti URL ini dimasukkan ke dashboard Midtrans.
+     * URL ini dimasukkan ke dashboard Midtrans.
      */
     public function notification(Request $request)
     {
@@ -140,12 +163,31 @@ class MidtransPaymentController extends Controller
             ], 403);
         }
 
-        $this->syncPaymentStatus($order, $payment, $payload);
+        try {
+            $this->syncPaymentStatus($order, $payment, $payload);
 
-        return response()->json([
-            'status' => true,
-            'message' => 'Notification processed.',
-        ]);
+            /*
+             * Kirim invoice email dari jalur callback Midtrans.
+             * Ini penting kalau callback Midtrans datang lebih dulu daripada tombol Check Status.
+             */
+            $this->sendInvoiceEmailIfPaid($order);
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Notification processed.',
+            ]);
+        } catch (\Throwable $error) {
+            Log::error('Gagal memproses notification Midtrans.', [
+                'midtrans_order_id' => $midtransOrderId,
+                'order_id' => $order->id ?? null,
+                'error' => $error->getMessage(),
+            ]);
+
+            return response()->json([
+                'status' => false,
+                'message' => 'Gagal memproses notification: ' . $error->getMessage(),
+            ], 500);
+        }
     }
 
     /**
@@ -406,6 +448,96 @@ class MidtransPaymentController extends Controller
 
             $order->update($orderUpdate);
         });
+    }
+
+    /**
+     * Kirim email invoice jika pembayaran sudah paid.
+     *
+     * Catatan:
+     * - Email hanya dikirim satu kali.
+     * - Pencegahan double-send memakai kolom orders.invoice_sent_at.
+     * - Jika email gagal dikirim, invoice_sent_at dikosongkan lagi supaya bisa dicoba ulang.
+     */
+    private function sendInvoiceEmailIfPaid(Order $order): void
+    {
+        $freshOrder = $order->fresh([
+            'user',
+            'package',
+            'items',
+            'addons',
+            'payment',
+        ]);
+
+        if (! $freshOrder) {
+            return;
+        }
+
+        if ($freshOrder->payment_status !== 'paid') {
+            return;
+        }
+
+        if (! empty($freshOrder->invoice_sent_at)) {
+            return;
+        }
+
+        $email = $freshOrder->customer_email ?: $freshOrder->user?->email;
+
+        if (! $email) {
+            Log::warning('Invoice email tidak dikirim karena email pelanggan kosong.', [
+                'order_id' => $freshOrder->id,
+                'invoice_number' => $freshOrder->invoice_number,
+            ]);
+
+            return;
+        }
+
+        /*
+         * Lock sederhana agar kalau check-status dan callback Midtrans masuk bersamaan,
+         * email tidak terkirim dobel.
+         */
+        $reserved = Order::where('id', $freshOrder->id)
+            ->where('payment_status', 'paid')
+            ->whereNull('invoice_sent_at')
+            ->update([
+                'invoice_sent_at' => now(),
+            ]);
+
+        if ($reserved === 0) {
+            return;
+        }
+
+        try {
+            $orderForEmail = Order::with([
+                'user',
+                'package',
+                'items',
+                'addons',
+                'payment',
+            ])->find($freshOrder->id);
+
+            if (! $orderForEmail) {
+                throw new \Exception('Order tidak ditemukan saat akan mengirim invoice email.');
+            }
+
+            Mail::to($email)->send(new InvoicePaidMail($orderForEmail));
+
+            Log::info('Invoice email berhasil dikirim.', [
+                'order_id' => $orderForEmail->id,
+                'invoice_number' => $orderForEmail->invoice_number,
+                'email' => $email,
+            ]);
+        } catch (\Throwable $error) {
+            Order::where('id', $freshOrder->id)->update([
+                'invoice_sent_at' => null,
+            ]);
+
+            Log::error('Gagal mengirim invoice email.', [
+                'order_id' => $freshOrder->id,
+                'invoice_number' => $freshOrder->invoice_number,
+                'email' => $email,
+                'error' => $error->getMessage(),
+            ]);
+        }
     }
 
     /**
