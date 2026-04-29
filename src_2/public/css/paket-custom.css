@@ -1,0 +1,622 @@
+/* ==================== PAKET CUSTOM PAGE STYLES ==================== */
+
+.paket-custom-section {
+    padding: 120px 0 60px;
+    background: linear-gradient(135deg, #f5f7fa 0%, #eef2f7 100%);
+    min-height: 100vh;
+}
+
+/* Breadcrumb */
+.breadcrumb {
+    background: transparent;
+    padding: 0;
+    margin-bottom: 30px;
+}
+
+.breadcrumb-item a {
+    color: var(--gray-600);
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.breadcrumb-item a:hover {
+    color: var(--primary);
+}
+
+.breadcrumb-item.active {
+    color: var(--primary);
+}
+
+/* ==================== CUSTOM FORM LEFT ==================== */
+.custom-form {
+    background: white;
+    border-radius: 24px;
+    padding: 30px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+}
+
+.custom-form h3 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 5px;
+    color: var(--gray-900);
+}
+
+.custom-form h3 i {
+    color: var(--primary);
+    margin-right: 10px;
+}
+
+/* Form Section */
+.form-section {
+    margin-bottom: 25px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.form-section h5 {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 15px;
+    color: var(--gray-800);
+}
+
+.form-section h5 i {
+    color: var(--primary);
+    margin-right: 8px;
+}
+
+.form-section .form-label {
+    font-weight: 500;
+    font-size: 0.85rem;
+    margin-bottom: 5px;
+}
+
+.form-section .form-control {
+    border: 1px solid var(--gray-300);
+    border-radius: 10px;
+    padding: 10px 15px;
+    transition: var(--transition);
+}
+
+.form-section .form-control:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(44, 123, 229, 0.1);
+}
+
+/* ==================== CUSTOM ITEM ROW (VERTIKAL DENGAN GAMBAR) ==================== */
+.custom-item-row {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: var(--gray-100);
+    border-radius: 16px;
+    padding: 12px 15px;
+    margin-bottom: 12px;
+    transition: all 0.3s ease;
+}
+
+.custom-item-row:hover {
+    background: rgba(44, 123, 229, 0.05);
+    transform: translateX(5px);
+}
+
+.custom-item-img {
+    flex-shrink: 0;
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: white;
+    border: 1px solid var(--gray-200);
+}
+
+.custom-item-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.custom-item-detail {
+    flex: 1;
+}
+
+.custom-item-detail h6 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin: 0 0 3px 0;
+}
+
+.custom-item-detail .price {
+    font-size: 0.75rem;
+    color: var(--primary);
+    font-weight: 600;
+    margin: 0;
+}
+
+.custom-item-qty {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.qty-btn-sm {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: 1px solid var(--gray-300);
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: var(--gray-700);
+}
+
+.qty-btn-sm:hover {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+}
+
+.qty-input-sm {
+    width: 55px;
+    text-align: center;
+    border: 1px solid var(--gray-300);
+    border-radius: 8px;
+    padding: 6px;
+    font-size: 0.85rem;
+}
+
+.qty-input-sm:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.item-total-sm {
+    font-weight: 700;
+    color: var(--primary);
+    min-width: 90px;
+    text-align: right;
+    font-size: 0.85rem;
+}
+
+/* ==================== ADD-ONS CARD (DENGAN QUANTITY) ==================== */
+#addonsContainer {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 -8px;
+}
+
+#addonsContainer .col-md-6 {
+    padding: 0 8px;
+}
+
+.addon-card {
+    background: white;
+    border-radius: 16px;
+    padding: 12px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: 2px solid var(--gray-200);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.addon-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(44, 123, 229, 0.15);
+    border-color: var(--primary-light);
+}
+
+.addon-card.selected {
+    border-color: var(--primary);
+    background: linear-gradient(135deg, #ffffff 0%, rgba(44, 123, 229, 0.03) 100%);
+}
+
+.addon-card-inner {
+    display: flex;
+    gap: 12px;
+    flex: 1;
+}
+
+/* Gambar Add-on */
+.addon-image {
+    flex-shrink: 0;
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--gray-100);
+}
+
+.addon-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.addon-card:hover .addon-image img {
+    transform: scale(1.05);
+}
+
+/* Informasi Add-on */
+.addon-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.addon-name {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 4px;
+}
+
+.addon-name i {
+    color: var(--primary);
+    font-size: 0.9rem;
+}
+
+.addon-name strong {
+    font-size: 0.85rem;
+    color: var(--gray-800);
+}
+
+.addon-detail {
+    font-size: 0.7rem;
+    color: var(--gray-500);
+    margin-bottom: 6px;
+}
+
+.addon-price-wrapper {
+    display: flex;
+    align-items: baseline;
+    gap: 5px;
+    margin-bottom: 8px;
+}
+
+.addon-price {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.addon-unit {
+    font-size: 0.65rem;
+    color: var(--gray-500);
+}
+
+/* Quantity Selector untuk Add-ons */
+.addon-quantity {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+}
+
+.addon-quantity .qty-btn-sm {
+    width: 28px;
+    height: 28px;
+    font-size: 0.8rem;
+}
+
+.addon-quantity .qty-value {
+    font-weight: 600;
+    min-width: 24px;
+    text-align: center;
+    font-size: 0.85rem;
+}
+
+.addon-quantity .qty-total {
+    font-size: 0.75rem;
+    color: var(--primary);
+    font-weight: 600;
+    margin-left: 5px;
+}
+
+/* ==================== CUSTOM SUMMARY RIGHT ==================== */
+.custom-summary {
+    background: white;
+    border-radius: 24px;
+    padding: 25px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 100px;
+}
+
+.custom-summary h4 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--gray-200);
+}
+
+.custom-summary h4 i {
+    color: var(--primary);
+    margin-right: 8px;
+}
+
+.summary-items {
+    margin-bottom: 15px;
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+.summary-item-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--gray-200);
+    font-size: 0.85rem;
+}
+
+.summary-item-name {
+    font-weight: 500;
+}
+
+.summary-item-name small {
+    font-size: 0.7rem;
+    color: var(--gray-500);
+}
+
+.summary-item-price {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+/* Add-ons Summary */
+.summary-addons {
+    margin-bottom: 15px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--gray-200);
+}
+
+.addons-header {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--primary);
+    margin-bottom: 8px;
+}
+
+.addons-header i {
+    margin-right: 5px;
+}
+
+.addon-summary-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    padding: 5px 0;
+    color: var(--gray-700);
+}
+
+.addon-summary-row .addon-price {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+/* ==================== SHIPPING SECTION ==================== */
+.shipping-section {
+    margin: 20px 0;
+    padding-top: 15px;
+    border-top: 1px solid var(--gray-200);
+}
+
+.shipping-info-custom .shipping-card {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 12px;
+    padding: 12px 15px;
+    border-left: 4px solid var(--primary);
+    margin-bottom: 15px;
+}
+
+.shipping-distance, .shipping-fee {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.85rem;
+    margin-bottom: 5px;
+}
+
+.shipping-distance i, .shipping-fee i {
+    color: var(--primary);
+}
+
+.shipping-note {
+    font-size: 0.7rem;
+    color: var(--gray-600);
+    margin-top: 8px;
+    padding-top: 5px;
+    border-top: 1px dashed var(--gray-300);
+}
+
+.shipping-note.free {
+    color: #28a745;
+}
+
+.shipping-note.charge {
+    color: #dc3545;
+}
+
+/* ==================== PRICE SUMMARY ==================== */
+.price-summary-custom {
+    background: var(--gray-100);
+    border-radius: 16px;
+    padding: 15px;
+    margin-top: 15px;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+    color: var(--gray-700);
+}
+
+.summary-row.total {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--gray-300);
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.summary-row.total span:last-child {
+    color: var(--primary);
+    font-size: 1.1rem;
+}
+
+.payment-note {
+    background: rgba(44, 123, 229, 0.05);
+    padding: 8px 12px;
+    border-radius: 10px;
+    margin-top: 12px;
+    font-size: 0.7rem;
+}
+
+.payment-note i {
+    color: var(--primary);
+    margin-right: 5px;
+}
+
+/* ==================== ACTION BUTTONS ==================== */
+.action-buttons {
+    margin-top: 20px;
+}
+
+#addToCartBtn {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    border: none;
+    padding: 14px;
+    font-weight: 600;
+}
+
+#addToCartBtn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(44, 123, 229, 0.3);
+}
+
+#bookNowBtn {
+    border-width: 2px;
+    padding: 12px;
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 991px) {
+    .paket-custom-section {
+        padding: 100px 0 40px;
+    }
+    
+    .custom-summary {
+        position: static;
+        margin-top: 25px;
+    }
+}
+
+@media (max-width: 768px) {
+    .custom-form {
+        padding: 20px;
+    }
+    
+    .custom-item-row {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    .custom-item-qty {
+        width: 100%;
+        justify-content: flex-start;
+        margin-left: 75px;
+    }
+    
+    .item-total-sm {
+        margin-left: auto;
+    }
+    
+    /* Fix add-ons di mobile */
+    .addon-card-inner {
+        flex-wrap: wrap;
+    }
+    
+    .addon-image {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .addon-quantity {
+        width: 100%;
+        justify-content: flex-start;
+        margin-top: 8px;
+    }
+}
+
+@media (max-width: 576px) {
+    .custom-item-row {
+        padding: 10px;
+    }
+    
+    .custom-item-img {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .custom-item-detail h6 {
+        font-size: 0.85rem;
+    }
+    
+    .qty-btn-sm {
+        width: 28px;
+        height: 28px;
+    }
+    
+    .qty-input-sm {
+        width: 45px;
+    }
+    
+    .item-total-sm {
+        min-width: 80px;
+        font-size: 0.75rem;
+    }
+    
+    /* Mobile add-ons */
+    .addon-card {
+        padding: 10px;
+    }
+    
+    .addon-image {
+        width: 45px;
+        height: 45px;
+    }
+    
+    .addon-name strong {
+        font-size: 0.8rem;
+    }
+    
+    .addon-detail {
+        font-size: 0.65rem;
+    }
+    
+    .addon-price {
+        font-size: 0.75rem;
+    }
+    
+    .addon-quantity .qty-btn-sm {
+        width: 24px;
+        height: 24px;
+    }
+    
+    .addon-quantity .qty-value {
+        font-size: 0.75rem;
+        min-width: 20px;
+    }
+}

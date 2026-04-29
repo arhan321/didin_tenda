@@ -1,0 +1,625 @@
+/* ==================== PAKET DETAIL PAGE ==================== */
+
+.paket-detail-section {
+    padding: 120px 0 60px;
+    background: linear-gradient(135deg, #f5f7fa 0%, #eef2f7 100%);
+    min-height: 100vh;
+}
+
+/* Breadcrumb */
+.breadcrumb {
+    background: transparent;
+    padding: 0;
+    margin-bottom: 30px;
+}
+
+.breadcrumb-item a {
+    color: var(--gray-600);
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.breadcrumb-item a:hover {
+    color: var(--primary);
+}
+
+.breadcrumb-item.active {
+    color: var(--primary);
+}
+
+/* Gallery */
+.paket-gallery {
+    background: white;
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.main-image {
+    width: 100%;
+    border-radius: 15px;
+    object-fit: cover;
+    min-height: 300px;
+    background: var(--gray-100);
+}
+
+.gallery-thumbs {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 5px;
+}
+
+.gallery-thumbs img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: var(--transition);
+    border: 2px solid transparent;
+}
+
+.gallery-thumbs img:hover {
+    transform: translateY(-3px);
+    border-color: var(--primary);
+}
+
+/* Paket Info */
+.paket-info {
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.paket-info h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 10px;
+}
+
+.paket-rating {
+    color: var(--warning);
+    margin-bottom: 15px;
+}
+
+.paket-rating span {
+    color: var(--gray-600);
+    font-size: 0.9rem;
+}
+
+.paket-price-large {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--primary);
+    margin-bottom: 20px;
+}
+
+.paket-description {
+    color: var(--gray-600);
+    line-height: 1.8;
+    margin-bottom: 20px;
+}
+
+/* Fitur Paket */
+.paket-features-list {
+    background: var(--gray-100);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 25px;
+}
+
+.paket-features-list h6 {
+    font-weight: 700;
+    margin-bottom: 15px;
+}
+
+.paket-features-list .feature-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    color: var(--gray-700);
+}
+
+.paket-features-list .feature-item i {
+    color: var(--primary);
+    font-size: 1.1rem;
+}
+
+/* Booking Form */
+.booking-form h5 {
+    font-weight: 700;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--gray-200);
+}
+
+.booking-form .form-label {
+    font-weight: 500;
+    font-size: 0.85rem;
+    margin-bottom: 5px;
+}
+
+.booking-form .form-control {
+    border: 1px solid var(--gray-300);
+    border-radius: 10px;
+    padding: 12px 15px;
+    transition: var(--transition);
+}
+
+.booking-form .form-control:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(44, 123, 229, 0.1);
+}
+
+/* Add-ons */
+.addons-section h5 {
+    font-weight: 700;
+    margin-bottom: 15px;
+}
+
+.addon-item {
+    background: var(--gray-100);
+    border-radius: 12px;
+    padding: 12px 15px;
+    transition: var(--transition);
+    cursor: pointer;
+}
+
+.addon-item:hover {
+    background: rgba(44, 123, 229, 0.05);
+    border-color: var(--primary-light);
+}
+
+.addon-item.selected {
+    background: rgba(44, 123, 229, 0.1);
+    border: 1px solid var(--primary);
+}
+
+.addon-item .form-check {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.addon-item .form-check-input {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.addon-item .addon-price {
+    color: var(--primary);
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+/* ==================== SHIPPING INFO (ONGKIR) STYLES ==================== */
+
+.shipping-info {
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+
+.shipping-card {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 12px;
+    padding: 15px;
+    border-left: 4px solid var(--primary);
+}
+
+.shipping-distance, .shipping-fee {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+
+.shipping-distance i, .shipping-fee i {
+    font-size: 1.1rem;
+    color: var(--primary);
+}
+
+.shipping-distance strong, .shipping-fee strong {
+    color: var(--primary);
+}
+
+.shipping-note {
+    font-size: 0.75rem;
+    color: var(--gray-600);
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--gray-300);
+}
+
+.shipping-note.free {
+    color: #28a745;
+}
+
+.shipping-note.charge {
+    color: #dc3545;
+}
+
+/* Tombol Cek Ongkir */
+#checkShippingBtn {
+    transition: all 0.3s ease;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+#checkShippingBtn:hover {
+    transform: translateY(-2px);
+}
+
+/* Ringkasan Ongkir di Price Summary */
+#shippingSummary .summary-row {
+    color: var(--primary);
+    font-weight: 500;
+}
+
+#shippingSummary .text-success {
+    color: #28a745 !important;
+}
+
+/* ==================== END SHIPPING STYLES ==================== */
+
+/* Price Summary */
+.price-summary {
+    background: var(--gray-100);
+    border-radius: 15px;
+    padding: 20px;
+    margin: 20px 0;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-size: 0.95rem;
+    color: var(--gray-700);
+}
+
+.summary-row.total {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--gray-300);
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--gray-900);
+}
+
+.summary-row.total span:last-child {
+    color: var(--primary);
+    font-size: 1.2rem;
+}
+
+.payment-note {
+    background: rgba(44, 123, 229, 0.05);
+    padding: 10px 15px;
+    border-radius: 10px;
+    margin-top: 15px;
+}
+
+.payment-note i {
+    color: var(--primary);
+    margin-right: 8px;
+}
+
+/* Action Buttons */
+.action-buttons {
+    margin-top: 20px;
+}
+
+#addToCartBtn {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    border: none;
+    padding: 14px;
+    font-weight: 600;
+}
+
+#addToCartBtn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(44, 123, 229, 0.3);
+}
+
+#bookNowBtn {
+    border-width: 2px;
+    padding: 12px;
+}
+
+/* Loading State untuk Tombol */
+.btn-loading {
+    position: relative;
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.btn-loading::after {
+    content: '';
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    border: 2px solid white;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    right: 15px;
+    top: calc(50% - 9px);
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media (max-width: 991px) {
+    .paket-detail-section {
+        padding: 100px 0 40px;
+    }
+    
+    .paket-info {
+        margin-top: 20px;
+    }
+}
+
+@media (max-width: 576px) {
+    .paket-info {
+        padding: 20px;
+    }
+    
+    .paket-info h1 {
+        font-size: 1.5rem;
+    }
+    
+    .paket-price-large {
+        font-size: 1.5rem;
+    }
+    
+    .gallery-thumbs img {
+        width: 60px;
+        height: 60px;
+    }
+    
+    /* Shipping responsive */
+    .shipping-card {
+        padding: 12px;
+    }
+    
+    .shipping-distance, .shipping-fee {
+        font-size: 0.8rem;
+    }
+    
+    .shipping-note {
+        font-size: 0.7rem;
+    }
+}
+
+
+/* ==================== ADD-ONS CARD WITH IMAGE & QUANTITY ==================== */
+
+.addon-card {
+    background: white;
+    border-radius: 16px;
+    padding: 12px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: 2px solid var(--gray-200);
+    height: 100%;
+}
+
+.addon-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(44, 123, 229, 0.15);
+    border-color: var(--primary-light);
+}
+
+.addon-card.selected {
+    border-color: var(--primary);
+    background: linear-gradient(135deg, #ffffff 0%, rgba(44, 123, 229, 0.03) 100%);
+    box-shadow: 0 8px 20px rgba(44, 123, 229, 0.2);
+}
+
+.addon-card-inner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* Gambar Add-on */
+.addon-image {
+    flex-shrink: 0;
+    width: 70px;
+    height: 70px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--gray-100);
+}
+
+.addon-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.addon-card:hover .addon-image img {
+    transform: scale(1.05);
+}
+
+/* Informasi Add-on */
+.addon-info {
+    flex: 1;
+}
+
+.addon-name {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 4px;
+}
+
+.addon-name i {
+    color: var(--primary);
+    font-size: 0.9rem;
+}
+
+.addon-name strong {
+    font-size: 0.9rem;
+    color: var(--gray-800);
+}
+
+.addon-detail {
+    font-size: 0.7rem;
+    color: var(--gray-500);
+    margin-bottom: 4px;
+}
+
+.addon-price-wrapper {
+    display: flex;
+    align-items: baseline;
+    gap: 5px;
+    margin-top: 4px;
+}
+
+.addon-price {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.addon-unit {
+    font-size: 0.65rem;
+    color: var(--gray-500);
+}
+
+/* Quantity Selector */
+.addon-quantity {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.qty-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    border: 1px solid var(--gray-300);
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: var(--gray-700);
+}
+
+.qty-btn:hover {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+}
+
+.qty-value {
+    font-weight: 600;
+    min-width: 24px;
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+.qty-total {
+    font-size: 0.75rem;
+    color: var(--primary);
+    font-weight: 500;
+    margin-left: 5px;
+}
+
+/* Simple Add-on Check */
+.addon-check {
+    flex-shrink: 0;
+}
+
+.custom-checkbox {
+    width: 28px;
+    height: 28px;
+    border-radius: 10px;
+    border: 2px solid var(--gray-300);
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.custom-checkbox.checked {
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+.custom-checkbox.checked i {
+    color: white;
+    font-size: 1rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .addon-card-inner {
+        gap: 10px;
+    }
+    
+    .addon-image {
+        width: 55px;
+        height: 55px;
+    }
+    
+    .addon-name strong {
+        font-size: 0.8rem;
+    }
+    
+    .addon-detail {
+        font-size: 0.65rem;
+    }
+    
+    .addon-price {
+        font-size: 0.8rem;
+    }
+    
+    .addon-quantity {
+        gap: 5px;
+    }
+    
+    .qty-btn {
+        width: 24px;
+        height: 24px;
+    }
+    
+    .qty-value {
+        font-size: 0.8rem;
+        min-width: 20px;
+    }
+    
+    .qty-total {
+        font-size: 0.7rem;
+    }
+    
+    .custom-checkbox {
+        width: 24px;
+        height: 24px;
+    }
+}
+
+@media (max-width: 576px) {
+    .addon-card {
+        padding: 10px;
+    }
+    
+    .addon-image {
+        width: 50px;
+        height: 50px;
+    }
+}

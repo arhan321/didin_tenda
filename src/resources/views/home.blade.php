@@ -84,7 +84,7 @@
                 <div class="card-body d-flex justify-content-between align-items-center">
                     <div class="text-left">
                         <h6 class="card-title" style="color: #48BB78; font-weight: 600;">TOTAL PRODUCTS</h6>
-                        <h2 class="card-text" style="font-weight: bold; color: #333;">{{$totalproducts}}</h2>
+                        {{-- <h2 class="card-text" style="font-weight: bold; color: #333;">{{$totalproducts}}</h2> --}}
                     </div>
                     <i class="bi bi-box-seam-fill" style="font-size: 2.5rem; color: lightgray;"></i>
                 </div>
@@ -95,7 +95,7 @@
                 <div class="card-body d-flex justify-content-between align-items-center">
                     <div class="text-left">
                         <h6 class="card-title" style="color: #4299E1; font-weight: 600;">ORDER</h6>
-                        <h2 class="card-text" style="font-weight: bold; color: #333;">{{ $totalorders }}</h2>
+                        {{-- <h2 class="card-text" style="font-weight: bold; color: #333;">{{ $totalorders }}</h2> --}}
                     </div>
                     <i class="bi bi-clipboard-check-fill" style="font-size: 2.5rem; color: lightgray;"></i>
                 </div>
@@ -119,14 +119,14 @@
         <div class="col-lg-6 mb-4">
             <div class="card p-4 shadow-sm">
                 <div class="card-body">
-                    {!! $chart->container() !!}
+                    {{-- {!! $chart->container() !!} --}}
                 </div>
             </div>
         </div>
         <div class="col-lg-6 mb-4">
             <div class="card p-4 shadow-sm">
                 <div class="card-body">
-                    {!! $chart2->container() !!}
+                    {{-- {!! $chart2->container() !!} --}}
                 </div>
             </div>
         </div>
@@ -154,7 +154,7 @@
 @endsection
 
 @section('scripts')
-
+{{-- 
 @if($chart)
     <script src="{{ $chart->cdn() }}"></script>
     {{ $chart->script() }}
@@ -163,7 +163,7 @@
 @if($chart2)
     <script src="{{ $chart2->cdn() }}"></script>
     {{ $chart2->script() }}
-@endif
+@endif --}}
 
 {{-- <script src="{{ $chart->cdn() }}"></script>
 {{ $chart->script() }}
