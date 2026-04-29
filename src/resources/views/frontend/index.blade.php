@@ -316,29 +316,82 @@
     </div>
 </section>
 
+<!-- TESTIMONI SECTION START -->
 <section id="testimoni" class="testimoni-section">
     <div class="container">
         <div class="section-header text-center" data-aos="fade-up">
             <h5 class="section-subtitle">Testimoni</h5>
             <h2 class="section-title">Apa Kata <span class="text-primary">Pelanggan</span></h2>
         </div>
-        <div class="row">
-            @foreach([
-                ['Ahmad Fauzi','Pernikahan - 12 Des 2025','Pelayanan sangat memuaskan! Proses booking cepat dan mudah melalui website.'],
-                ['Siti Nurhaliza','Acara Kantor - 5 Mar 2025','Sangat merekomendasikan! Sistem pembayarannya aman dan transparan.'],
-                ['Budi Santoso','Khitanan - 20 Jun 2025','Tim profesional, peralatan berkualitas, harga bersaing dengan kualitas terbaik.'],
-            ] as $testi)
-                <div class="col-lg-4 col-md-6" data-aos="fade-up">
-                    <div class="testimoni-card">
-                        <div class="testimoni-rating"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
-                        <p class="testimoni-text">"{{ $testi[2] }}"</p>
-                        <div class="testimoni-user"><img src="https://placehold.co/60x60/2c3e50/white?text={{ substr($testi[0], 0, 1) }}" alt="User" class="rounded-circle"><div><h5>{{ $testi[0] }}</h5><p>{{ $testi[1] }}</p></div></div>
+
+        @if(($reviews ?? collect())->count() > 0)
+            <div class="row">
+                @foreach($reviews as $index => $review)
+                    @php
+                        $customerName = $review->user?->name
+                            ?? $review->order?->customer_name
+                            ?? 'Pelanggan';
+
+                        $packageName = $review->order?->package?->name
+                            ?? 'Paket Dekorasi';
+
+                        $eventDate = $review->order?->event_date
+                            ? $review->order->event_date->translatedFormat('d M Y')
+                            : null;
+
+                        $initial = strtoupper(mb_substr($customerName, 0, 1));
+                        $rating = (int) $review->rating;
+                    @endphp
+
+                    <div class="col-lg-4 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="{{ ($index + 1) * 100 }}">
+                        <div class="testimoni-card">
+                            <div class="testimoni-rating">
+                                @for($i = 1; $i <= 5; $i++)
+                                    @if($i <= $rating)
+                                        <i class="bi bi-star-fill"></i>
+                                    @else
+                                        <i class="bi bi-star"></i>
+                                    @endif
+                                @endfor
+                            </div>
+
+                            <p class="testimoni-text">
+                                "{{ $review->review ?: 'Pelayanan sangat memuaskan. Terima kasih Didin Tenda Decoration!' }}"
+                            </p>
+
+                            <div class="testimoni-user">
+                                <img
+                                    src="https://placehold.co/60x60/2c3e50/white?text={{ urlencode($initial) }}"
+                                    alt="{{ $customerName }}"
+                                    class="rounded-circle"
+                                >
+
+                                <div>
+                                    <h5>{{ $customerName }}</h5>
+                                    <p>
+                                        {{ $packageName }}
+                                        @if($eventDate)
+                                            - {{ $eventDate }}
+                                        @endif
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        @else
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="alert alert-info text-center">
+                        Belum ada testimoni dari pelanggan. Review akan tampil setelah pesanan selesai dan pelanggan memberikan rating.
                     </div>
                 </div>
-            @endforeach
-        </div>
+            </div>
+        @endif
     </div>
 </section>
+<!-- TESTIMONI SECTION END -->
 
 <section id="faq" class="faq-section">
     <div class="container">

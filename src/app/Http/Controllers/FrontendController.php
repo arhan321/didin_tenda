@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Addon;
 use App\Models\Order;
+use App\Models\Review;
 use App\Models\Package;
 use App\Models\CustomItem;
 use Illuminate\Http\Request;
@@ -17,29 +18,32 @@ class FrontendController extends Controller
 {
     public function home()
     {
-        $packages = Package::with([
-                'items' => function ($query) {
-                    $query->where('is_active', true)
-                        ->orderBy('sort_order');
-                }
-            ])
-            ->where('type', 'fixed')
-            ->where('is_active', true)
-            ->orderBy('sort_order')
-            ->get();
+    $packages = Package::with(['items'])
+        ->where('is_active', true)
+        ->orderBy('sort_order')
+        ->orderBy('id')
+        ->get();
 
-        $customPackage = Package::where('type', 'custom')
-            ->where('is_active', true)
-            ->orderBy('sort_order')
-            ->first();
+    $reviews = Review::with([
+            'user',
+            'order.package',
+        ])
+        ->where('is_visible', true)
+        ->whereHas('order', function ($query) {
+            $query->where('status', 'completed')
+                ->where('payment_status', 'paid');
+        })
+        ->latest()
+        ->take(6)
+        ->get();
 
-        $cartCount = count(session('booking_cart', []));
+    $cartCount = count(session('booking_cart', []));
 
-        return view('frontend.index', compact(
-            'packages',
-            'customPackage',
-            'cartCount'
-        ));
+    return view('frontend.index', compact(
+        'packages',
+        'reviews',
+        'cartCount'
+    ));
     }
 
     public function paket()
