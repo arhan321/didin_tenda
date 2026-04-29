@@ -9,6 +9,7 @@ use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 
 class BookingController extends Controller
 {
@@ -25,17 +26,28 @@ class BookingController extends Controller
     {
         $validated = $request->validate([
             'package_id' => ['required', 'exists:packages,id'],
+
             'event_date' => ['required', 'date', 'after_or_equal:today'],
             'event_location_name' => ['required', 'string', 'max:255'],
             'event_address' => ['required', 'string'],
+
+            // Koordinat titik lokasi acara dari map
+            'event_latitude' => ['required', 'numeric', 'between:-90,90'],
+            'event_longitude' => ['required', 'numeric', 'between:-180,180'],
+
             'customer_name' => ['required', 'string', 'max:255'],
             'customer_phone' => ['required', 'string', 'max:30'],
             'customer_email' => ['nullable', 'email', 'max:255'],
+
             'notes' => ['nullable', 'string'],
+
             'addons' => ['nullable', 'array'],
             'addons.*.quantity' => ['nullable', 'integer', 'min:0'],
+
+            // Dari frontend boleh dikirim, tapi backend tetap hitung ulang
             'distance_km' => ['nullable', 'numeric', 'min:0'],
             'shipping_fee' => ['nullable', 'integer', 'min:0'],
+
             'checkout_now' => ['nullable'],
         ]);
 
@@ -54,13 +66,35 @@ class BookingController extends Controller
         $selectedAddons = $this->prepareSelectedAddons($request->input('addons', []));
         $subtotalAddons = collect($selectedAddons)->sum('total_price');
 
-        $distanceKm = $request->filled('distance_km')
-            ? (float) $request->distance_km
-            : $this->estimateDistanceFromAddress($validated['event_address']);
+        // Hitung ulang jarak dari koordinat memakai OSRM
+        $distanceKm = $this->getDistanceFromCoordinates(
+            (float) config('didin.depot_lat', -6.262311),
+            (float) config('didin.depot_lng', 106.472969),
+            (float) $validated['event_latitude'],
+            (float) $validated['event_longitude']
+        );
 
-        $shippingFee = $request->filled('shipping_fee')
-            ? (int) $request->shipping_fee
-            : $this->calculateShippingFee($distanceKm);
+        // Fallback 1: pakai jarak dari frontend jika OSRM gagal
+        if (! $distanceKm || $distanceKm <= 0) {
+            $distanceKm = $request->filled('distance_km')
+                ? (float) $validated['distance_km']
+                : 0;
+        }
+
+        // Fallback 2: hitung garis lurus x 1.25 jika masih kosong
+        if (! $distanceKm || $distanceKm <= 0) {
+            $distanceKm = $this->calculateStraightDistance(
+                (float) config('didin.depot_lat', -6.262311),
+                (float) config('didin.depot_lng', 106.472969),
+                (float) $validated['event_latitude'],
+                (float) $validated['event_longitude']
+            ) * 1.25;
+        }
+
+        $distanceKm = round($distanceKm, 2);
+
+        // Ongkir selalu dihitung ulang di backend
+        $shippingFee = $this->calculateShippingFee($distanceKm);
 
         $subtotalPackage = (int) $package->price;
         $totalPrice = $subtotalPackage + $subtotalAddons + $shippingFee;
@@ -86,6 +120,10 @@ class BookingController extends Controller
             'event_date' => $validated['event_date'],
             'event_location_name' => $validated['event_location_name'],
             'event_address' => $validated['event_address'],
+
+            // Koordinat dari map
+            'event_latitude' => $validated['event_latitude'],
+            'event_longitude' => $validated['event_longitude'],
 
             'distance_km' => $distanceKm,
             'shipping_fee' => $shippingFee,
@@ -169,25 +207,33 @@ class BookingController extends Controller
                 ->with('error', 'Keranjang masih kosong.');
         }
 
-        $orders = DB::transaction(function () use ($cart) {
-            $createdOrders = [];
+        try {
+            $orders = DB::transaction(function () use ($cart) {
+                $createdOrders = [];
 
-            foreach ($cart as $cartItem) {
-                if ($this->isDateBooked($cartItem['package']['id'], $cartItem['event_date'])) {
-                    throw new \Exception('Tanggal ' . $cartItem['event_date'] . ' sudah dibooking. Silakan hapus item tersebut dan pilih tanggal lain.');
+                foreach ($cart as $cartItem) {
+                    if ($this->isDateBooked($cartItem['package']['id'], $cartItem['event_date'])) {
+                        throw new \Exception(
+                            'Tanggal ' . $cartItem['event_date'] . ' sudah dibooking. Silakan hapus item tersebut dan pilih tanggal lain.'
+                        );
+                    }
+
+                    $createdOrders[] = $this->createOrderFromCartItem($cartItem);
                 }
 
-                $createdOrders[] = $this->createOrderFromCartItem($cartItem);
-            }
+                return $createdOrders;
+            });
 
-            return $createdOrders;
-        });
+            session()->forget('booking_cart');
 
-        session()->forget('booking_cart');
-
-        return redirect()
-            ->route('frontend.pesanan')
-            ->with('success', count($orders) . ' booking berhasil dibuat. Silakan lanjutkan pembayaran.');
+            return redirect()
+                ->route('frontend.pesanan')
+                ->with('success', count($orders) . ' booking berhasil dibuat. Silakan lanjutkan pembayaran.');
+        } catch (\Throwable $error) {
+            return redirect()
+                ->route('frontend.cart')
+                ->with('error', $error->getMessage());
+        }
     }
 
     public function quickCheck(Request $request)
@@ -284,6 +330,10 @@ class BookingController extends Controller
             'event_location_name' => $cartItem['event_location_name'],
             'event_address' => $cartItem['event_address'],
 
+            // Koordinat lokasi acara
+            'event_latitude' => $cartItem['event_latitude'] ?? null,
+            'event_longitude' => $cartItem['event_longitude'] ?? null,
+
             'distance_km' => $cartItem['distance_km'] ?? null,
             'shipping_fee' => $cartItem['shipping_fee'] ?? 0,
 
@@ -349,42 +399,75 @@ class BookingController extends Controller
     {
         do {
             $number = 'INV/' . now()->format('Y') . '/' .
-                str_pad((string) (Order::whereYear('created_at', now()->year)->count() + 1), 4, '0', STR_PAD_LEFT) .
+                str_pad(
+                    (string) (Order::whereYear('created_at', now()->year)->count() + 1),
+                    4,
+                    '0',
+                    STR_PAD_LEFT
+                ) .
                 '-' . strtoupper(Str::random(4));
         } while (Order::where('invoice_number', $number)->exists());
 
         return $number;
     }
 
-    private function estimateDistanceFromAddress(string $address): float
-    {
-        $address = strtolower(trim($address));
+    private function getDistanceFromCoordinates(
+        float $originLat,
+        float $originLng,
+        float $destinationLat,
+        float $destinationLng
+    ): ?float {
+        try {
+            $baseUrl = rtrim(config('didin.osrm_base_url', 'https://router.project-osrm.org'), '/');
 
-        if ($address === '') {
-            return 0;
+            $url = $baseUrl . '/route/v1/driving/' .
+                $originLng . ',' . $originLat . ';' .
+                $destinationLng . ',' . $destinationLat;
+
+            $response = Http::timeout(10)->get($url, [
+                'overview' => 'false',
+            ]);
+
+            if (! $response->successful()) {
+                return null;
+            }
+
+            $data = $response->json();
+
+            if (
+                ! isset($data['routes']) ||
+                ! isset($data['routes'][0]) ||
+                ! isset($data['routes'][0]['distance'])
+            ) {
+                return null;
+            }
+
+            return round($data['routes'][0]['distance'] / 1000, 2);
+        } catch (\Throwable $error) {
+            return null;
         }
+    }
 
-        $hash = 0;
+    private function calculateStraightDistance(
+        float $lat1,
+        float $lng1,
+        float $lat2,
+        float $lng2
+    ): float {
+        $earthRadiusKm = 6371;
 
-        for ($i = 0; $i < strlen($address); $i++) {
-            $hash = (($hash << 5) - $hash) + ord($address[$i]);
-        }
+        $dLat = deg2rad($lat2 - $lat1);
+        $dLng = deg2rad($lng2 - $lng1);
 
-        $distance = (abs($hash) % 50) + 1;
+        $a = sin($dLat / 2) * sin($dLat / 2) +
+            cos(deg2rad($lat1)) *
+            cos(deg2rad($lat2)) *
+            sin($dLng / 2) *
+            sin($dLng / 2);
 
-        if (str_contains($address, 'tangerang') || str_contains($address, 'jakarta')) {
-            return (float) min($distance, 15);
-        }
+        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
 
-        if (
-            str_contains($address, 'bogor') ||
-            str_contains($address, 'bekasi') ||
-            str_contains($address, 'depok')
-        ) {
-            return (float) min($distance, 30);
-        }
-
-        return (float) $distance;
+        return $earthRadiusKm * $c;
     }
 
     private function calculateShippingFee(float $distanceKm): int

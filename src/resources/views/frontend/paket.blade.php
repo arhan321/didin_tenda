@@ -12,6 +12,12 @@
     
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- Leaflet Map CSS -->
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    >
     
     <!-- AOS Animation -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
@@ -168,6 +174,10 @@
             <input type="hidden" name="distance_km" id="distanceKmInput" value="{{ old('distance_km', 0) }}">
             <input type="hidden" name="shipping_fee" id="shippingFeeInput" value="{{ old('shipping_fee', 0) }}">
 
+            {{-- Koordinat lokasi acara dari map --}}
+            <input type="hidden" name="event_latitude" id="eventLatitudeInput" value="{{ old('event_latitude') }}">
+            <input type="hidden" name="event_longitude" id="eventLongitudeInput" value="{{ old('event_longitude') }}">
+
             <div class="row g-4">
                 <!-- KOLOM KIRI: Gambar & Galeri -->
                 <div class="col-lg-6" data-aos="fade-right">
@@ -274,7 +284,7 @@
                                     >
                                 </div>
                                 
-                                <!-- ========== TAMBAHAN ALAMAT LENGKAP & ONGKIR ========== -->
+                                <!-- Alamat Lengkap -->
                                 <div class="col-12">
                                     <label class="form-label">
                                         Alamat Lengkap Acara <span class="text-danger">*</span>
@@ -287,7 +297,18 @@
                                         placeholder="Masukkan alamat lengkap acara (Jalan, RT/RW, Kelurahan, Kecamatan, Kota)"
                                         required
                                     >{{ old('event_address') }}</textarea>
-                                    <small class="text-muted">Alamat akan digunakan untuk menghitung biaya pengiriman</small>
+                                    <small class="text-muted">Alamat akan digunakan sebagai keterangan lokasi acara</small>
+                                </div>
+
+                                <!-- Pilih Titik Lokasi Map -->
+                                <div class="col-12">
+                                    <button type="button" class="btn btn-outline-primary w-100" id="openLocationPickerBtn">
+                                        <i class="bi bi-geo-alt-fill"></i> Pilih Titik Lokasi di Map
+                                    </button>
+
+                                    <small class="text-muted d-block mt-2" id="selectedLocationText">
+                                        Titik lokasi belum dipilih. Pilih titik lokasi agar jarak lebih akurat.
+                                    </small>
                                 </div>
 
                                 <!-- Tampilan Jarak & Ongkir -->
@@ -313,7 +334,6 @@
                                         <i class="bi bi-geo-alt"></i> Cek Jarak & Ongkir
                                     </button>
                                 </div>
-                                <!-- ========== END ONGKIR ========== -->
                                 
                                 <div class="col-12">
                                     <label class="form-label">
@@ -492,6 +512,67 @@
     </div>
 </section>
 
+<!-- ==================== MODAL PILIH LOKASI MAP ==================== -->
+<div class="modal fade" id="locationPickerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content location-picker-modal">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-geo-alt-fill text-primary"></i>
+                    Pilih Titik Lokasi Acara
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="alert alert-info small mb-3">
+                    Cari lokasi acara melalui kolom pencarian, lalu pilih hasilnya. Anda juga tetap bisa klik atau geser pin di map.
+                </div>
+
+                <div class="location-search-wrapper mb-3">
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="bi bi-search"></i>
+                        </span>
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            id="locationSearchInput"
+                            placeholder="Cari lokasi, contoh: Esa Unggul, Citra Raya, Balai Kartini"
+                        >
+
+                        <button type="button" class="btn btn-primary" id="locationSearchBtn">
+                            Cari
+                        </button>
+                    </div>
+
+                    <div id="locationSearchResults" class="list-group mt-2" style="display: none;"></div>
+                </div>
+
+                <div
+                    id="locationPickerMap"
+                    style="height: 420px; border-radius: 14px; overflow: hidden;"
+                ></div>
+
+                <div class="mt-3 small text-muted" id="mapCoordinateText">
+                    Belum ada titik dipilih.
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" id="locateMeBtn">
+                    <i class="bi bi-crosshair"></i> Gunakan Lokasi Saya
+                </button>
+
+                <button type="button" class="btn btn-primary" id="useSelectedLocationBtn">
+                    <i class="bi bi-check-circle"></i> Gunakan Titik Ini
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- ==================== FOOTER ==================== -->
 <footer id="kontak" class="footer-section">
     <div class="container">
@@ -595,11 +676,27 @@
 
 <script>
     window.didinPackagePrice = {{ (int) $package->price }};
+
+    window.didinRouteConfig = {
+        depot: {
+            lat: {{ (float) config('didin.depot_lat', -6.262311) }},
+            lng: {{ (float) config('didin.depot_lng', 106.472969) }},
+            name: @json(config('didin.depot_name', 'Didin Tenda Decoration')),
+        },
+        osrmBaseUrl: @json(config('didin.osrm_base_url', 'https://router.project-osrm.org')),
+        defaultCenter: {
+            lat: {{ (float) config('didin.depot_lat', -6.262311) }},
+            lng: {{ (float) config('didin.depot_lng', 106.472969) }},
+        }
+    };
 </script>
 
 <!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+<!-- Leaflet Map JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <!-- JS umum untuk index/layout -->
 <script src="{{ asset('js/script.js') }}?v={{ time() }}"></script>

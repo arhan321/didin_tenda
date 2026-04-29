@@ -20,18 +20,27 @@ class Order extends Model
         'user_id',
         'package_id',
         'order_type',
+
         'customer_name',
         'customer_phone',
         'customer_email',
+
         'event_date',
         'event_location_name',
         'event_address',
+
+        // Koordinat titik lokasi acara dari map
+        'event_latitude',
+        'event_longitude',
+
         'distance_km',
         'shipping_fee',
+
         'subtotal_package',
         'subtotal_custom',
         'subtotal_addons',
         'total_price',
+
         'status',
         'payment_status',
         'payment_deadline',
@@ -40,18 +49,26 @@ class Order extends Model
         'processed_at',
         'completed_at',
         'cancelled_at',
+
         'cancelled_reason',
         'notes',
     ];
 
     protected $casts = [
         'event_date' => 'date',
+
+        // Koordinat lokasi acara
+        'event_latitude' => 'decimal:7',
+        'event_longitude' => 'decimal:7',
+
         'distance_km' => 'decimal:2',
         'shipping_fee' => 'integer',
+
         'subtotal_package' => 'integer',
         'subtotal_custom' => 'integer',
         'subtotal_addons' => 'integer',
         'total_price' => 'integer',
+
         'payment_deadline' => 'datetime',
         'paid_at' => 'datetime',
         'confirmed_at' => 'datetime',

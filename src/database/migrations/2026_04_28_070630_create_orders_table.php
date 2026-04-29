@@ -35,7 +35,9 @@ return new class extends Migration
             $table->date('event_date');
             $table->string('event_location_name')->nullable();
             $table->text('event_address')->nullable();
-
+            // Tambahan koordinat titik lokasi dari map
+            $table->decimal('event_latitude', 10, 7)->nullable();
+            $table->decimal('event_longitude', 10, 7)->nullable();
             $table->decimal('distance_km', 8, 2)->nullable();
             $table->unsignedBigInteger('shipping_fee')->default(0);
 
