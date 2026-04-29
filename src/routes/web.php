@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BookingController;
+use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\FrontendController;
 
 /*
@@ -15,7 +16,12 @@ Route::get('/', [FrontendController::class, 'home'])->name('frontend.index');
 Route::get('/paket-custom', [FrontendController::class, 'paket'])->name('frontend.paket-custom');
 Route::get('/history', [FrontendController::class, 'history'])->name('frontend.history');
 Route::get('/paket', [FrontendController::class, 'detail_paket'])->name('frontend.paket');
-Route::get('/pesanan', [FrontendController::class, 'pesanan'])->name('frontend.pesanan');
+Route::get('/pesanan', [FrontendController::class, 'pesanan'])
+    ->middleware('auth')
+    ->name('frontend.pesanan');
+Route::get('/pesanan/{order}/invoice', [InvoiceController::class, 'download'])
+    ->middleware('auth')
+    ->name('frontend.invoice.download');
 
 Route::get('/cart', [BookingController::class, 'index'])->name('frontend.cart');
 Route::post('/cart/add', [BookingController::class, 'add'])->name('frontend.cart.add');

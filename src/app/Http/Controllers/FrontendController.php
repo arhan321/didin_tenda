@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Addon;
+use App\Models\Order;
 use App\Models\Package;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -88,10 +89,6 @@ public function detail_paket(Request $request)
     ));
 }
 
-    public function pesanan()
-    {
-        return view('frontend.pesanan');
-    }
 
     public function profile()
     {
@@ -292,4 +289,135 @@ public function detail_paket(Request $request)
 
         return redirect($redirect)->with('success', $message);
     }
+
+    public function pesanan()
+{
+    if (! Auth::check()) {
+        return redirect()
+            ->route('frontend.index')
+            ->with('error', 'Silakan login terlebih dahulu untuk melihat pesanan Anda.');
+    }
+
+    $orders = Order::with([
+            'package',
+            'items',
+            'addons',
+            'review',
+            'payment',
+        ])
+        ->where('user_id', Auth::id())
+        ->latest()
+        ->get();
+
+    $ordersForJs = $orders->map(function ($order) {
+        $firstItem = $order->items->first();
+
+        $packageName = $order->package?->name
+            ?? $firstItem?->name
+            ?? 'Paket';
+
+        $packageSlug = $order->package?->slug
+            ?? $firstItem?->snapshot['slug']
+            ?? null;
+
+        $statusCode = $this->normalizeOrderStatusForFrontend($order->status, $order->payment_status);
+        $statusLabel = $this->getOrderStatusLabel($statusCode);
+
+        return [
+            'id' => $order->id,
+            'orderId' => $order->invoice_number,
+            'orderDate' => optional($order->created_at)->toIso8601String(),
+            'status' => $statusLabel,
+            'statusCode' => $statusCode,
+            'paymentStatus' => $order->payment_status,
+            'invoiceUrl' => route('frontend.invoice.download', $order->id),
+
+            'items' => [
+                [
+                    'id' => $packageSlug,
+                    'name' => $packageName,
+                    'price' => (int) $order->total_price,
+                    'basePrice' => (int) $order->subtotal_package,
+                    'date' => optional($order->event_date)->format('Y-m-d'),
+                    'location' => $order->event_location_name,
+                    'fullAddress' => $order->event_address,
+                    'customerName' => $order->customer_name,
+                    'customerPhone' => $order->customer_phone,
+                    'customerEmail' => $order->customer_email,
+                    'shippingFee' => (int) $order->shipping_fee,
+                    'distance' => (float) $order->distance_km,
+                    'latitude' => $order->event_latitude,
+                    'longitude' => $order->event_longitude,
+
+                    'addons' => $order->addons->map(function ($addon) {
+                        return [
+                            'id' => $addon->addon_id,
+                            'name' => $addon->name,
+                            'detail' => $addon->detail,
+                            'unit' => $addon->unit,
+                            'quantity' => (int) $addon->quantity,
+                            'price' => (int) $addon->price,
+                            'totalPrice' => (int) $addon->total_price,
+                        ];
+                    })->values(),
+                ],
+            ],
+
+            'subtotalPackage' => (int) $order->subtotal_package,
+            'subtotalCustom' => (int) $order->subtotal_custom,
+            'subtotalAddons' => (int) $order->subtotal_addons,
+            'shippingFee' => (int) $order->shipping_fee,
+            'totalPrice' => (int) $order->total_price,
+
+            'paymentDeadline' => optional($order->payment_deadline)->toIso8601String(),
+            'paidAt' => optional($order->paid_at)->toIso8601String(),
+            'notes' => $order->notes,
+
+            'rating' => $order->review?->rating,
+            'review' => $order->review?->comment ?? $order->review?->review,
+        ];
+    })->values();
+
+    $cartCount = count(session('booking_cart', []));
+
+    return view('frontend.pesanan', compact('ordersForJs', 'cartCount'));
+}
+
+private function normalizeOrderStatusForFrontend(?string $status, ?string $paymentStatus): string
+{
+    if ($status === 'cancelled' || $paymentStatus === 'cancelled' || $paymentStatus === 'expired') {
+        return 'cancelled';
+    }
+
+    if ($status === 'completed') {
+        return 'completed';
+    }
+
+    if ($status === 'ongoing') {
+        return 'ongoing';
+    }
+
+    if ($status === 'processing' || $status === 'processed') {
+        return 'processing';
+    }
+
+    if ($status === 'confirmed' || $paymentStatus === 'paid') {
+        return 'confirmed';
+    }
+
+    return 'waiting_payment';
+}
+
+private function getOrderStatusLabel(string $statusCode): string
+{
+    return match ($statusCode) {
+        'waiting_payment' => 'Menunggu Pembayaran',
+        'confirmed' => 'Dikonfirmasi',
+        'processing' => 'Pesanan Diproses',
+        'ongoing' => 'Pelaksanaan Acara',
+        'completed' => 'Selesai',
+        'cancelled' => 'Dibatalkan',
+        default => 'Menunggu Pembayaran',
+    };
+}
 }

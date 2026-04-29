@@ -54,7 +54,7 @@
                 <div class="d-flex ms-lg-3">
                     <a href="{{ route('frontend.cart') }}" class="user-menu-link" data-bs-toggle="tooltip" title="Keranjang Booking">
                         <i class="bi bi-cart3"></i>
-                        <span class="menu-badge" id="cartCount">0</span>
+                        <span class="menu-badge" id="cartCount">{{ $cartCount ?? 0 }}</span>
                     </a>
 
                     <a href="{{ route('frontend.pesanan') }}" class="user-menu-link active" data-bs-toggle="tooltip" title="Pesanan Saya">
@@ -82,6 +82,18 @@
                 <p>Kelola dan lacak semua pesanan dekorasi acara Anda</p>
             </div>
 
+            @if(session('success'))
+                <div class="alert alert-success mb-4">
+                    {{ session('success') }}
+                </div>
+            @endif
+
+            @if(session('error'))
+                <div class="alert alert-danger mb-4">
+                    {{ session('error') }}
+                </div>
+            @endif
+
             <!-- Filter & Search -->
             <div class="filter-section">
                 <div class="filter-buttons">
@@ -97,12 +109,12 @@
                 </div>
             </div>
 
-            <!-- Demo Mode Alert -->
+            <!-- Real Data Alert -->
             <div class="demo-alert">
                 <i class="bi bi-info-circle-fill"></i>
                 <div>
-                    <strong>Mode Demo / Statis</strong><br>
-                    <small>Karena masih tahap development, beberapa tombol aksi bersifat simulasi. Status akan berubah otomatis berdasarkan tanggal acara.</small>
+                    <strong>Data Pesanan Real</strong><br>
+                    <small>Pesanan ditampilkan dari database sesuai akun yang sedang login.</small>
                 </div>
             </div>
 
@@ -266,12 +278,22 @@
         <i class="bi bi-arrow-up"></i>
     </button>
 
+    <script>
+        window.DIDIN_ORDERS = @json($ordersForJs ?? []);
+        window.DIDIN_PESANAN_ROUTES = {
+            paketIndex: @json(route('frontend.index') . '#paket'),
+            cart: @json(route('frontend.cart')),
+            pesanan: @json(route('frontend.pesanan')),
+            history: @json(route('frontend.history')),
+        };
+    </script>
+
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 
     <!-- Custom JS -->
-    <script src="{{ asset('js/script.js') }}"></script>
-    <script src="{{ asset('js/pesanan.js') }}"></script>
+    <script src="{{ asset('js/script.js') }}?v={{ time() }}"></script>
+    <script src="{{ asset('js/pesanan.js') }}?v={{ time() }}"></script>
 </body>
 </html>
