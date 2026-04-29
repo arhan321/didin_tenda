@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Addon;
 use App\Models\Order;
 use App\Models\Package;
+use App\Models\CustomItem;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
@@ -520,5 +521,29 @@ public function history()
     $cartCount = count(session('booking_cart', []));
 
     return view('frontend.history', compact('historyForJs', 'cartCount'));
+}
+public function paketCustom()
+{
+    $customItems = CustomItem::query()
+        ->where('is_active', true)
+        ->orderBy('sort_order')
+        ->orderBy('id')
+        ->get();
+
+    $addons = class_exists(Addon::class)
+        ? Addon::query()
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get()
+        : collect();
+
+    $cartCount = count(session('booking_cart', []));
+
+    return view('frontend.paket-custom', compact(
+        'customItems',
+        'addons',
+        'cartCount'
+    ));
 }
 }

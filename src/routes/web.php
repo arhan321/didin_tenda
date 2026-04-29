@@ -15,7 +15,11 @@ use App\Http\Controllers\MidtransPaymentController;
 */
 
 Route::get('/', [FrontendController::class, 'home'])->name('frontend.index');
-Route::get('/paket-custom', [FrontendController::class, 'paket'])->name('frontend.paket-custom');
+Route::get('/paket-custom', [FrontendController::class, 'paketCustom'])
+    ->name('frontend.paket-custom');
+Route::post('/paket-custom/add-to-cart', [BookingController::class, 'addCustomToCart'])
+    ->middleware('auth')
+    ->name('frontend.custom.add-to-cart');
 // Route::get('/history', [FrontendController::class, 'history'])->name('frontend.history');
 Route::get('/paket', [FrontendController::class, 'detail_paket'])->name('frontend.paket');
 Route::get('/pesanan', [FrontendController::class, 'pesanan'])

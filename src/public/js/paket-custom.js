@@ -1,327 +1,354 @@
 /**
- * PAKET-CUSTOM.JS - Halaman Paket Custom
- * Layout vertikal dengan gambar custom + add-ons (dengan quantity) + ongkir + edit mode
+ * PAKET-CUSTOM.JS
+ *
+ * Paket Custom sudah connect ke database Laravel:
+ * - window.DIDIN_CUSTOM_ITEMS
+ * - window.DIDIN_ADDONS
+ * - window.DIDIN_CUSTOM_ROUTES
+ * - window.DIDIN_SHIPPING_CONFIG
+ *
+ * Catatan penting:
+ * - Tidak memakai localStorage.
+ * - Tidak mengubah struktur styling add-ons lama.
+ * - Add-ons tetap memakai class lama:
+ *   addon-card, addon-card-inner, addon-image, addon-info,
+ *   addon-name, addon-detail, addon-price-wrapper,
+ *   addon-quantity, qty-btn, qty-value, qty-total.
  */
 
-// ===== DATA ADD-ONS (DENGAN FLAG isPerItem) =====
-const addonsDatabaseCustom = [
-    { 
-        id: 'ac-blower',
-        name: 'AC Blower indoor Honeywell',
-        detail: 'Pendingin ruangan portable',
-        price: 400000,
-        image: 'assets/images/addons/ac-blower.png',
-        icon: 'bi-wind',
-        isPerItem: true  // bisa pilih jumlah
-    },
-    { 
-        id: 'kipas-embun',
-        name: 'Kipas embun',
-        detail: 'Kipas pendingin outdoor + embun',
-        price: 500000,
-        image: 'assets/images/addons/kipas-embun.png',
-        icon: 'bi-fan',
-        isPerItem: true
-    },
-    { 
-        id: 'kursi-futura-sarung',
-        name: 'Kursi Futura plus sarung',
-        detail: 'Kursi futura premium dengan sarung',
-        price: 15000,
-        image: 'assets/images/addons/kursi-futura-sarung.png',
-        icon: 'bi-chair',
-        isPerItem: true
-    },
-    { 
-        id: 'kursi-plastik-cover',
-        name: 'Kursi plastik plus cover',
-        detail: 'Kursi plastik dengan cover',
-        price: 9000,
-        image: 'assets/images/addons/kursi-plastik-cover.png',
-        icon: 'bi-chair',
-        isPerItem: true
-    },
-    { 
-        id: 'kursi-plastik',
-        name: 'Kursi plastik',
-        detail: 'Kursi plastik standar',
-        price: 7000,
-        image: 'assets/images/addons/kursi-plastik.png',
-        icon: 'bi-chair',
-        isPerItem: true
-    },
-    { 
-        id: 'kursi-futura',
-        name: 'Kursi Futura',
-        detail: 'Kursi futura standar',
-        price: 13000,
-        image: 'assets/images/addons/kursi-futura.png',
-        icon: 'bi-chair',
-        isPerItem: true
-    },
-    { 
-        id: 'kursi-stainless',
-        name: 'Kursi stainless',
-        detail: 'Kursi stainless steel mewah',
-        price: 10000,
-        image: 'assets/images/addons/kursi-stainless.png',
-        icon: 'bi-brightness-alt-high',
-        isPerItem: true
-    }
-];
+let customItems = [];
+let addonsData = [];
 
-// ===== DATA CUSTOM ITEMS =====
-let customQty = {
-    tenda: 0,
-    panggung: 0,
-    mejakotak: 0,
-    mejabulat: 0,
-    soundsystem: 0
-};
-
-const customPrices = {
-    tenda: 65000,
-    panggung: 50000,
-    mejakotak: 30000,
-    mejabulat: 50000,
-    soundsystem: 3000000
-};
-
-const customNames = {
-    tenda: 'Tenda Dekorasi',
-    panggung: 'Panggung Rigging',
-    mejakotak: 'Meja Kotak Hajatan',
-    mejabulat: 'Meja Bulat',
-    soundsystem: 'Sound System'
-};
-
-const customUnits = {
-    tenda: 'meter',
-    panggung: 'meter',
-    mejakotak: 'meter',
-    mejabulat: 'pcs',
-    soundsystem: 'set'
-};
-
-// ===== VARIABEL GLOBAL =====
+let customQty = {};
 let selectedAddonsCustom = [];
-let currentDistance = 0;
-let currentShippingFee = 0;
-let isEditMode = false;
-let editIndex = -1;
 
-// ===== CEK APAKAH MODE EDIT (DARI CART) =====
-function checkEditMode() {
-    const urlParams = new URLSearchParams(window.location.search);
-    isEditMode = urlParams.get('edit') === 'true';
-    
-    if (isEditMode) {
-        const savedItem = sessionStorage.getItem('editCartItem');
-        const savedIndex = sessionStorage.getItem('editCartIndex');
-        if (savedItem && savedIndex) {
-            editIndex = parseInt(savedIndex);
-            const item = JSON.parse(savedItem);
-            
-            setTimeout(() => {
-                if (item.date) document.getElementById('eventDate').value = item.date;
-                if (item.location) document.getElementById('eventLocation').value = item.location;
-                if (item.fullAddress) document.getElementById('eventFullAddress').value = item.fullAddress;
-                if (item.customerName) document.getElementById('customerName').value = item.customerName;
-                if (item.customerPhone) document.getElementById('customerPhone').value = item.customerPhone;
-                
-                // Reset custom quantities
-                for (let key in customQty) {
-                    customQty[key] = 0;
-                }
-                
-                // Isi custom items
-                if (item.customItems && item.customItems.length > 0) {
-                    item.customItems.forEach(custom => {
-                        if (custom.id === 'custom-tenda' && custom.quantity) customQty.tenda = custom.quantity;
-                        else if (custom.id === 'custom-panggung' && custom.quantity) customQty.panggung = custom.quantity;
-                        else if (custom.id === 'custom-mejakotak' && custom.quantity) customQty.mejakotak = custom.quantity;
-                        else if (custom.id === 'custom-mejabulat' && custom.quantity) customQty.mejabulat = custom.quantity;
-                        else if (custom.id === 'custom-soundsystem' && custom.quantity) customQty.soundsystem = custom.quantity;
-                    });
-                    
-                    for (let key in customQty) {
-                        updateCustomTotalDisplay(key);
-                        const inputField = document.getElementById(`qty-${key}`);
-                        if (inputField) inputField.value = customQty[key];
-                    }
-                }
-                
-                // Isi add-ons dengan quantity
-                if (item.addons && item.addons.length > 0) {
-                    selectedAddonsCustom = item.addons.map(addon => ({
-                        id: addon.id,
-                        name: addon.name,
-                        detail: addon.detail || addon.name,
-                        price: addon.price,
-                        quantity: addon.quantity || 1,
-                        totalPrice: addon.totalPrice || (addon.price * (addon.quantity || 1)),
-                        image: addon.image || `assets/images/addons/${addon.id}.png`,
-                        icon: addon.icon || 'bi-plus-circle',
-                        isPerItem: true
-                    }));
-                    renderAddonsCustom();
-                }
-                
-                if (item.shippingFee) {
-                    currentShippingFee = item.shippingFee;
-                    currentDistance = item.distance || 0;
-                    
-                    const shippingInfo = document.getElementById('shippingInfo');
-                    const distanceEl = document.getElementById('distanceValue');
-                    const feeEl = document.getElementById('shippingFeeValue');
-                    if (shippingInfo && currentDistance > 0) {
-                        shippingInfo.style.display = 'block';
-                        if (distanceEl) distanceEl.textContent = currentDistance.toFixed(1);
-                        if (feeEl) feeEl.textContent = formatShippingFee(currentShippingFee);
-                    }
-                }
-                
-                updateAllTotals();
-                showNotification('📝 Mode Edit: Silakan perbarui pesanan Anda', 'info');
-            }, 100);
-        }
+let selectedLocation = {
+    lat: null,
+    lng: null,
+    address: null,
+    distanceKm: 0,
+    shippingFee: 0,
+    routeFound: false,
+};
+
+let eventMap = null;
+let baseMarker = null;
+let eventMarker = null;
+let routeLine = null;
+
+document.addEventListener('DOMContentLoaded', function () {
+    customItems = Array.isArray(window.DIDIN_CUSTOM_ITEMS) ? window.DIDIN_CUSTOM_ITEMS : [];
+    addonsData = Array.isArray(window.DIDIN_ADDONS) ? window.DIDIN_ADDONS : [];
+
+    initAosCustom();
+    initMinDate();
+    initCustomState();
+    renderAddonsCustom();
+    bindCustomEvents();
+    updateAllTotals();
+    updateCartBadge();
+});
+
+// ==================== INIT ====================
+
+function initAosCustom() {
+    if (typeof AOS !== 'undefined') {
+        AOS.init({
+            duration: 800,
+            once: true,
+        });
     }
 }
 
-// ===== UPDATE QUANTITY CUSTOM ITEM =====
-function updateCustomQty(itemId, delta) {
-    let newQty = customQty[itemId] + delta;
-    if (itemId === 'panggung' && newQty > 64) newQty = 64;
-    if (newQty < 0) newQty = 0;
-    
-    customQty[itemId] = newQty;
-    
-    const inputField = document.getElementById(`qty-${itemId}`);
-    if (inputField) inputField.value = newQty;
-    
-    updateCustomTotalDisplay(itemId);
-    updateAllTotals();
+function initMinDate() {
+    const dateInput = document.getElementById('eventDate');
+
+    if (!dateInput) return;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+
+    dateInput.setAttribute('min', `${year}-${month}-${day}`);
 }
 
-function updateCustomQtyDirect(itemId) {
-    const inputField = document.getElementById(`qty-${itemId}`);
-    let newQty = parseInt(inputField.value) || 0;
-    if (itemId === 'panggung' && newQty > 64) newQty = 64;
-    if (newQty < 0) newQty = 0;
-    
-    customQty[itemId] = newQty;
-    if (inputField) inputField.value = newQty;
-    
+function initCustomState() {
+    customItems.forEach(item => {
+        customQty[getKey(item.id)] = 0;
+    });
+}
+
+function bindCustomEvents() {
+    const addToCartBtn = document.getElementById('addToCartBtn');
+    const bookNowBtn = document.getElementById('bookNowBtn');
+    const checkShippingBtn = document.getElementById('checkShippingBtn');
+
+    if (addToCartBtn) {
+        addToCartBtn.addEventListener('click', function () {
+            submitCustomOrder(false, this);
+        });
+    }
+
+    if (bookNowBtn) {
+        bookNowBtn.addEventListener('click', function () {
+            submitCustomOrder(true, this);
+        });
+    }
+
+    if (checkShippingBtn) {
+        checkShippingBtn.addEventListener('click', openLocationMapModal);
+    }
+
+    const backToTop = document.getElementById('backToTop');
+
+    if (backToTop) {
+        window.addEventListener('scroll', function () {
+            backToTop.classList.toggle('show', window.scrollY > 300);
+        });
+
+        backToTop.addEventListener('click', function () {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth',
+            });
+        });
+    }
+
+    const mapSearchBtn = document.getElementById('mapSearchBtn');
+    const mapSearchInput = document.getElementById('mapSearchInput');
+    const useSelectedPointBtn = document.getElementById('useSelectedPointBtn');
+    const useMyLocationBtn = document.getElementById('useMyLocationBtn');
+
+    if (mapSearchBtn) {
+        mapSearchBtn.addEventListener('click', searchLocationOnMap);
+    }
+
+    if (mapSearchInput) {
+        mapSearchInput.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                searchLocationOnMap();
+            }
+        });
+    }
+
+    if (useSelectedPointBtn) {
+        useSelectedPointBtn.addEventListener('click', useSelectedPoint);
+    }
+
+    if (useMyLocationBtn) {
+        useMyLocationBtn.addEventListener('click', useMyCurrentLocation);
+    }
+
+    ['eventFullAddress', 'eventLocation'].forEach(id => {
+        const element = document.getElementById(id);
+
+        if (!element) return;
+
+        element.addEventListener('input', function () {
+            resetShippingOnly();
+        });
+    });
+}
+
+// ==================== CUSTOM ITEMS ====================
+
+window.updateCustomQty = function (itemId, delta) {
+    const item = getCustomItem(itemId);
+    const input = getCustomInput(itemId);
+
+    if (!item || !input) return;
+
+    const key = getKey(itemId);
+
+    let currentQty = Number(input.value || 0);
+    let newQty = currentQty + Number(delta || 0);
+
+    newQty = normalizeCustomQuantity(item, newQty);
+
+    input.value = newQty;
+    customQty[key] = newQty;
+
     updateCustomTotalDisplay(itemId);
     updateAllTotals();
+};
+
+window.updateCustomQtyDirect = function (itemId) {
+    const item = getCustomItem(itemId);
+    const input = getCustomInput(itemId);
+
+    if (!item || !input) return;
+
+    const key = getKey(itemId);
+
+    let newQty = Number(input.value || 0);
+    newQty = normalizeCustomQuantity(item, newQty);
+
+    input.value = newQty;
+    customQty[key] = newQty;
+
+    updateCustomTotalDisplay(itemId);
+    updateAllTotals();
+};
+
+function normalizeCustomQuantity(item, qty) {
+    let value = Number(qty || 0);
+
+    if (value < 0) {
+        value = 0;
+    }
+
+    const minQty = Number(item.minQuantity || 0);
+    const maxQty = item.maxQuantity !== null && item.maxQuantity !== undefined
+        ? Number(item.maxQuantity)
+        : null;
+
+    if (value > 0 && minQty > 0 && value < minQty) {
+        value = minQty;
+    }
+
+    if (maxQty !== null && value > maxQty) {
+        value = maxQty;
+        showCustomNotification(`Jumlah ${item.name} maksimal ${maxQty} ${item.unit}.`, 'warning');
+    }
+
+    return value;
 }
 
 function updateCustomTotalDisplay(itemId) {
-    const total = customQty[itemId] * customPrices[itemId];
-    const totalSpan = document.getElementById(`total-${itemId}`);
-    if (totalSpan) totalSpan.textContent = formatRupiah(total);
-}
+    const item = getCustomItem(itemId);
 
-// ===== UPDATE SEMUA TOTAL =====
-function updateAllTotals() {
-    let subtotal = 0;
-    for (let key in customQty) {
-        subtotal += customQty[key] * customPrices[key];
-    }
-    
-    const totalAddons = selectedAddonsCustom.reduce((sum, addon) => {
-        return sum + (addon.totalPrice || (addon.price * (addon.quantity || 1)));
-    }, 0);
-    
-    const grandTotal = subtotal + totalAddons + currentShippingFee;
-    
-    document.getElementById('subtotalItem').textContent = formatRupiah(subtotal);
-    document.getElementById('totalCustom').textContent = formatRupiah(grandTotal);
-    
-    updateSummaryItems();
-    updateAddonsSummary();
-    
-    const shippingSummary = document.getElementById('shippingSummaryCustom');
-    if (shippingSummary) {
-        if (currentShippingFee > 0) {
-            shippingSummary.innerHTML = `<div class="summary-row"><span>🚚 Biaya Pengiriman</span><span>${formatRupiah(currentShippingFee)}</span></div>`;
-        } else if (currentShippingFee === 0 && currentDistance > 0) {
-            shippingSummary.innerHTML = `<div class="summary-row"><span>🚚 Biaya Pengiriman</span><span class="text-success">GRATIS</span></div>`;
-        } else {
-            shippingSummary.innerHTML = '';
-        }
+    if (!item) return;
+
+    const key = getKey(itemId);
+    const totalElement = document.getElementById(`total-custom-${itemId}`);
+    const qty = Number(customQty[key] || 0);
+    const total = qty * Number(item.price || 0);
+
+    if (totalElement) {
+        totalElement.textContent = formatRupiah(total);
     }
 }
 
-// ===== UPDATE SUMMARY ITEMS DI RINGKASAN =====
-function updateSummaryItems() {
-    const container = document.getElementById('summaryItems');
-    let hasItems = false;
-    let html = '';
-    
-    for (let key in customQty) {
-        if (customQty[key] > 0) {
-            hasItems = true;
-            const total = customQty[key] * customPrices[key];
-            const unitText = customUnits[key] === 'pcs' ? `${customQty[key]} pcs` : `${customQty[key]} meter`;
-            html += `
-                <div class="summary-item-row">
-                    <span class="summary-item-name">
-                        ${customNames[key]} <small>(${unitText})</small>
-                    </span>
-                    <span class="summary-item-price">${formatRupiah(total)}</span>
-                </div>
-            `;
-        }
-    }
-    
-    if (!hasItems) {
-        html = '<p class="text-muted small mb-0">Belum ada item dipilih</p>';
-    }
-    
-    container.innerHTML = html;
+function getCustomInput(itemId) {
+    return document.getElementById(`qty-custom-${itemId}`);
 }
 
-// ===== RENDER ADD-ONS DENGAN QUANTITY (SEPERTI PAKET.HTML) =====
+function getCustomItem(itemId) {
+    return customItems.find(item => getKey(item.id) === getKey(itemId));
+}
+
+function getSelectedCustomItems() {
+    return customItems
+        .map(item => {
+            const key = getKey(item.id);
+            const quantity = Number(customQty[key] || 0);
+            const price = Number(item.price || 0);
+
+            return {
+                id: item.id,
+                name: item.name,
+                slug: item.slug,
+                description: item.description,
+                unit: item.unit || 'pcs',
+                quantity: quantity,
+                price: price,
+                totalPrice: price * quantity,
+                total_price: price * quantity,
+            };
+        })
+        .filter(item => item.quantity > 0);
+}
+
+// ==================== ADD-ONS - STRUKTUR CLASS LAMA ====================
+
 function renderAddonsCustom() {
     const container = document.getElementById('addonsContainer');
+
     if (!container) return;
-    
+
+    if (!addonsData.length) {
+        container.innerHTML = `
+            <div class="col-12">
+                <p class="text-muted small mb-0">Belum ada add-ons tersedia.</p>
+            </div>
+        `;
+        return;
+    }
+
     let html = '';
-    
-    addonsDatabaseCustom.forEach(addon => {
-        const existingItem = selectedAddonsCustom.find(a => a.id === addon.id);
-        const quantity = existingItem ? (existingItem.quantity || 1) : 0;
+
+    addonsData.forEach(addon => {
+        const existingItem = selectedAddonsCustom.find(item => getKey(item.id) === getKey(addon.id));
+        const quantity = existingItem ? Number(existingItem.quantity || 1) : 0;
         const isChecked = quantity > 0;
-        const totalPrice = addon.price * quantity;
-        
+        const totalPrice = Number(addon.price || 0) * quantity;
+
+        const imageUrl = addon.image || `https://placehold.co/80x80/2c3e50/white?text=${encodeURIComponent(shortLabel(addon.name || 'Add'))}`;
+        const addonIcon = addon.icon || 'bi-plus-circle';
+        const addonDetail = addon.detail || addon.description || '';
+        const addonUnit = addon.unit || 'pcs';
+
         html += `
             <div class="col-md-6 col-lg-6 mb-3">
-                <div class="addon-card ${isChecked ? 'selected' : ''}" data-addon-id="${addon.id}">
+                <div class="addon-card ${isChecked ? 'selected' : ''}" data-addon-id="${escapeAttribute(addon.id)}">
                     <div class="addon-card-inner">
                         <div class="addon-image">
-                            <img src="${addon.image}" alt="${addon.name}" 
-                                 onerror="this.src='https://placehold.co/60x60/2c7be5/white?text=${addon.name.substring(0, 3)}'">
+                            <img
+                                src="${escapeAttribute(imageUrl)}"
+                                alt="${escapeAttribute(addon.name || 'Add-on')}"
+                                onerror="this.src='https://placehold.co/80x80/2c3e50/white?text=${encodeURIComponent(shortLabel(addon.name || 'Add'))}'"
+                            >
                         </div>
+
                         <div class="addon-info">
                             <div class="addon-name">
-                                <i class="bi ${addon.icon}"></i>
-                                <strong>${addon.name}</strong>
+                                <i class="bi ${escapeAttribute(addonIcon)}"></i>
+                                <strong>${escapeHtml(addon.name || 'Add-on')}</strong>
                             </div>
-                            <div class="addon-detail">${addon.detail}</div>
+
+                            <div class="addon-detail">
+                                ${escapeHtml(addonDetail)}
+                            </div>
+
                             <div class="addon-price-wrapper">
                                 <span class="addon-price">${formatRupiah(addon.price)}</span>
-                                <span class="addon-unit">/item</span>
+                                <span class="addon-unit">/${escapeHtml(addonUnit)}</span>
                             </div>
-                            <div class="addon-quantity">
-                                <button class="qty-btn-sm minus" onclick="event.stopPropagation(); updateAddonQuantityCustom('${addon.id}', -1)">
-                                    <i class="bi bi-dash"></i>
+
+                            <div class="custom-item-qty addon-qty-wrapper mt-2">
+                                <button
+                                    type="button"
+                                    class="qty-btn-sm minus"
+                                    onclick="event.stopPropagation(); updateAddonQuantity(${jsValue(addon.id)}, -1)"
+                                >
+                                    -
                                 </button>
-                                <span class="qty-value">${quantity}</span>
-                                <button class="qty-btn-sm plus" onclick="event.stopPropagation(); updateAddonQuantityCustom('${addon.id}', 1)">
-                                    <i class="bi bi-plus"></i>
+
+                                <input
+                                    type="number"
+                                    class="qty-input-sm"
+                                    id="qty-addon-${escapeAttribute(addon.id)}"
+                                    value="${escapeAttribute(quantity)}"
+                                    min="0"
+                                    ${addon.stock ? `max="${escapeAttribute(addon.stock)}"` : ''}
+                                    onchange="updateAddonQuantityDirect(${jsValue(addon.id)})"
+                                >
+
+                                <button
+                                    type="button"
+                                    class="qty-btn-sm plus"
+                                    onclick="event.stopPropagation(); updateAddonQuantity(${jsValue(addon.id)}, 1)"
+                                >
+                                    +
                                 </button>
-                                <span class="qty-total">${quantity > 0 ? formatRupiah(totalPrice) : ''}</span>
+
+                                <span class="item-total-sm addon-total-sm" id="total-addon-${escapeAttribute(addon.id)}">
+                                    ${quantity > 0 ? formatRupiah(totalPrice) : 'Rp 0'}
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -329,19 +356,23 @@ function renderAddonsCustom() {
             </div>
         `;
     });
-    
+
     container.innerHTML = html;
 }
 
-// ===== UPDATE QUANTITY ADD-ON CUSTOM =====
-function updateAddonQuantityCustom(addonId, delta) {
-    const addon = addonsDatabaseCustom.find(a => a.id === addonId);
+window.updateAddonQuantity = function (addonId, delta) {
+    const addon = getAddon(addonId);
+
     if (!addon) return;
-    
-    let existingIndex = selectedAddonsCustom.findIndex(a => a.id === addonId);
-    let currentQty = existingIndex !== -1 ? (selectedAddonsCustom[existingIndex].quantity || 1) : 0;
-    let newQty = currentQty + delta;
-    
+
+    const existingIndex = selectedAddonsCustom.findIndex(item => getKey(item.id) === getKey(addonId));
+    const currentQty = existingIndex !== -1
+        ? Number(selectedAddonsCustom[existingIndex].quantity || 1)
+        : 0;
+
+    let newQty = currentQty + Number(delta || 0);
+    newQty = normalizeAddonQuantity(addon, newQty);
+
     if (newQty <= 0) {
         if (existingIndex !== -1) {
             selectedAddonsCustom.splice(existingIndex, 1);
@@ -350,265 +381,941 @@ function updateAddonQuantityCustom(addonId, delta) {
         const newItem = {
             id: addon.id,
             name: addon.name,
-            detail: addon.detail,
-            price: addon.price,
+            detail: addon.detail || addon.description || null,
+            description: addon.description || addon.detail || null,
+            price: Number(addon.price || 0),
             quantity: newQty,
-            totalPrice: addon.price * newQty,
-            image: addon.image,
-            icon: addon.icon,
-            isPerItem: true
+            unit: addon.unit || 'pcs',
+            totalPrice: Number(addon.price || 0) * newQty,
+            total_price: Number(addon.price || 0) * newQty,
+            image: addon.image || null,
+            icon: addon.icon || null,
         };
-        
+
         if (existingIndex !== -1) {
             selectedAddonsCustom[existingIndex] = newItem;
         } else {
             selectedAddonsCustom.push(newItem);
         }
     }
-    
+
     renderAddonsCustom();
     updateAllTotals();
+};
+window.updateAddonQuantityDirect = function (addonId) {
+    const addon = getAddon(addonId);
+    const input = document.getElementById(`qty-addon-${addonId}`);
+
+    if (!addon || !input) return;
+
+    let newQty = Number(input.value || 0);
+    newQty = normalizeAddonQuantity(addon, newQty);
+
+    const existingIndex = selectedAddonsCustom.findIndex(item => getKey(item.id) === getKey(addonId));
+
+    if (newQty <= 0) {
+        if (existingIndex !== -1) {
+            selectedAddonsCustom.splice(existingIndex, 1);
+        }
+    } else {
+        const newItem = {
+            id: addon.id,
+            name: addon.name,
+            detail: addon.detail || addon.description || null,
+            description: addon.description || addon.detail || null,
+            price: Number(addon.price || 0),
+            quantity: newQty,
+            unit: addon.unit || 'pcs',
+            totalPrice: Number(addon.price || 0) * newQty,
+            total_price: Number(addon.price || 0) * newQty,
+            image: addon.image || null,
+            icon: addon.icon || null,
+        };
+
+        if (existingIndex !== -1) {
+            selectedAddonsCustom[existingIndex] = newItem;
+        } else {
+            selectedAddonsCustom.push(newItem);
+        }
+    }
+
+    renderAddonsCustom();
+    updateAllTotals();
+};
+function normalizeAddonQuantity(addon, qty) {
+    let value = Number(qty || 0);
+
+    if (value < 0) {
+        value = 0;
+    }
+
+    const maxQty = addon.maxQuantity || addon.stock || null;
+
+    if (maxQty && value > Number(maxQty)) {
+        value = Number(maxQty);
+        showCustomNotification(`Jumlah ${addon.name} maksimal ${maxQty} ${addon.unit || 'pcs'}.`, 'warning');
+    }
+
+    return value;
 }
 
-// ===== UPDATE ADD-ONS SUMMARY =====
-function updateAddonsSummary() {
-    const container = document.getElementById('addonsSummaryCustom');
+function getAddon(addonId) {
+    return addonsData.find(addon => getKey(addon.id) === getKey(addonId));
+}
+
+function getSelectedAddons() {
+    return selectedAddonsCustom.map(addon => ({
+        id: addon.id,
+        name: addon.name,
+        detail: addon.detail || addon.description || null,
+        unit: addon.unit || 'pcs',
+        quantity: Number(addon.quantity || 1),
+        price: Number(addon.price || 0),
+        totalPrice: Number(addon.totalPrice || addon.total_price || 0),
+        total_price: Number(addon.totalPrice || addon.total_price || 0),
+    }));
+}
+
+// ==================== SUMMARY ====================
+
+function updateAllTotals() {
+    const selectedCustomItems = getSelectedCustomItems();
+    const selectedAddons = getSelectedAddons();
+
+    const subtotalCustom = selectedCustomItems.reduce((sum, item) => {
+        return sum + Number(item.totalPrice || item.total_price || 0);
+    }, 0);
+
+    const totalAddons = selectedAddons.reduce((sum, addon) => {
+        return sum + Number(addon.totalPrice || addon.total_price || 0);
+    }, 0);
+
+    const shippingFee = Number(selectedLocation.shippingFee || 0);
+    const grandTotal = subtotalCustom + totalAddons + shippingFee;
+
+    renderSummaryItems(selectedCustomItems);
+    renderAddonsSummary(selectedAddons);
+    renderShippingSummary();
+
+    const subtotalItemEl = document.getElementById('subtotalItem');
+    const totalCustomEl = document.getElementById('totalCustom');
+
+    if (subtotalItemEl) {
+        subtotalItemEl.textContent = formatRupiah(subtotalCustom);
+    }
+
+    if (totalCustomEl) {
+        totalCustomEl.textContent = formatRupiah(grandTotal);
+    }
+}
+
+function renderSummaryItems(selectedCustomItems) {
+    const container = document.getElementById('summaryItems');
+
     if (!container) return;
-    
-    if (selectedAddonsCustom.length === 0) {
-        container.innerHTML = '';
+
+    if (!selectedCustomItems.length) {
+        container.innerHTML = `<p class="text-muted small">Belum ada item dipilih</p>`;
         return;
     }
-    
-    let html = '<div class="addons-header"><i class="bi bi-plus-circle"></i> Add-ons:</div>';
-    selectedAddonsCustom.forEach(addon => {
-        const totalPrice = addon.totalPrice || (addon.price * (addon.quantity || 1));
-        const qtyText = (addon.quantity > 1) ? ` (${addon.quantity} pcs)` : '';
+
+    let html = '';
+
+    selectedCustomItems.forEach(item => {
         html += `
-            <div class="addon-summary-row">
-                <span>${addon.name}${qtyText}</span>
-                <span class="addon-price">${formatRupiah(totalPrice)}</span>
+            <div class="summary-item">
+                <div>
+                    <strong>${escapeHtml(item.name)}</strong>
+                    <small>
+                        ${escapeHtml(item.quantity)} ${escapeHtml(item.unit)}
+                        x ${formatRupiah(item.price)}
+                    </small>
+                </div>
+
+                <span>${formatRupiah(item.totalPrice || item.total_price)}</span>
             </div>
         `;
     });
-    
+
     container.innerHTML = html;
 }
 
-// ===== CEK ONGKIR (KONSISTEN - TIDAK BERUBAH-UBAH) =====
-async function checkShippingFeeCustom() {
-    const address = document.getElementById('eventFullAddress').value;
-    const shippingInfo = document.getElementById('shippingInfo');
-    const distanceEl = document.getElementById('distanceValue');
-    const feeEl = document.getElementById('shippingFeeValue');
-    const noteEl = document.getElementById('shippingNote');
-    const checkBtn = document.getElementById('checkShippingBtn');
-    
-    if (!address) {
-        showNotification('⚠️ Silakan masukkan alamat lengkap acara terlebih dahulu!', 'warning');
+function renderAddonsSummary(selectedAddons) {
+    const container = document.getElementById('addonsSummaryCustom');
+
+    if (!container) return;
+
+    if (!selectedAddons.length) {
+        container.innerHTML = '';
         return;
     }
-    
-    const originalText = checkBtn.innerHTML;
-    checkBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Menghitung jarak...';
-    checkBtn.disabled = true;
-    
-    setTimeout(() => {
-        let hash = 0;
-        for (let i = 0; i < address.length; i++) {
-            hash = ((hash << 5) - hash) + address.charCodeAt(i);
-            hash = hash & hash;
-        }
-        
-        let distance = (Math.abs(hash) % 60) + 1;
-        
-        if (address.toLowerCase().includes('jakarta') || address.toLowerCase().includes('tangerang')) {
-            distance = Math.min(distance, 15);
-        } else if (address.toLowerCase().includes('bogor') || address.toLowerCase().includes('bekasi') || address.toLowerCase().includes('depok')) {
-            distance = Math.min(distance, 35);
-        } else if (address.toLowerCase().includes('esa unggul') || address.toLowerCase().includes('citra')) {
-            distance = 11;
-        }
-        
-        currentDistance = distance;
-        currentShippingFee = calculateShippingFee(currentDistance);
-        
-        distanceEl.textContent = currentDistance.toFixed(1);
-        feeEl.textContent = formatShippingFee(currentShippingFee);
-        
-        if (currentShippingFee === 0) {
-            noteEl.innerHTML = `<i class="bi bi-check-circle"></i> ✅ Lokasi dalam radius 10km (${currentDistance.toFixed(1)}km). Pengiriman GRATIS!`;
-            noteEl.className = 'shipping-note free';
-        } else if (currentDistance <= 30) {
-            const extraKm = currentDistance - 10;
-            noteEl.innerHTML = `<i class="bi bi-info-circle"></i> 📍 Jarak ${currentDistance.toFixed(1)}km dari lokasi kami.<br>🚚 Biaya pengiriman: ${extraKm.toFixed(1)}km x Rp5.000 = ${formatRupiah(currentShippingFee)}`;
-            noteEl.className = 'shipping-note charge';
-        } else {
-            const extraKm = currentDistance - 30;
-            noteEl.innerHTML = `<i class="bi bi-info-circle"></i> 📍 Jarak ${currentDistance.toFixed(1)}km dari lokasi kami.<br>🚚 Biaya pengiriman: 20km pertama x Rp5.000 + ${extraKm.toFixed(1)}km x Rp10.000 = ${formatRupiah(currentShippingFee)}`;
-            noteEl.className = 'shipping-note charge';
-        }
-        
-        shippingInfo.style.display = 'block';
-        updateAllTotals();
-        
-        checkBtn.innerHTML = originalText;
-        checkBtn.disabled = false;
-        
-        showNotification(`📍 Jarak: ${currentDistance.toFixed(1)} km | Ongkir: ${formatShippingFee(currentShippingFee)}`, 'info');
-    }, 1000);
+
+    let html = `
+        <hr>
+        <h6 class="mb-2">
+            <i class="bi bi-plus-circle"></i> Add-ons
+        </h6>
+    `;
+
+    selectedAddons.forEach(addon => {
+        html += `
+            <div class="summary-row small">
+                <span>
+                    ${escapeHtml(addon.name)}
+                    (${escapeHtml(addon.quantity)} ${escapeHtml(addon.unit || 'pcs')})
+                </span>
+
+                <span>${formatRupiah(addon.totalPrice || addon.total_price)}</span>
+            </div>
+        `;
+    });
+
+    container.innerHTML = html;
 }
 
-// ===== VALIDASI FORM =====
-function validateFormCustom() {
-    const name = document.getElementById('customerName').value;
-    const phone = document.getElementById('customerPhone').value;
-    const date = document.getElementById('eventDate').value;
-    const location = document.getElementById('eventLocation').value;
-    const fullAddress = document.getElementById('eventFullAddress').value;
-    
-    let hasItem = false;
-    for (let key in customQty) {
-        if (customQty[key] > 0) hasItem = true;
+function renderShippingSummary() {
+    const container = document.getElementById('shippingSummaryCustom');
+
+    if (!container) return;
+
+    const distance = Number(selectedLocation.distanceKm || 0);
+    const fee = Number(selectedLocation.shippingFee || 0);
+
+    if (!distance) {
+        container.innerHTML = '';
+        return;
     }
-    
-    if (!hasItem && selectedAddonsCustom.length === 0) {
-        showNotification('⚠️ Silakan pilih minimal satu item dekorasi atau add-on!', 'warning');
-        return false;
-    }
-    if (!name) { showNotification('⚠️ Silakan isi nama lengkap!', 'warning'); return false; }
-    if (!phone) { showNotification('⚠️ Silakan isi nomor WhatsApp!', 'warning'); return false; }
-    if (!date) { showNotification('⚠️ Silakan pilih tanggal acara!', 'warning'); return false; }
-    if (!location) { showNotification('⚠️ Silakan isi nama lokasi acara!', 'warning'); return false; }
-    if (!fullAddress) { showNotification('⚠️ Silakan isi alamat lengkap acara!', 'warning'); return false; }
-    
-    return true;
+
+    container.innerHTML = `
+        <div class="summary-row">
+            <span>Biaya Pengiriman (${distance.toFixed(1)} km)</span>
+            <span>${fee === 0 ? 'GRATIS' : formatRupiah(fee)}</span>
+        </div>
+    `;
 }
 
-// ===== TAMBAH KE KERANJANG (DENGAN EDIT MODE) =====
-function addToCartCustom() {
-    if (!validateFormCustom()) return;
-    
-    const customerName = document.getElementById('customerName').value;
-    const customerPhone = document.getElementById('customerPhone').value;
-    const eventDate = document.getElementById('eventDate').value;
-    const eventLocation = document.getElementById('eventLocation').value;
-    const eventFullAddress = document.getElementById('eventFullAddress').value;
-    
-    let customItemsList = [];
-    let subtotal = 0;
-    
-    for (let key in customQty) {
-        if (customQty[key] > 0) {
-            const total = customQty[key] * customPrices[key];
-            subtotal += total;
-            customItemsList.push({
-                id: `custom-${key}`,
-                name: customNames[key],
-                quantity: customQty[key],
-                unit: customUnits[key],
-                pricePerUnit: customPrices[key],
-                price: customPrices[key],
-                totalPrice: total
-            });
+// ==================== MAP & ONGKIR ====================
+
+function openLocationMapModal() {
+    const modalElement = document.getElementById('locationMapModal');
+
+    if (!modalElement) return;
+
+    const modal = new bootstrap.Modal(modalElement);
+    modal.show();
+
+    modalElement.addEventListener('shown.bs.modal', function () {
+        initMap();
+
+        setTimeout(function () {
+            if (eventMap) {
+                eventMap.invalidateSize();
+            }
+        }, 250);
+
+        const mapSearchInput = document.getElementById('mapSearchInput');
+        const locationName = getInputValue('eventLocation');
+        const fullAddress = getInputValue('eventFullAddress');
+
+        if (mapSearchInput && !mapSearchInput.value) {
+            mapSearchInput.value = [locationName, fullAddress].filter(Boolean).join(', ');
         }
+    }, { once: true });
+}
+
+function initMap() {
+    if (typeof L === 'undefined') {
+        showCustomNotification('Leaflet Map belum terbaca. Periksa koneksi CDN Leaflet.', 'error');
+        return;
     }
-    
-    let addonsList = selectedAddonsCustom.map(addon => ({
-        id: addon.id,
-        name: addon.name,
-        price: addon.price,
-        quantity: addon.quantity || 1,
-        totalPrice: addon.totalPrice || (addon.price * (addon.quantity || 1))
-    }));
-    
-    const totalAddons = selectedAddonsCustom.reduce((sum, a) => sum + (a.totalPrice || (a.price * (a.quantity || 1))), 0);
-    const totalPrice = subtotal + totalAddons + currentShippingFee;
-    
-    const cartItem = {
-        id: 'paket-custom',
-        name: 'Paket Custom',
-        price: totalPrice,
-        basePrice: subtotal,
-        date: eventDate,
-        location: eventLocation,
-        fullAddress: eventFullAddress,
-        customerName: customerName,
-        customerPhone: customerPhone,
-        customItems: customItemsList,
-        addons: addonsList,
-        shippingFee: currentShippingFee,
-        distance: currentDistance,
-        isCustom: true,
-        addedAt: new Date().toISOString()
-    };
-    
-    let cart = localStorage.getItem('didinCart');
-    cart = cart ? JSON.parse(cart) : [];
-    
-    if (isEditMode && editIndex >= 0 && editIndex < cart.length) {
-        cart[editIndex] = cartItem;
-        sessionStorage.removeItem('editCartItem');
-        sessionStorage.removeItem('editCartIndex');
-        showNotification(`✅ Paket Custom berhasil diperbarui!`, 'success');
+
+    if (eventMap) return;
+
+    const config = getShippingConfig();
+
+    eventMap = L.map('eventMap').setView([config.baseLat, config.baseLng], 13);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap contributors',
+    }).addTo(eventMap);
+
+    baseMarker = L.marker([config.baseLat, config.baseLng])
+        .addTo(eventMap)
+        .bindPopup(config.baseName || 'Didin Tenda Decoration');
+
+    eventMap.on('click', async function (event) {
+        await setSelectedPoint(event.latlng.lat, event.latlng.lng, true);
+    });
+}
+
+async function searchLocationOnMap() {
+    const input = document.getElementById('mapSearchInput');
+    const resultsContainer = document.getElementById('mapSearchResults');
+
+    if (!input || !resultsContainer) return;
+
+    const keyword = input.value.trim();
+
+    if (!keyword) {
+        showCustomNotification('Masukkan kata kunci lokasi terlebih dahulu.', 'warning');
+        return;
+    }
+
+    resultsContainer.style.display = 'block';
+    resultsContainer.innerHTML = `
+        <div class="list-group-item small text-muted">
+            <i class="bi bi-hourglass-split"></i> Mencari lokasi...
+        </div>
+    `;
+
+    try {
+        const url = `https://nominatim.openstreetmap.org/search?format=json&limit=6&countrycodes=id&q=${encodeURIComponent(keyword)}`;
+        const response = await fetch(url, {
+            headers: {
+                'Accept': 'application/json',
+            },
+        });
+
+        const data = await response.json();
+
+        if (!Array.isArray(data) || data.length === 0) {
+            resultsContainer.innerHTML = `
+                <div class="list-group-item small text-danger">
+                    Lokasi tidak ditemukan. Coba masukkan alamat yang lebih lengkap.
+                </div>
+            `;
+            return;
+        }
+
+        window.__didinMapSearchResults = data;
+
+        resultsContainer.innerHTML = data.map((item, index) => {
+            const title = item.display_name ? item.display_name.split(',')[0] : 'Lokasi';
+
+            return `
+                <button
+                    type="button"
+                    class="list-group-item list-group-item-action"
+                    onclick="selectSearchResult(${index})"
+                >
+                    <strong>${escapeHtml(title)}</strong><br>
+                    <small>${escapeHtml(item.display_name || '')}</small>
+                </button>
+            `;
+        }).join('');
+    } catch (error) {
+        console.error(error);
+
+        resultsContainer.innerHTML = `
+            <div class="list-group-item small text-danger">
+                Gagal mencari lokasi. Periksa koneksi internet Anda.
+            </div>
+        `;
+    }
+}
+
+window.selectSearchResult = async function (index) {
+    const results = window.__didinMapSearchResults || [];
+    const selected = results[index];
+
+    if (!selected) return;
+
+    const lat = Number(selected.lat);
+    const lng = Number(selected.lon);
+    const address = selected.display_name || null;
+
+    await setSelectedPoint(lat, lng, false, address);
+
+    const resultsContainer = document.getElementById('mapSearchResults');
+
+    if (resultsContainer) {
+        resultsContainer.style.display = 'none';
+        resultsContainer.innerHTML = '';
+    }
+};
+
+async function setSelectedPoint(lat, lng, shouldReverseGeocode = true, knownAddress = null) {
+    if (!eventMap) return;
+
+    selectedLocation.lat = Number(lat);
+    selectedLocation.lng = Number(lng);
+
+    if (eventMarker) {
+        eventMarker.setLatLng([selectedLocation.lat, selectedLocation.lng]);
     } else {
-        cart.push(cartItem);
-        showNotification(`✅ Paket Custom ditambahkan ke keranjang!`, 'success');
+        eventMarker = L.marker([selectedLocation.lat, selectedLocation.lng], {
+            draggable: true,
+        }).addTo(eventMap);
+
+        eventMarker.on('dragend', async function () {
+            const position = eventMarker.getLatLng();
+            await setSelectedPoint(position.lat, position.lng, true);
+        });
     }
-    
-    localStorage.setItem('didinCart', JSON.stringify(cart));
-    updateCartBadge();
-    
-    setTimeout(() => {
-        window.location.href = 'cart.html';
-    }, 1000);
+
+    eventMarker.bindPopup('Titik lokasi acara').openPopup();
+    eventMap.setView([selectedLocation.lat, selectedLocation.lng], 15);
+
+    let address = knownAddress;
+
+    if (!address && shouldReverseGeocode) {
+        address = await reverseGeocode(selectedLocation.lat, selectedLocation.lng);
+    }
+
+    if (address) {
+        selectedLocation.address = address;
+        setInputValue('eventFullAddress', address);
+
+        const firstName = address.split(',')[0]?.trim();
+
+        if (firstName && !getInputValue('eventLocation')) {
+            setInputValue('eventLocation', firstName);
+        }
+    }
+
+    setInputValue('eventLatitude', selectedLocation.lat.toFixed(7));
+    setInputValue('eventLongitude', selectedLocation.lng.toFixed(7));
+
+    updateSelectedPointText();
+
+    await calculateDistanceAndShipping(selectedLocation.lat, selectedLocation.lng);
 }
 
-function bookNowCustom() {
-    if (!validateFormCustom()) return;
-    addToCartCustom();
-}
+async function calculateDistanceAndShipping(lat, lng) {
+    const config = getShippingConfig();
 
-function setMinDate() {
-    const today = new Date().toISOString().split('T')[0];
-    const dateInput = document.getElementById('eventDate');
-    if (dateInput) dateInput.setAttribute('min', today);
-}
+    let distanceKm = 0;
+    let routeFound = false;
 
-// ===== INITIALIZE =====
-document.addEventListener('DOMContentLoaded', function() {
-    setMinDate();
-    renderAddonsCustom();
+    try {
+        const url = `https://router.project-osrm.org/route/v1/driving/${config.baseLng},${config.baseLat};${lng},${lat}?overview=full&geometries=geojson`;
+        const response = await fetch(url, {
+            headers: {
+                'Accept': 'application/json',
+            },
+        });
+
+        const data = await response.json();
+
+        if (data && data.routes && data.routes[0]) {
+            distanceKm = Number(data.routes[0].distance || 0) / 1000;
+            routeFound = true;
+
+            drawRouteLine(data.routes[0].geometry);
+        }
+    } catch (error) {
+        console.warn('OSRM gagal, fallback ke haversine.', error);
+    }
+
+    if (!distanceKm) {
+        distanceKm = haversineDistance(config.baseLat, config.baseLng, lat, lng) * 1.35;
+        routeFound = false;
+        drawFallbackLine(config.baseLat, config.baseLng, lat, lng);
+    }
+
+    selectedLocation.distanceKm = Number(distanceKm.toFixed(2));
+    selectedLocation.shippingFee = calculateShippingFee(selectedLocation.distanceKm);
+    selectedLocation.routeFound = routeFound;
+
+    showShippingInfo();
     updateAllTotals();
-    checkEditMode();
-    
-    const addToCartBtn = document.getElementById('addToCartBtn');
-    const bookNowBtn = document.getElementById('bookNowBtn');
-    const checkShippingBtn = document.getElementById('checkShippingBtn');
-    
-    if (addToCartBtn) addToCartBtn.addEventListener('click', addToCartCustom);
-    if (bookNowBtn) bookNowBtn.addEventListener('click', bookNowCustom);
-    if (checkShippingBtn) checkShippingBtn.addEventListener('click', checkShippingFeeCustom);
-    
-    const backToTop = document.getElementById('backToTop');
-    if (backToTop) {
-        window.addEventListener('scroll', () => {
-            backToTop.classList.toggle('show', window.scrollY > 300);
-        });
-        backToTop.addEventListener('click', () => {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
-    }
-    
-    if (typeof AOS !== 'undefined') AOS.init({ duration: 800, once: true });
-    updateCartBadge();
-});
-
-// Fungsi global untuk dipanggil dari HTML onclick
-function updateCustomQtyGlobal(itemId, delta) {
-    updateCustomQty(itemId, delta);
 }
 
-function updateCustomQtyDirectGlobal(itemId) {
-    updateCustomQtyDirect(itemId);
+function drawRouteLine(geometry) {
+    if (!eventMap || !geometry || !geometry.coordinates) return;
+
+    if (routeLine) {
+        eventMap.removeLayer(routeLine);
+    }
+
+    const latLngs = geometry.coordinates.map(coord => [coord[1], coord[0]]);
+
+    routeLine = L.polyline(latLngs, {
+        weight: 4,
+        opacity: 0.85,
+    }).addTo(eventMap);
+
+    eventMap.fitBounds(routeLine.getBounds(), {
+        padding: [35, 35],
+    });
+}
+
+function drawFallbackLine(baseLat, baseLng, lat, lng) {
+    if (!eventMap) return;
+
+    if (routeLine) {
+        eventMap.removeLayer(routeLine);
+    }
+
+    routeLine = L.polyline([
+        [baseLat, baseLng],
+        [lat, lng],
+    ], {
+        weight: 3,
+        opacity: 0.65,
+        dashArray: '8, 8',
+    }).addTo(eventMap);
+
+    eventMap.fitBounds(routeLine.getBounds(), {
+        padding: [35, 35],
+    });
+}
+
+async function reverseGeocode(lat, lng) {
+    try {
+        const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`;
+        const response = await fetch(url, {
+            headers: {
+                'Accept': 'application/json',
+            },
+        });
+
+        const data = await response.json();
+
+        return data.display_name || null;
+    } catch (error) {
+        console.warn(error);
+        return null;
+    }
+}
+
+function useSelectedPoint() {
+    if (!selectedLocation.lat || !selectedLocation.lng) {
+        showCustomNotification('Silakan pilih titik lokasi di map terlebih dahulu.', 'warning');
+        return;
+    }
+
+    const modalElement = document.getElementById('locationMapModal');
+    const modal = bootstrap.Modal.getInstance(modalElement);
+
+    if (modal) {
+        modal.hide();
+    }
+
+    showCustomNotification('Titik lokasi dan ongkir berhasil dihitung.', 'success');
+}
+
+function useMyCurrentLocation() {
+    if (!navigator.geolocation) {
+        showCustomNotification('Browser Anda tidak mendukung fitur lokasi.', 'warning');
+        return;
+    }
+
+    showCustomNotification('Mengambil lokasi Anda...', 'info');
+
+    navigator.geolocation.getCurrentPosition(
+        async function (position) {
+            await setSelectedPoint(position.coords.latitude, position.coords.longitude, true);
+        },
+        function () {
+            showCustomNotification('Gagal mengambil lokasi. Izinkan akses lokasi pada browser.', 'error');
+        },
+        {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0,
+        }
+    );
+}
+
+function updateSelectedPointText() {
+    const element = document.getElementById('selectedPointText');
+
+    if (!element) return;
+
+    if (!selectedLocation.lat || !selectedLocation.lng) {
+        element.textContent = 'Titik belum dipilih.';
+        return;
+    }
+
+    element.textContent = `Titik dipilih: ${selectedLocation.lat.toFixed(6)}, ${selectedLocation.lng.toFixed(6)}`;
+}
+
+function showShippingInfo() {
+    const shippingInfo = document.getElementById('shippingInfo');
+    const distanceValue = document.getElementById('distanceValue');
+    const shippingFeeValue = document.getElementById('shippingFeeValue');
+    const shippingNote = document.getElementById('shippingNote');
+
+    const distance = Number(selectedLocation.distanceKm || 0);
+    const fee = Number(selectedLocation.shippingFee || 0);
+    const config = getShippingConfig();
+
+    if (shippingInfo) {
+        shippingInfo.style.display = 'block';
+    }
+
+    if (distanceValue) {
+        distanceValue.textContent = distance.toFixed(1);
+    }
+
+    if (shippingFeeValue) {
+        shippingFeeValue.textContent = fee === 0 ? 'GRATIS' : formatRupiah(fee);
+    }
+
+    if (shippingNote) {
+        if (fee === 0) {
+            shippingNote.innerHTML = `
+                <i class="bi bi-info-circle"></i>
+                Gratis ongkir untuk jarak hingga ${config.freeKm} km.
+            `;
+        } else {
+            const chargeableKm = Math.max(0, distance - config.freeKm);
+
+            shippingNote.innerHTML = `
+                <i class="bi bi-info-circle"></i>
+                Jarak ${distance.toFixed(1)} km.
+                Biaya setelah ${config.freeKm} km pertama:
+                ${chargeableKm.toFixed(1)} km x ${formatRupiah(config.ratePerKm)}.
+                ${
+                    selectedLocation.routeFound
+                        ? ''
+                        : '<br><small>Catatan: rute memakai estimasi fallback karena OSRM gagal.</small>'
+                }
+            `;
+        }
+    }
+}
+
+function resetShippingOnly() {
+    selectedLocation.lat = null;
+    selectedLocation.lng = null;
+    selectedLocation.address = null;
+    selectedLocation.distanceKm = 0;
+    selectedLocation.shippingFee = 0;
+    selectedLocation.routeFound = false;
+
+    setInputValue('eventLatitude', '');
+    setInputValue('eventLongitude', '');
+
+    const shippingInfo = document.getElementById('shippingInfo');
+
+    if (shippingInfo) {
+        shippingInfo.style.display = 'none';
+    }
+
+    updateAllTotals();
+}
+
+function calculateShippingFee(distanceKm) {
+    const config = getShippingConfig();
+    const distance = Number(distanceKm || 0);
+
+    if (distance <= config.freeKm) {
+        return 0;
+    }
+
+    const chargeableDistance = distance - config.freeKm;
+    const rawFee = chargeableDistance * config.ratePerKm;
+    const roundTo = Number(config.roundTo || 1000);
+
+    return Math.ceil(rawFee / roundTo) * roundTo;
+}
+
+function getShippingConfig() {
+    return {
+        baseLat: Number(window.DIDIN_SHIPPING_CONFIG?.baseLat || -6.269378),
+        baseLng: Number(window.DIDIN_SHIPPING_CONFIG?.baseLng || 106.476574),
+        baseName: window.DIDIN_SHIPPING_CONFIG?.baseName || 'Didin Tenda Decoration',
+        freeKm: Number(window.DIDIN_SHIPPING_CONFIG?.freeKm || 10),
+        ratePerKm: Number(window.DIDIN_SHIPPING_CONFIG?.ratePerKm || 5000),
+        roundTo: Number(window.DIDIN_SHIPPING_CONFIG?.roundTo || 5000),
+    };
+}
+
+function haversineDistance(lat1, lng1, lat2, lng2) {
+    const earthRadiusKm = 6371;
+
+    const dLat = toRad(lat2 - lat1);
+    const dLng = toRad(lng2 - lng1);
+
+    const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(toRad(lat1)) *
+        Math.cos(toRad(lat2)) *
+        Math.sin(dLng / 2) *
+        Math.sin(dLng / 2);
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    return earthRadiusKm * c;
+}
+
+function toRad(value) {
+    return value * Math.PI / 180;
+}
+
+// ==================== SUBMIT TO LARAVEL ====================
+
+async function submitCustomOrder(checkoutNow = false, buttonElement = null) {
+    const validation = validateCustomForm();
+
+    if (!validation.valid) {
+        showCustomNotification(validation.message, 'warning');
+        return;
+    }
+
+    const payload = buildCustomPayload(checkoutNow);
+
+    setButtonLoading(
+        buttonElement,
+        true,
+        checkoutNow
+            ? '<i class="bi bi-hourglass-split"></i> Memproses Booking...'
+            : '<i class="bi bi-hourglass-split"></i> Menambahkan...'
+    );
+
+    try {
+        const response = await fetch(window.DIDIN_CUSTOM_ROUTES?.addToCart || '/paket-custom/add-to-cart', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': getCsrfToken(),
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+        });
+
+        const data = await safeReadJson(response);
+
+        if (!response.ok || !data.status) {
+            if (response.status === 401) {
+                showCustomNotification(data.message || 'Silakan login terlebih dahulu.', 'warning');
+
+                setTimeout(function () {
+                    window.location.href = data.redirect_url || window.DIDIN_CUSTOM_ROUTES?.login || '/';
+                }, 1000);
+
+                return;
+            }
+
+            showCustomNotification(data.message || 'Gagal memproses paket custom.', 'error');
+            return;
+        }
+
+        showCustomNotification(data.message || 'Paket custom berhasil diproses.', 'success');
+
+        if (data.cart_count !== undefined) {
+            updateCartBadge(data.cart_count);
+        }
+
+        setTimeout(function () {
+            window.location.href = data.redirect_url || (
+                checkoutNow
+                    ? window.DIDIN_CUSTOM_ROUTES?.pesanan
+                    : window.DIDIN_CUSTOM_ROUTES?.cart
+            ) || '/cart';
+        }, 900);
+    } catch (error) {
+        console.error(error);
+        showCustomNotification('Terjadi kesalahan saat mengirim data paket custom.', 'error');
+    } finally {
+        setButtonLoading(buttonElement, false);
+    }
+}
+
+function validateCustomForm() {
+    const selectedCustom = getSelectedCustomItems();
+
+    if (!getInputValue('customerName')) {
+        return {
+            valid: false,
+            message: 'Nama lengkap wajib diisi.',
+        };
+    }
+
+    if (!getInputValue('customerPhone')) {
+        return {
+            valid: false,
+            message: 'Nomor WhatsApp wajib diisi.',
+        };
+    }
+
+    if (!getInputValue('eventDate')) {
+        return {
+            valid: false,
+            message: 'Tanggal acara wajib dipilih.',
+        };
+    }
+
+    if (!getInputValue('eventLocation')) {
+        return {
+            valid: false,
+            message: 'Nama lokasi acara wajib diisi.',
+        };
+    }
+
+    if (!getInputValue('eventFullAddress')) {
+        return {
+            valid: false,
+            message: 'Alamat lengkap acara wajib diisi.',
+        };
+    }
+
+    if (!selectedCustom.length) {
+        return {
+            valid: false,
+            message: 'Pilih minimal satu item dekorasi custom.',
+        };
+    }
+
+    if (!selectedLocation.lat || !selectedLocation.lng || !selectedLocation.distanceKm) {
+        return {
+            valid: false,
+            message: 'Silakan pilih titik lokasi dan cek ongkir terlebih dahulu.',
+        };
+    }
+
+    return {
+        valid: true,
+        message: 'Valid',
+    };
+}
+
+function buildCustomPayload(checkoutNow = false) {
+    return {
+        customer_name: getInputValue('customerName'),
+        customer_phone: getInputValue('customerPhone'),
+        customer_email: '',
+
+        event_date: getInputValue('eventDate'),
+        event_location_name: getInputValue('eventLocation'),
+        event_address: getInputValue('eventFullAddress'),
+
+        event_latitude: getInputValue('eventLatitude') || selectedLocation.lat,
+        event_longitude: getInputValue('eventLongitude') || selectedLocation.lng,
+
+        distance_km: selectedLocation.distanceKm,
+        shipping_fee: selectedLocation.shippingFee,
+
+        custom_items: getSelectedCustomItems().map(item => ({
+            id: item.id,
+            quantity: item.quantity,
+        })),
+
+        addons: getSelectedAddons().map(addon => ({
+            id: addon.id,
+            quantity: addon.quantity,
+        })),
+
+        checkout_now: checkoutNow ? 1 : 0,
+    };
+}
+
+// ==================== HELPERS ====================
+
+function updateCartBadge(value = null) {
+    const badge = document.getElementById('cartCount');
+
+    if (!badge) return;
+
+    if (value !== null) {
+        badge.textContent = value;
+    }
+}
+
+function getInputValue(id) {
+    const element = document.getElementById(id);
+
+    return element ? element.value.trim() : '';
+}
+
+function setInputValue(id, value) {
+    const element = document.getElementById(id);
+
+    if (element) {
+        element.value = value || '';
+    }
+}
+
+function getCsrfToken() {
+    return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+}
+
+function formatRupiah(number) {
+    return 'Rp ' + new Intl.NumberFormat('id-ID').format(Number(number || 0));
+}
+
+function shortLabel(text) {
+    if (!text) return 'Add';
+
+    const words = String(text).split(' ').filter(Boolean);
+
+    if (words.length === 1) {
+        return words[0].substring(0, 4);
+    }
+
+    return words
+        .slice(0, 2)
+        .map(word => word[0])
+        .join('')
+        .toUpperCase();
+}
+
+function getKey(value) {
+    return String(value);
+}
+
+function jsValue(value) {
+    return JSON.stringify(value);
+}
+
+function showCustomNotification(message, type = 'info') {
+    if (typeof window.showNotification === 'function') {
+        window.showNotification(message, type);
+        return;
+    }
+
+    alert(message);
+}
+
+async function safeReadJson(response) {
+    try {
+        return await response.json();
+    } catch (error) {
+        return {
+            status: false,
+            message: 'Response server tidak valid. Kemungkinan Anda belum login atau route belum sesuai.',
+        };
+    }
+}
+
+function setButtonLoading(buttonElement, isLoading, loadingHtml = null) {
+    if (!buttonElement) return;
+
+    if (isLoading) {
+        buttonElement.dataset.originalHtml = buttonElement.innerHTML;
+        buttonElement.disabled = true;
+
+        if (loadingHtml) {
+            buttonElement.innerHTML = loadingHtml;
+        }
+
+        return;
+    }
+
+    buttonElement.disabled = false;
+
+    if (buttonElement.dataset.originalHtml) {
+        buttonElement.innerHTML = buttonElement.dataset.originalHtml;
+        delete buttonElement.dataset.originalHtml;
+    }
+}
+
+function escapeHtml(value) {
+    if (value === null || value === undefined) {
+        return '';
+    }
+
+    return String(value)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+}
+
+function escapeAttribute(value) {
+    return escapeHtml(value).replaceAll('`', '&#096;');
 }

@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
     <title>Paket Custom - Didin Tenda Decoration</title>
-    
+
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     
@@ -13,7 +15,10 @@
     
     <!-- AOS Animation -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    
+
+    <!-- Leaflet Map CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
     <link rel="stylesheet" href="{{ asset('css/paket-custom.css') }}">
@@ -37,24 +42,28 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('frontend.index') }}#beranda">Beranda</a>
                     </li>
+
                     <li class="nav-item">
                         <a class="nav-link active" href="{{ route('frontend.index') }}#paket">Paket</a>
                     </li>
+
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('frontend.index') }}#galeri">Galeri</a>
                     </li>
+
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('frontend.index') }}#testimoni">Testimoni</a>
                     </li>
+
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('frontend.index') }}#kontak">Kontak</a>
                     </li>
                 </ul>
 
-                <div class="d-flex ms-lg-3">
+                <div class="d-flex ms-lg-3 align-items-center">
                     <a href="{{ route('frontend.cart') }}" class="user-menu-link" data-bs-toggle="tooltip" title="Keranjang Booking">
                         <i class="bi bi-cart3"></i>
-                        <span class="menu-badge" id="cartCount">0</span>
+                        <span class="menu-badge" id="cartCount">{{ $cartCount ?? 0 }}</span>
                     </a>
 
                     <a href="{{ route('frontend.pesanan') }}" class="user-menu-link" data-bs-toggle="tooltip" title="Pesanan Saya">
@@ -68,6 +77,12 @@
                     <a href="{{ route('frontend.profile') }}" class="user-menu-link" data-bs-toggle="tooltip" title="Akun Saya">
                         <i class="bi bi-person-circle"></i>
                     </a>
+
+                    @auth
+                        <span class="text-white small ms-2 d-none d-lg-inline">
+                            {{ auth()->user()->name }}
+                        </span>
+                    @endauth
                 </div>
             </div>
         </div>
@@ -82,12 +97,38 @@
                     <li class="breadcrumb-item">
                         <a href="{{ route('frontend.index') }}">Beranda</a>
                     </li>
+
                     <li class="breadcrumb-item">
                         <a href="{{ route('frontend.index') }}#paket">Paket</a>
                     </li>
+
                     <li class="breadcrumb-item active">Paket Custom</li>
                 </ol>
             </nav>
+
+            @if(session('success'))
+                <div class="alert alert-success mb-4">
+                    {{ session('success') }}
+                </div>
+            @endif
+
+            @if(session('error'))
+                <div class="alert alert-danger mb-4">
+                    {{ session('error') }}
+                </div>
+            @endif
+
+            @if($errors->any())
+                <div class="alert alert-danger mb-4">
+                    <strong>Terjadi kesalahan:</strong>
+
+                    <ul class="mb-0 mt-2">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
 
             <div class="row g-4">
                 <!-- KOLOM KIRI: Form Custom Items -->
@@ -95,165 +136,164 @@
                     <div class="custom-form">
                         <h3><i class="bi bi-pencil-square"></i> Buat Paket Custom</h3>
                         <p class="text-muted mb-4">Pilih item dekorasi sesuai kebutuhan acara Anda</p>
-                        
+
                         <!-- ===== DATA DIRI SECTION ===== -->
                         <div class="form-section">
                             <h5><i class="bi bi-person"></i> Data Diri</h5>
 
                             <div class="row g-3">
                                 <div class="col-md-6">
-                                    <label class="form-label">Nama Lengkap <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="customerName" placeholder="Nama lengkap Anda">
+                                    <label class="form-label">
+                                        Nama Lengkap <span class="text-danger">*</span>
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        id="customerName"
+                                        placeholder="Nama lengkap Anda"
+                                        value="{{ optional(auth()->user())->name ?? '' }}"
+                                    >
                                 </div>
 
                                 <div class="col-md-6">
-                                    <label class="form-label">Nomor WhatsApp <span class="text-danger">*</span></label>
-                                    <input type="tel" class="form-control" id="customerPhone" placeholder="0812-3456-7890">
+                                    <label class="form-label">
+                                        Nomor WhatsApp <span class="text-danger">*</span>
+                                    </label>
+
+                                    <input
+                                        type="tel"
+                                        class="form-control"
+                                        id="customerPhone"
+                                        placeholder="0812-3456-7890"
+                                        value="{{ optional(auth()->user())->phone ?? '' }}"
+                                    >
                                 </div>
 
                                 <div class="col-md-6">
-                                    <label class="form-label">Tanggal Acara <span class="text-danger">*</span></label>
-                                    <input type="date" class="form-control" id="eventDate" min="">
+                                    <label class="form-label">
+                                        Tanggal Acara <span class="text-danger">*</span>
+                                    </label>
+
+                                    <input type="date" class="form-control" id="eventDate">
                                 </div>
 
                                 <div class="col-md-6">
-                                    <label class="form-label">Nama Lokasi Acara <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="eventLocation" placeholder="Contoh: Gedung Serbaguna">
+                                    <label class="form-label">
+                                        Nama Lokasi Acara <span class="text-danger">*</span>
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        id="eventLocation"
+                                        placeholder="Contoh: Gedung Serbaguna"
+                                    >
                                 </div>
 
                                 <div class="col-12">
-                                    <label class="form-label">Alamat Lengkap Acara <span class="text-danger">*</span></label>
-                                    <textarea class="form-control" id="eventFullAddress" rows="2" placeholder="Masukkan alamat lengkap acara (Jalan, RT/RW, Kelurahan, Kecamatan, Kota)"></textarea>
-                                    <small class="text-muted">Alamat akan digunakan untuk menghitung biaya pengiriman</small>
+                                    <label class="form-label">
+                                        Alamat Lengkap Acara <span class="text-danger">*</span>
+                                    </label>
+
+                                    <textarea
+                                        class="form-control"
+                                        id="eventFullAddress"
+                                        rows="2"
+                                        placeholder="Masukkan alamat lengkap acara (Jalan, RT/RW, Kelurahan, Kecamatan, Kota)"
+                                    ></textarea>
+
+                                    <small class="text-muted">
+                                        Alamat akan digunakan untuk menghitung biaya pengiriman
+                                    </small>
                                 </div>
+
+                                <input type="hidden" id="eventLatitude">
+                                <input type="hidden" id="eventLongitude">
                             </div>
                         </div>
 
                         <!-- ===== ITEM CUSTOM ===== -->
                         <div class="form-section">
                             <h5><i class="bi bi-grid"></i> Pilih Item Dekorasi</h5>
-                            
-                            <!-- Item 1: Tenda Dekorasi -->
-                            <div class="custom-item-row">
-                                <div class="custom-item-img">
-                                    <img 
-                                        src="{{ asset('assets/images/custom/tenda.png') }}" 
-                                        alt="Tenda Dekorasi"
-                                        onerror="this.src='https://placehold.co/60x60/2c7be5/white?text=Tenda'"
-                                    >
-                                </div>
 
-                                <div class="custom-item-detail">
-                                    <h6>Tenda Dekorasi</h6>
-                                    <p class="price">Rp 65.000 / meter</p>
-                                </div>
+                            @forelse($customItems ?? [] as $item)
+                                <div class="custom-item-row" data-custom-id="{{ $item->id }}">
+                                    <div class="custom-item-img">
+                                        <img
+                                            src="{{ $item->image ? asset($item->image) : 'https://placehold.co/60x60/2c7be5/white?text=Item' }}"
+                                            alt="{{ $item->name }}"
+                                            onerror="this.src='https://placehold.co/60x60/2c7be5/white?text=Item'"
+                                        >
+                                    </div>
 
-                                <div class="custom-item-qty">
-                                    <button type="button" class="qty-btn-sm minus" onclick="updateCustomQty('tenda', -1)">-</button>
-                                    <input type="number" id="qty-tenda" class="qty-input-sm" value="0" min="0" step="1" onchange="updateCustomQtyDirect('tenda')">
-                                    <button type="button" class="qty-btn-sm plus" onclick="updateCustomQty('tenda', 1)">+</button>
-                                    <span class="item-total-sm" id="total-tenda">Rp 0</span>
-                                </div>
-                            </div>
+                                    <div class="custom-item-detail">
+                                        <h6>{{ $item->name }}</h6>
 
-                            <!-- Item 2: Panggung Rigging -->
-                            <div class="custom-item-row">
-                                <div class="custom-item-img">
-                                    <img 
-                                        src="{{ asset('assets/images/custom/panggung.png') }}" 
-                                        alt="Panggung Rigging"
-                                        onerror="this.src='https://placehold.co/60x60/e67e22/white?text=Panggung'"
-                                    >
-                                </div>
+                                        <p class="price">
+                                            Rp {{ number_format((int) $item->price, 0, ',', '.') }} / {{ $item->unit }}
+                                        </p>
 
-                                <div class="custom-item-detail">
-                                    <h6>Panggung Rigging</h6>
-                                    <p class="price">Rp 50.000 / meter (maks. 64m)</p>
-                                </div>
+                                        @if($item->description)
+                                            <small class="text-muted d-block">
+                                                {{ $item->description }}
+                                            </small>
+                                        @endif
 
-                                <div class="custom-item-qty">
-                                    <button type="button" class="qty-btn-sm minus" onclick="updateCustomQty('panggung', -1)">-</button>
-                                    <input type="number" id="qty-panggung" class="qty-input-sm" value="0" min="0" max="64" step="1" onchange="updateCustomQtyDirect('panggung')">
-                                    <button type="button" class="qty-btn-sm plus" onclick="updateCustomQty('panggung', 1)">+</button>
-                                    <span class="item-total-sm" id="total-panggung">Rp 0</span>
-                                </div>
-                            </div>
+                                        @if($item->max_quantity)
+                                            <small class="text-muted d-block">
+                                                Maks. {{ $item->max_quantity }} {{ $item->unit }}
+                                            </small>
+                                        @endif
+                                    </div>
 
-                            <!-- Item 3: Meja Kotak Hajatan -->
-                            <div class="custom-item-row">
-                                <div class="custom-item-img">
-                                    <img 
-                                        src="{{ asset('assets/images/custom/meja-kotak.png') }}" 
-                                        alt="Meja Kotak Hajatan"
-                                        onerror="this.src='https://placehold.co/60x60/27ae60/white?text=Meja+Kotak'"
-                                    >
-                                </div>
+                                    <div class="custom-item-qty">
+                                        <button
+                                            type="button"
+                                            class="qty-btn-sm minus"
+                                            onclick="updateCustomQty({{ $item->id }}, -1)"
+                                        >
+                                            -
+                                        </button>
 
-                                <div class="custom-item-detail">
-                                    <h6>Meja Kotak Hajatan</h6>
-                                    <p class="price">Rp 30.000 / meter</p>
-                                </div>
+                                        <input
+                                            type="number"
+                                            id="qty-custom-{{ $item->id }}"
+                                            class="qty-input-sm"
+                                            value="0"
+                                            min="0"
+                                            @if($item->max_quantity) max="{{ $item->max_quantity }}" @endif
+                                            step="1"
+                                            onchange="updateCustomQtyDirect({{ $item->id }})"
+                                        >
 
-                                <div class="custom-item-qty">
-                                    <button type="button" class="qty-btn-sm minus" onclick="updateCustomQty('mejakotak', -1)">-</button>
-                                    <input type="number" id="qty-mejakotak" class="qty-input-sm" value="0" min="0" step="1" onchange="updateCustomQtyDirect('mejakotak')">
-                                    <button type="button" class="qty-btn-sm plus" onclick="updateCustomQty('mejakotak', 1)">+</button>
-                                    <span class="item-total-sm" id="total-mejakotak">Rp 0</span>
-                                </div>
-                            </div>
+                                        <button
+                                            type="button"
+                                            class="qty-btn-sm plus"
+                                            onclick="updateCustomQty({{ $item->id }}, 1)"
+                                        >
+                                            +
+                                        </button>
 
-                            <!-- Item 4: Meja Bulat -->
-                            <div class="custom-item-row">
-                                <div class="custom-item-img">
-                                    <img 
-                                        src="{{ asset('assets/images/custom/meja-bulat.png') }}" 
-                                        alt="Meja Bulat"
-                                        onerror="this.src='https://placehold.co/60x60/8e44ad/white?text=Meja+Bulat'"
-                                    >
+                                        <span class="item-total-sm" id="total-custom-{{ $item->id }}">
+                                            Rp 0
+                                        </span>
+                                    </div>
                                 </div>
-
-                                <div class="custom-item-detail">
-                                    <h6>Meja Bulat</h6>
-                                    <p class="price">Rp 50.000 / pcs</p>
+                            @empty
+                                <div class="alert alert-warning mb-0">
+                                    Item custom belum tersedia. Silakan tambahkan data di tabel
+                                    <strong>custom_items</strong>.
                                 </div>
-
-                                <div class="custom-item-qty">
-                                    <button type="button" class="qty-btn-sm minus" onclick="updateCustomQty('mejabulat', -1)">-</button>
-                                    <input type="number" id="qty-mejabulat" class="qty-input-sm" value="0" min="0" step="1" onchange="updateCustomQtyDirect('mejabulat')">
-                                    <button type="button" class="qty-btn-sm plus" onclick="updateCustomQty('mejabulat', 1)">+</button>
-                                    <span class="item-total-sm" id="total-mejabulat">Rp 0</span>
-                                </div>
-                            </div>
-
-                            <!-- Item 5: Sound System -->
-                            <div class="custom-item-row">
-                                <div class="custom-item-img">
-                                    <img 
-                                        src="{{ asset('assets/images/custom/soundsystem.png') }}" 
-                                        alt="Sound System"
-                                        onerror="this.src='https://placehold.co/60x60/c0392b/white?text=Sound'"
-                                    >
-                                </div>
-
-                                <div class="custom-item-detail">
-                                    <h6>Sound System</h6>
-                                    <p class="price">Rp 3.000.000 / set</p>
-                                </div>
-
-                                <div class="custom-item-qty">
-                                    <button type="button" class="qty-btn-sm minus" onclick="updateCustomQty('soundsystem', -1)">-</button>
-                                    <input type="number" id="qty-soundsystem" class="qty-input-sm" value="0" min="0" step="1" onchange="updateCustomQtyDirect('soundsystem')">
-                                    <button type="button" class="qty-btn-sm plus" onclick="updateCustomQty('soundsystem', 1)">+</button>
-                                    <span class="item-total-sm" id="total-soundsystem">Rp 0</span>
-                                </div>
-                            </div>
+                            @endforelse
                         </div>
 
                         <!-- ===== ADD-ONS SECTION ===== -->
                         <div class="form-section">
                             <h5><i class="bi bi-plus-circle"></i> Tambahan (Add-ons)</h5>
+
                             <div class="row g-2" id="addonsContainer">
-                                <!-- Add-ons akan diisi JS -->
+                                <!-- Add-ons akan diisi oleh JavaScript -->
                             </div>
                         </div>
 
@@ -274,7 +314,7 @@
                 <div class="col-lg-5" data-aos="fade-left">
                     <div class="custom-summary">
                         <h4><i class="bi bi-receipt"></i> Ringkasan Pesanan</h4>
-                        
+
                         <!-- Daftar Item Custom -->
                         <div class="summary-items" id="summaryItems">
                             <p class="text-muted small">Belum ada item dipilih</p>
@@ -302,7 +342,7 @@
                             </div>
 
                             <button type="button" class="btn btn-outline-primary w-100 mt-3" id="checkShippingBtn">
-                                <i class="bi bi-geo-alt"></i> Cek Jarak & Ongkir
+                                <i class="bi bi-geo-alt"></i> Pilih Titik Lokasi & Cek Ongkir
                             </button>
                         </div>
 
@@ -329,108 +369,230 @@
                 </div>
             </div>
         </div>
-    </section>
+   </section>
 
-   <!-- ==================== FOOTER ==================== -->
-<footer id="kontak" class="footer-section">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-4 mb-4 mb-lg-0">
-                <h4>Didin Tenda Decoration</h4>
+    <!-- ==================== FOOTER ==================== -->
+    <footer id="kontak" class="footer-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 mb-4 mb-lg-0">
+                    <h4>Didin Tenda Decoration</h4>
 
-                <p class="footer-address">
-                    <i class="bi bi-geo-alt-fill"></i>
-                    Jl. Ki Mas Laeng Kp. Katomas, Tigaraksa, Kab. Tangerang, Banten
-                </p>
+                    <p class="footer-address">
+                        <i class="bi bi-geo-alt-fill"></i>
+                        Jl. Ki Mas Laeng Kp. Katomas, Tigaraksa, Kab. Tangerang, Banten
+                    </p>
 
-                <p>
-                    <i class="bi bi-telephone-fill"></i>
-                    <a href="tel:088289258764">0882-8925-8764</a>
-                </p>
+                    <p>
+                        <i class="bi bi-telephone-fill"></i>
+                        <a href="tel:088289258764">0882-8925-8764</a>
+                    </p>
 
-                <p>
-                    <i class="bi bi-envelope-fill"></i>
-                    <a href="mailto:info@didintenda.com">info@didintenda.com</a>
-                </p>
+                    <p>
+                        <i class="bi bi-envelope-fill"></i>
+                        <a href="mailto:info@didintenda.com">info@didintenda.com</a>
+                    </p>
+                </div>
+
+                <div class="col-lg-2 col-md-6 mb-4 mb-md-0">
+                    <h5>Menu Cepat</h5>
+
+                    <ul class="footer-links">
+                        <li>
+                            <a href="{{ route('frontend.index') }}#beranda">Beranda</a>
+                        </li>
+
+                        <li>
+                            <a href="{{ route('frontend.index') }}#paket">Paket</a>
+                        </li>
+
+                        <li>
+                            <a href="{{ route('frontend.index') }}#galeri">Galeri</a>
+                        </li>
+
+                        <li>
+                            <a href="{{ route('frontend.cart') }}">Keranjang</a>
+                        </li>
+
+                        <li>
+                            <a href="{{ route('frontend.pesanan') }}">Pesanan</a>
+                        </li>
+
+                        <li>
+                            <a href="{{ route('frontend.history') }}">History</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-3 col-md-6 mb-4 mb-md-0">
+                    <h5>Layanan</h5>
+
+                    <ul class="footer-links">
+                        <li>
+                            <a href="{{ route('frontend.index') }}#paket">Sewa Tenda</a>
+                        </li>
+
+                        <li>
+                            <a href="{{ route('frontend.index') }}#paket">Dekorasi Pernikahan</a>
+                        </li>
+
+                        <li>
+                            <a href="{{ route('frontend.index') }}#paket">Sewa Kursi</a>
+                        </li>
+
+                        <li>
+                            <a href="{{ route('frontend.index') }}#paket">Rigging & Lighting</a>
+                        </li>
+
+                        <li>
+                            <a href="{{ route('frontend.paket-custom') }}">Paket Custom</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-3">
+                    <h5>Metode Pembayaran</h5>
+
+                    <div class="payment-methods">
+                        <img src="https://placehold.co/60x40/2c3e50/white?text=BCA" alt="BCA" class="payment-logo">
+                        <img src="https://placehold.co/60x40/2c3e50/white?text=QRIS" alt="QRIS" class="payment-logo">
+                        <img src="https://placehold.co/60x40/2c3e50/white?text=GoPay" alt="GoPay" class="payment-logo">
+                    </div>
+                </div>
             </div>
 
-            <div class="col-lg-2 col-md-6 mb-4 mb-md-0">
-                <h5>Menu Cepat</h5>
-                <ul class="footer-links">
-                    <li>
-                        <a href="{{ route('frontend.index') }}#beranda">Beranda</a>
-                    </li>
-                    <li>
-                        <a href="{{ route('frontend.index') }}#paket">Paket</a>
-                    </li>
-                    <li>
-                        <a href="{{ route('frontend.index') }}#galeri">Galeri</a>
-                    </li>
-                    <li>
-                        <a href="{{ route('frontend.index') }}#kontak">Kontak</a>
-                    </li>
-                    <li>
-                        <a href="{{ route('frontend.cart') }}">Keranjang</a>
-                    </li>
-                    <li>
-                        <a href="{{ route('frontend.pesanan') }}">Pesanan</a>
-                    </li>
-                    <li>
-                        <a href="{{ route('frontend.history') }}">History</a>
-                    </li>
-                </ul>
-            </div>
+            <hr class="footer-hr">
 
-            <div class="col-lg-3 col-md-6 mb-4 mb-md-0">
-                <h5>Layanan</h5>
-                <ul class="footer-links">
-                    <li>
-                        <a href="{{ route('frontend.index') }}#paket">Sewa Tenda</a>
-                    </li>
-                    <li>
-                        <a href="{{ route('frontend.index') }}#paket">Dekorasi Pernikahan</a>
-                    </li>
-                    <li>
-                        <a href="{{ route('frontend.index') }}#paket">Sewa Kursi</a>
-                    </li>
-                    <li>
-                        <a href="{{ route('frontend.index') }}#paket">Rigging & Lighting</a>
-                    </li>
-                    <li>
-                        <a href="{{ route('frontend.paket-custom') }}">Paket Custom</a>
-                    </li>
-                </ul>
-            </div>
+            <div class="row">
+                <div class="col-md-6 text-center text-md-start">
+                    <p class="copyright">
+                        © 2026 Didin Tenda Decoration. All rights reserved.
+                    </p>
+                </div>
 
-            <div class="col-lg-3">
-                <h5>Metode Pembayaran</h5>
-
-                <div class="payment-methods">
-                    <img src="https://placehold.co/60x40/2c3e50/white?text=BCA" alt="BCA" class="payment-logo">
-                    <img src="https://placehold.co/60x40/2c3e50/white?text=QRIS" alt="QRIS" class="payment-logo">
-                    <img src="https://placehold.co/60x40/2c3e50/white?text=GoPay" alt="GoPay" class="payment-logo">
+                <div class="col-md-6 text-center text-md-end">
+                    <p class="developer">
+                        Developed for Tugas Akhir - Muhamad Darlan (20220803005)
+                    </p>
                 </div>
             </div>
         </div>
+    </footer>
 
-        <hr class="footer-hr">
+    <!-- ==================== MODAL PILIH TITIK LOKASI ==================== -->
+    <div class="modal fade" id="locationMapModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content location-map-modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-geo-alt-fill text-primary"></i> Pilih Titik Lokasi Acara
+                    </h5>
 
-        <div class="row">
-            <div class="col-md-6 text-center text-md-start">
-                <p class="copyright">© 2026 Didin Tenda Decoration. All rights reserved.</p>
-            </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
 
-            <div class="col-md-6 text-center text-md-end">
-                <p class="developer">Developed for Tugas Akhir - Muhamad Darlan (20220803005)</p>
+                <div class="modal-body">
+                    <div class="alert alert-info small mb-3">
+                        Cari alamat atau klik titik lokasi acara pada map.
+                        Setelah titik dipilih, alamat akan otomatis masuk ke form.
+                    </div>
+
+                    <div class="input-group mb-3">
+                        <input
+                            type="text"
+                            class="form-control"
+                            id="mapSearchInput"
+                            placeholder="Cari lokasi, contoh: Universitas Esa Unggul Tangerang"
+                        >
+
+                        <button class="btn btn-primary" type="button" id="mapSearchBtn">
+                            <i class="bi bi-search"></i> Cari
+                        </button>
+                    </div>
+
+                    <div id="mapSearchResults" class="list-group mb-3" style="display: none;"></div>
+
+                    <div id="eventMap" style="height: 420px; border-radius: 14px; overflow: hidden;"></div>
+
+                    <p class="text-muted small mt-2 mb-0" id="selectedPointText">
+                        Titik belum dipilih.
+                    </p>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" id="useMyLocationBtn">
+                        <i class="bi bi-crosshair"></i> Gunakan Lokasi Saya
+                    </button>
+
+                    <button type="button" class="btn btn-primary" id="useSelectedPointBtn">
+                        <i class="bi bi-check-circle"></i> Gunakan Titik Ini
+                    </button>
+                </div>
             </div>
         </div>
     </div>
-</footer>
 
     <!-- BACK TO TOP -->
     <button id="backToTop" class="back-to-top" title="Kembali ke atas">
         <i class="bi bi-arrow-up"></i>
     </button>
+
+    <!-- ==================== DATA DARI LARAVEL ==================== -->
+    @php
+        $customItemsForJs = ($customItems ?? collect())->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'name' => $item->name,
+                'slug' => $item->slug,
+                'description' => $item->description,
+                'price' => (int) $item->price,
+                'unit' => $item->unit,
+                'minQuantity' => (int) $item->min_quantity,
+                'maxQuantity' => $item->max_quantity ? (int) $item->max_quantity : null,
+                'image' => $item->image ? asset($item->image) : null,
+                'icon' => $item->icon,
+            ];
+        })->values();
+
+        $addonsForJs = ($addons ?? collect())->map(function ($addon) {
+            return [
+                'id' => $addon->id,
+                'name' => $addon->name,
+                'slug' => $addon->slug ?? null,
+                'description' => $addon->description ?? $addon->detail ?? null,
+                'detail' => $addon->detail ?? $addon->description ?? null,
+                'price' => (int) $addon->price,
+                'unit' => $addon->unit ?? 'pcs',
+                'stock' => isset($addon->stock) ? (int) $addon->stock : null,
+                'maxQuantity' => isset($addon->max_quantity) && $addon->max_quantity ? (int) $addon->max_quantity : null,
+                'image' => isset($addon->image) && $addon->image ? asset($addon->image) : null,
+                'icon' => $addon->icon ?? null,
+            ];
+        })->values();
+
+        $customRoutesForJs = [
+            'addToCart' => route('frontend.custom.add-to-cart'),
+            'cart' => route('frontend.cart'),
+            'pesanan' => route('frontend.pesanan'),
+            'login' => route('frontend.index'),
+        ];
+
+        $shippingConfigForJs = [
+            'baseLat' => -6.269378,
+            'baseLng' => 106.476574,
+            'baseName' => 'Didin Tenda Decoration',
+            'freeKm' => 10,
+            'ratePerKm' => 5000,
+            'roundTo' => 5000,
+        ];
+    @endphp
+
+    <script>
+        window.DIDIN_CUSTOM_ITEMS = @json($customItemsForJs);
+        window.DIDIN_ADDONS = @json($addonsForJs);
+        window.DIDIN_CUSTOM_ROUTES = @json($customRoutesForJs);
+        window.DIDIN_SHIPPING_CONFIG = @json($shippingConfigForJs);
+    </script>
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
@@ -438,8 +600,11 @@
     <!-- AOS Animation JS -->
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 
+    <!-- Leaflet Map JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
     <!-- Custom JS -->
-    <script src="{{ asset('js/script.js') }}"></script>
-    <script src="{{ asset('js/paket-custom.js') }}"></script>
+    <script src="{{ asset('js/script.js') }}?v={{ time() }}"></script>
+    <script src="{{ asset('js/paket-custom.js') }}?v={{ time() }}"></script>
 </body>
 </html>
