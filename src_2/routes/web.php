@@ -143,10 +143,26 @@ Route::group([
     Route::post('homes/ckmedia', 'HomefController@storeCKEditorImages')->name('homes.storeCKEditorImages');
     Route::resource('homes', 'HomefController');
 
-    Route::delete('tests/destroy', 'TestController@massDestroy')->name('tests.massDestroy');
-    Route::post('tests/media', 'TestController@storeMedia')->name('tests.storeMedia');
-    Route::post('tests/ckmedia', 'TestController@storeCKEditorImages')->name('tests.storeCKEditorImages');
-    Route::resource('tests', 'TestController');
+    // Route::delete('packages/destroy', 'PackagesController@massDestroy')->name('packages.massDestroy');
+    // Route::post('packages/media', 'PackagesController@storeMedia')->name('packages.storeMedia');
+    // Route::post('packages/ckmedia', 'PackagesController@storeCKEditorImages')->name('packages.storeCKEditorImages');
+    // Route::resource('packages', 'PackagesController');
+
+    Route::delete('packages/destroy', 'PackagesController@massDestroy')->name('packages.massDestroy');
+    Route::resource('packages', 'PackagesController');
+
+    Route::delete('package-items/destroy', 'PackageItemsController@massDestroy')->name('package-items.massDestroy');
+    Route::resource('package-items', 'PackageItemsController')->parameters([
+        'package-items' => 'packageItem',
+    ]);
+    
+    Route::delete('addons/destroy', 'AddonController@massDestroy')->name('addons.massDestroy');
+    Route::resource('addons', 'AddonController');
+
+    Route::delete('custom-items/destroy', 'CustomItemController@massDestroy')->name('custom-items.massDestroy');
+    Route::resource('custom-items', 'CustomItemController')->parameters([
+        'custom-items' => 'customItem',
+]);
 });
 
 /*

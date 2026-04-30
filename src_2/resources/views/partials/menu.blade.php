@@ -57,28 +57,70 @@
                 </ul>
             </li>
         @endcan
-        @can('cars_access')
-            <li class="c-sidebar-nav-dropdown  {{ request()->is("admin/products*") ? "c-show" : "" }}">
+        @can('package_access')
+            <li class="c-sidebar-nav-dropdown  {{ request()->is("admin/packages*") ? "c-show" : "" }} {{ request()->is("admin/package-items*") ? "c-show" : "" }}">
                 <a class="c-sidebar-nav-dropdown-toggle" href="#">
-                    <i class="fas fa-car c-sidebar-nav-icon">
-                    
+                    <i class="fas fa-box c-sidebar-nav-icon">
+
                     </i>
-                    {{ trans('cruds.cars.title') }}
+                    PACKAGE MANAGEMENT
                 </a>
                 <ul class="c-sidebar-nav-dropdown-items">
-                    @can('product_access')
+                    @can('package_access')
                         <li class="c-sidebar-nav-item">
-                            <a href="{{ route("admin.products.index") }}" class="c-sidebar-nav-link {{ request()->is("admin/products") || request()->is("admin/products/*") ? "c-active" : "" }}">
-                                <i class="fas fa-car-side c-sidebar-nav-icon">
+                            <a href="{{ route("admin.packages.index") }}" class="c-sidebar-nav-link {{ request()->is("admin/packages") || request()->is("admin/packages/*") ? "c-active" : "" }}">
+                                <i class="fas fa-box-open c-sidebar-nav-icon">
 
                                 </i>
-                                {{ trans('cruds.product.title') }}
+                                MANAJEMEN PAKET
+                            </a>
+                        </li>
+                    @endcan
+                    @can('package_item_access')
+                        <li class="c-sidebar-nav-item">
+                            <a href="{{ route("admin.package-items.index") }}" class="c-sidebar-nav-link {{ request()->is("admin/package-items") || request()->is("admin/package-items/*") ? "c-active" : "" }}">
+                                <i class="fas fa-list c-sidebar-nav-icon"></i>
+                                ITEM PAKET
                             </a>
                         </li>
                     @endcan
                 </ul>
             </li>
         @endcan
+        @can('addon_access')
+        <li class="c-sidebar-nav-dropdown {{ request()->is("admin/addons*") ? "c-show" : "" }}">
+            <a class="c-sidebar-nav-dropdown-toggle" href="#">
+                <i class="fas fa-plus-square c-sidebar-nav-icon"></i>
+                ADDON MANAGEMENT
+            </a>
+
+            <ul class="c-sidebar-nav-dropdown-items">
+                <li class="c-sidebar-nav-item">
+                    <a href="{{ route("admin.addons.index") }}" class="c-sidebar-nav-link {{ request()->is("admin/addons") || request()->is("admin/addons/*") ? "c-active" : "" }}">
+                        <i class="fas fa-puzzle-piece c-sidebar-nav-icon"></i>
+                        MANAJEMEN ADDON
+                    </a>
+                </li>
+            </ul>
+        </li>
+    @endcan
+    @can('custom_item_access')
+    <li class="c-sidebar-nav-dropdown {{ request()->is("admin/custom-items*") ? "c-show" : "" }}">
+        <a class="c-sidebar-nav-dropdown-toggle" href="#">
+            <i class="fas fa-th-large c-sidebar-nav-icon"></i>
+            CUSTOM ITEM<br>MANAGEMENT
+        </a>
+
+        <ul class="c-sidebar-nav-dropdown-items">
+            <li class="c-sidebar-nav-item">
+                <a href="{{ route("admin.custom-items.index") }}" class="c-sidebar-nav-link {{ request()->is("admin/custom-items") || request()->is("admin/custom-items/*") ? "c-active" : "" }}">
+                    <i class="fas fa-cubes c-sidebar-nav-icon"></i>
+                    MANAJEMEN CUSTOM ITEM
+                </a>
+            </li>
+        </ul>
+    </li>
+@endcan
         @if(file_exists(app_path('Http/Controllers/Auth/ChangePasswordController.php')))
             @can('profile_password_edit')
                 <li class="c-sidebar-nav-item">
