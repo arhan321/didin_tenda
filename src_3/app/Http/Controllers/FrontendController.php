@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Addon;
 use App\Models\Order;
 use App\Models\Review;
+use App\Models\Beranda;
 use App\Models\Package;
 use App\Models\CustomItem;
 use Illuminate\Http\Request;
@@ -550,4 +551,9 @@ public function paketCustom()
         'cartCount'
     ));
 }
+
+    public function getberanda(){
+        $beranda = Beranda::all();
+        return view ('frontend.index', compact('beranda'));
+    }
 }

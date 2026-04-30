@@ -158,6 +158,25 @@
                 </ul>
             </li>
         @endif
+        @if(Gate::allows('beranda_access'))
+            <li class="c-sidebar-nav-dropdown {{ request()->is("admin/berandas*") ? "c-show" : "" }}">
+                <a class="c-sidebar-nav-dropdown-toggle" href="#">
+                    <i class="fas fa-desktop c-sidebar-nav-icon"></i>
+                    FRONTEND MANAGEMENT
+                </a>
+
+                <ul class="c-sidebar-nav-dropdown-items">
+                    @can('beranda_access')
+                        <li class="c-sidebar-nav-item">
+                            <a href="{{ route("admin.berandas.index") }}" class="c-sidebar-nav-link {{ request()->is("admin/berandas") || request()->is("admin/berandas/*") ? "c-active" : "" }}">
+                                <i class="fas fa-home c-sidebar-nav-icon"></i>
+                                BERANDA
+                            </a>
+                        </li>
+                    @endcan
+                </ul>
+            </li>
+        @endif
         @if(file_exists(app_path('Http/Controllers/Auth/ChangePasswordController.php')))
             @can('profile_password_edit')
                 <li class="c-sidebar-nav-item">

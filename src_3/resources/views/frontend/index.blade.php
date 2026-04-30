@@ -97,24 +97,83 @@
     </div>
 @endif
 
+@php
+    $beranda = \App\Models\Beranda::latest()->first();
+
+    $title1 = $beranda->title_1 ?? 'Sejak 1996 • Terpercaya';
+    $title2 = $beranda->title_2 ?? 'Sewakan Tenda & Dekorasi Impian untuk Acara Istimewa Anda';
+    $deskripsi = $beranda->deskripsi ?? 'Booking online 24/7, cek ketersediaan real-time, dan pembayaran aman via berbagai metode. Wujudkan acara impian bersama Didin Tenda Decoration.';
+
+    if ($beranda && $beranda->image) {
+        if (str_starts_with($beranda->image, 'http://') || str_starts_with($beranda->image, 'https://')) {
+            $berandaImage = $beranda->image;
+        } elseif (str_starts_with($beranda->image, 'storage/')) {
+            $berandaImage = asset($beranda->image);
+        } elseif (str_starts_with($beranda->image, 'assets/')) {
+            $berandaImage = asset($beranda->image);
+        } else {
+            $berandaImage = asset('storage/' . $beranda->image);
+        }
+    } else {
+        $berandaImage = asset('assets/images/AWAL.png');
+    }
+
+    $title2Formatted = str_replace(
+        'Impian',
+        '<span class="text-primary">Impian</span>',
+        e($title2)
+    );
+@endphp
+
 <section id="beranda" class="hero-section">
     <div class="container h-100">
         <div class="row h-100 align-items-center">
             <div class="col-lg-6" data-aos="fade-right">
-                <h5 class="hero-subtitle">Sejak 1996 • Terpercaya</h5>
-                <h1 class="hero-title">Sewakan Tenda & Dekorasi <span class="text-primary">Impian</span> untuk Acara Istimewa Anda</h1>
-                <p class="hero-description">Booking online 24/7, cek ketersediaan real-time, dan pembayaran aman via berbagai metode. Wujudkan acara impian bersama Didin Tenda Decoration.</p>
+                <h5 class="hero-subtitle">
+                    {{ $title1 }}
+                </h5>
+
+                <h1 class="hero-title">
+                    {!! $title2Formatted !!}
+                </h1>
+
+                <p class="hero-description">
+                    {{ $deskripsi }}
+                </p>
+
                 <div class="hero-buttons">
-                    <a href="{{ route('frontend.index') }}#paket" class="btn btn-primary btn-lg me-3">Lihat Paket</a>
-                    <a href="{{ route('frontend.index') }}#kontak" class="btn btn-outline-dark btn-lg">Hubungi Kami</a>
+                    <a href="{{ route('frontend.index') }}#paket" class="btn btn-primary btn-lg me-3">
+                        Lihat Paket
+                    </a>
+
+                    <a href="{{ route('frontend.index') }}#kontak" class="btn btn-outline-dark btn-lg">
+                        Hubungi Kami
+                    </a>
                 </div>
 
                 <div class="hero-stats-wrapper">
                     <div class="hero-stats mt-5">
                         <div class="row g-2">
-                            <div class="col-4"><div class="stat-item"><div class="stat-number">28+</div><div class="stat-label">Tahun Pengalaman</div></div></div>
-                            <div class="col-4"><div class="stat-item"><div class="stat-number">5.000+</div><div class="stat-label">Acara Terselenggara</div></div></div>
-                            <div class="col-4"><div class="stat-item"><div class="stat-number">385+</div><div class="stat-label">Transaksi/Tahun</div></div></div>
+                            <div class="col-4">
+                                <div class="stat-item">
+                                    <div class="stat-number">28+</div>
+                                    <div class="stat-label">Tahun Pengalaman</div>
+                                </div>
+                            </div>
+
+                            <div class="col-4">
+                                <div class="stat-item">
+                                    <div class="stat-number">5.000+</div>
+                                    <div class="stat-label">Acara Terselenggara</div>
+                                </div>
+                            </div>
+
+                            <div class="col-4">
+                                <div class="stat-item">
+                                    <div class="stat-number">385+</div>
+                                    <div class="stat-label">Transaksi/Tahun</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -122,9 +181,16 @@
 
             <div class="col-lg-6" data-aos="fade-left">
                 <div class="hero-image-wrapper">
-                    <img src="{{ asset('assets/images/AWAL.png') }}" alt="Dekorasi Tenda" class="img-fluid hero-image">
+                    <img 
+                        src="{{ $berandaImage }}" 
+                        alt="{{ $title2 }}" 
+                        class="img-fluid hero-image"
+                        onerror="this.src='{{ asset('assets/images/AWAL.png') }}'"
+                    >
+
                     <div class="hero-card">
                         <i class="bi bi-shield-check text-primary"></i>
+
                         <div>
                             <strong>Pembayaran Aman</strong>
                             <small>100% Lunas di Awal</small>
@@ -134,6 +200,7 @@
             </div>
         </div>
     </div>
+
     <div class="hero-wave">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 155">
             <path fill="#ffffff" fill-opacity="1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,154.7C960,171,1056,181,1152,170.7C1248,160,1344,128,1392,112L1440,96L1440,320L0,320Z"></path>

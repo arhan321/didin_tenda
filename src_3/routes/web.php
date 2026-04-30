@@ -15,6 +15,7 @@ use App\Http\Controllers\MidtransPaymentController;
 */
 
 Route::get('/', [FrontendController::class, 'home'])->name('frontend.index');
+// Route::get('/', [FrontendController::class, 'getberanda'])->name('frontend.index');
 Route::get('/paket-custom', [FrontendController::class, 'paketCustom'])
     ->name('frontend.paket-custom');
 Route::post('/paket-custom/add-to-cart', [BookingController::class, 'addCustomToCart'])
@@ -175,6 +176,11 @@ Route::group([
     Route::resource('order-items', 'OrderItemController')->parameters([
         'order-items' => 'orderItem',
     ]);
+
+    Route::delete('berandas/destroy', 'BerandaController@massDestroy')->name('berandas.massDestroy');
+    Route::resource('berandas', 'BerandaController')->parameters([
+        'berandas' => 'beranda',
+]);
 });
 
 /*
