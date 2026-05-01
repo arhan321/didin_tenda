@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Models\Order;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Auth;
 
-class InvoiceController extends Controller
+final class InvoiceController extends Controller
 {
     public function download(Order $order)
     {
@@ -26,7 +28,7 @@ class InvoiceController extends Controller
             'order' => $order,
         ])->setPaper('a4', 'portrait');
 
-        $fileName = 'Invoice-' . str_replace(['/', '\\'], '-', $order->invoice_number) . '.pdf';
+        $fileName = 'Invoice-'.str_replace(['/', '\\'], '-', $order->invoice_number).'.pdf';
 
         return $pdf->download($fileName);
     }

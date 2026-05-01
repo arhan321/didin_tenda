@@ -1,20 +1,24 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
-use Midtrans\Snap;
-use Midtrans\Config;
+use App\Mail\InvoicePaidMail;
 use App\Models\Order;
 use App\Models\Payment;
-use Midtrans\Transaction;
+use Exception;
 use Illuminate\Http\Request;
-use App\Mail\InvoicePaidMail;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
+use Midtrans\Config;
+use Midtrans\Snap;
+use Midtrans\Transaction;
+use Throwable;
 
-class MidtransPaymentController extends Controller
+final class MidtransPaymentController extends Controller
 {
     /**
      * Membuat / mengambil Snap Token Midtrans.
@@ -46,7 +50,7 @@ class MidtransPaymentController extends Controller
                 'redirect_url' => $payment->redirect_url,
                 'message' => 'Snap token berhasil dibuat.',
             ]);
-        } catch (\Throwable $error) {
+        } catch (Throwable $error) {
             Log::error('Gagal membuat pembayaran Midtrans.', [
                 'order_id' => $order->id,
                 'invoice_number' => $order->invoice_number,
@@ -55,7 +59,7 @@ class MidtransPaymentController extends Controller
 
             return response()->json([
                 'status' => false,
-                'message' => 'Gagal membuat pembayaran: ' . $error->getMessage(),
+                'message' => 'Gagal membuat pembayaran: '.$error->getMessage(),
             ], 500);
         }
     }
@@ -107,7 +111,7 @@ class MidtransPaymentController extends Controller
                     'va_number' => $freshPayment->va_number,
                 ],
             ]);
-        } catch (\Throwable $error) {
+        } catch (Throwable $error) {
             Log::error('Gagal mengecek status pembayaran Midtrans.', [
                 'order_id' => $order->id,
                 'invoice_number' => $order->invoice_number,
@@ -116,7 +120,7 @@ class MidtransPaymentController extends Controller
 
             return response()->json([
                 'status' => false,
-                'message' => 'Gagal mengecek status pembayaran: ' . $error->getMessage(),
+                'message' => 'Gagal mengecek status pembayaran: '.$error->getMessage(),
             ], 500);
         }
     }
@@ -176,7 +180,7 @@ class MidtransPaymentController extends Controller
                 'status' => true,
                 'message' => 'Notification processed.',
             ]);
-        } catch (\Throwable $error) {
+        } catch (Throwable $error) {
             Log::error('Gagal memproses notification Midtrans.', [
                 'midtrans_order_id' => $midtransOrderId,
                 'order_id' => $order->id ?? null,
@@ -185,7 +189,7 @@ class MidtransPaymentController extends Controller
 
             return response()->json([
                 'status' => false,
-                'message' => 'Gagal memproses notification: ' . $error->getMessage(),
+                'message' => 'Gagal memproses notification: '.$error->getMessage(),
             ], 500);
         }
     }
@@ -312,7 +316,7 @@ class MidtransPaymentController extends Controller
 
         foreach ($order->items as $item) {
             $items[] = [
-                'id' => 'ITEM-' . $item->id,
+                'id' => 'ITEM-'.$item->id,
                 'price' => (int) $item->price,
                 'quantity' => (int) $item->quantity,
                 'name' => mb_substr($item->name, 0, 50),
@@ -321,7 +325,7 @@ class MidtransPaymentController extends Controller
 
         foreach ($order->addons as $addon) {
             $items[] = [
-                'id' => 'ADDON-' . $addon->id,
+                'id' => 'ADDON-'.$addon->id,
                 'price' => (int) $addon->price,
                 'quantity' => (int) $addon->quantity,
                 'name' => mb_substr($addon->name, 0, 50),
@@ -330,7 +334,7 @@ class MidtransPaymentController extends Controller
 
         if ((int) $order->shipping_fee > 0) {
             $items[] = [
-                'id' => 'SHIPPING-' . $order->id,
+                'id' => 'SHIPPING-'.$order->id,
                 'price' => (int) $order->shipping_fee,
                 'quantity' => 1,
                 'name' => 'Biaya Pengiriman',
@@ -348,7 +352,7 @@ class MidtransPaymentController extends Controller
 
             if ($difference !== 0) {
                 $items[] = [
-                    'id' => 'ADJUST-' . $order->id,
+                    'id' => 'ADJUST-'.$order->id,
                     'price' => $difference,
                     'quantity' => 1,
                     'name' => 'Penyesuaian Total',
@@ -516,7 +520,7 @@ class MidtransPaymentController extends Controller
             ])->find($freshOrder->id);
 
             if (! $orderForEmail) {
-                throw new \Exception('Order tidak ditemukan saat akan mengirim invoice email.');
+                throw new Exception('Order tidak ditemukan saat akan mengirim invoice email.');
             }
 
             Mail::to($email)->send(new InvoicePaidMail($orderForEmail));
@@ -526,7 +530,7 @@ class MidtransPaymentController extends Controller
                 'invoice_number' => $orderForEmail->invoice_number,
                 'email' => $email,
             ]);
-        } catch (\Throwable $error) {
+        } catch (Throwable $error) {
             Order::where('id', $freshOrder->id)->update([
                 'invoice_sent_at' => null,
             ]);
@@ -605,7 +609,7 @@ class MidtransPaymentController extends Controller
      */
     private function generateMidtransOrderId(Order $order): string
     {
-        return 'DT-' . $order->id . '-' . now()->format('YmdHis');
+        return 'DT-'.$order->id.'-'.now()->format('YmdHis');
     }
 
     /**
@@ -647,9 +651,9 @@ class MidtransPaymentController extends Controller
 
         $signature = hash(
             'sha512',
-            $payload['order_id'] .
-            $payload['status_code'] .
-            $payload['gross_amount'] .
+            $payload['order_id'].
+            $payload['status_code'].
+            $payload['gross_amount'].
             $serverKey
         );
 

@@ -36,6 +36,7 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use DutchCodingCompany\FilamentDeveloperLogins\FilamentDeveloperLoginsPlugin;
 
+
 final class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
@@ -69,15 +70,35 @@ final class AdminPanelProvider extends PanelProvider
             ->discoverWidgets(in: app_path('Filament/Admin/Widgets'), for: 'App\Filament\Admin\Widgets')
             ->widgets([
                 OverlookWidget::class,
-                LatestAccessLogs::class,
             ])
             ->navigationGroups([
-                NavigationGroup::make()
-                    ->collapsed(true)
-                    ->label('General'),
-                NavigationGroup::make()
-                    ->collapsed(true)
-                    ->label('Administration'),
+    NavigationGroup::make()
+        ->collapsed(true)
+        ->label('Administration'),
+
+    NavigationGroup::make()
+        ->collapsed(true)
+        ->label('Manajemen Paket'),
+
+    NavigationGroup::make()
+        ->collapsed(true)
+        ->label('Addon Management'),
+
+    NavigationGroup::make()
+        ->collapsed(true)
+        ->label('Custom Item Management'),
+
+    NavigationGroup::make()
+        ->collapsed(true)
+        ->label('Order Management'),
+
+    NavigationGroup::make()
+        ->collapsed(true)
+        ->label('Frontend Management'),
+
+    NavigationGroup::make()
+        ->collapsed(true)
+        ->label('General'),
             ])
             ->plugins([
                 AuthDesignerPlugin::make()

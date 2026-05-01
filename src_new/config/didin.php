@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
     'depot_lat' => env('DIDIN_TENDA_LAT', -6.262311),
     'depot_lng' => env('DIDIN_TENDA_LNG', 106.472969),

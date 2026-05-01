@@ -4,20 +4,20 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\Users;
 
-use App\Filament\Admin\Resources\Users\Pages\CreateUser;
-use App\Filament\Admin\Resources\Users\Pages\EditUser;
-use App\Filament\Admin\Resources\Users\Pages\ListUsers;
-use App\Filament\Admin\Resources\Users\Pages\ViewUser;
-use App\Filament\Admin\Resources\Users\Schemas\UserForm;
-use App\Filament\Admin\Resources\Users\Schemas\UserInfolist;
-use App\Filament\Admin\Resources\Users\Tables\UsersTable;
-use App\Models\User;
-use BackedEnum;
-use Filament\Resources\Resource;
-use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
-use Filament\Tables\Table;
 use UnitEnum;
+use BackedEnum;
+use App\Models\User;
+use Filament\Tables\Table;
+use Filament\Schemas\Schema;
+use Filament\Resources\Resource;
+use Filament\Support\Icons\Heroicon;
+use App\Filament\Admin\Resources\Users\Pages\EditUser;
+use App\Filament\Admin\Resources\Users\Pages\ViewUser;
+use App\Filament\Admin\Resources\Users\Pages\ListUsers;
+use App\Filament\Admin\Resources\Users\Pages\CreateUser;
+use App\Filament\Admin\Resources\Users\Schemas\UserForm;
+use App\Filament\Admin\Resources\Users\Tables\UsersTable;
+use App\Filament\Admin\Resources\Users\Schemas\UserInfolist;
 
 final class UserResource extends Resource
 {
@@ -25,9 +25,11 @@ final class UserResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::Users;
 
-    protected static string|null|UnitEnum $navigationGroup = 'Administration';
+protected static string|null|UnitEnum $navigationGroup = 'Administration';
 
-    protected static ?int $navigationSort = 1;
+protected static ?int $navigationSort = 1;
+
+protected static ?string $navigationLabel = 'Users';
 
     protected static ?string $recordTitleAttribute = 'name';
 

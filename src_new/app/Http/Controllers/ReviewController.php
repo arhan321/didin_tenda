@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Models\Order;
@@ -7,7 +9,7 @@ use App\Models\Review;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class ReviewController extends Controller
+final class ReviewController extends Controller
 {
     public function store(Request $request, Order $order)
     {

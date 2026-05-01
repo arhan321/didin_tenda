@@ -2,32 +2,52 @@
 
 declare(strict_types=1);
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\BookingController;
-use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\FrontendController;
+use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\MidtransPaymentController;
+use App\Http\Controllers\ReviewController;
+use Illuminate\Support\Facades\Route;
 
-Route::get('/', [FrontendController::class, 'home'])->name('frontend.index');
+/*
+|--------------------------------------------------------------------------
+| Frontend Pages
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/', [FrontendController::class, 'home'])
+    ->name('frontend.index');
+
+/*
+|--------------------------------------------------------------------------
+| Default Login Redirect Route
+|--------------------------------------------------------------------------
+| Middleware auth Laravel otomatis mencari route bernama "login"
+| kalau user belum login. Jadi route ini wajib ada.
+*/
+
+Route::get('/login', function () {
+    if (auth()->check()) {
+        return redirect()->route('frontend.index');
+    }
+
+    return redirect()
+        ->route('frontend.index')
+        ->with('error', 'Silakan login terlebih dahulu untuk mengakses halaman tersebut.')
+        ->with('open_auth_modal', 'login');
+})->name('login');
 
 Route::get('/paket-custom', [FrontendController::class, 'paketCustom'])
     ->name('frontend.paket-custom');
 
-Route::post('/paket-custom/add-to-cart', [BookingController::class, 'addCustomToCart'])
-    ->middleware('auth')
-    ->name('frontend.custom.add-to-cart');
-
 Route::get('/paket', [FrontendController::class, 'detail_paket'])
     ->name('frontend.paket');
 
-Route::get('/pesanan', [FrontendController::class, 'pesanan'])
-    ->middleware('auth')
-    ->name('frontend.pesanan');
-
-Route::get('/pesanan/{order}/invoice', [InvoiceController::class, 'download'])
-    ->middleware('auth')
-    ->name('frontend.invoice.download');
+/*
+|--------------------------------------------------------------------------
+| Cart & Booking
+|--------------------------------------------------------------------------
+*/
 
 Route::get('/cart', [BookingController::class, 'index'])
     ->name('frontend.cart');
@@ -72,7 +92,6 @@ Route::post('/frontend-logout', [FrontendController::class, 'logout'])
 |--------------------------------------------------------------------------
 | Password Reset Routes
 |--------------------------------------------------------------------------
-| Ini yang memperbaiki error route [password.email] not defined.
 */
 
 Route::middleware('guest')->group(function () {
@@ -86,33 +105,49 @@ Route::middleware('guest')->group(function () {
         ->name('password.update');
 });
 
-Route::get('/profile', [FrontendController::class, 'profile'])
-    ->middleware('auth')
-    ->name('frontend.profile');
-
-Route::post('/profile/update', [FrontendController::class, 'updateProfile'])
-    ->middleware('auth')
-    ->name('frontend.profile.update');
-
-Route::post('/profile/update-password', [FrontendController::class, 'updatePassword'])
-    ->middleware('auth')
-    ->name('frontend.profile.updatePassword');
+/*
+|--------------------------------------------------------------------------
+| Authenticated Frontend Routes
+|--------------------------------------------------------------------------
+*/
 
 Route::middleware('auth')->group(function () {
+    Route::post('/paket-custom/add-to-cart', [BookingController::class, 'addCustomToCart'])
+        ->name('frontend.custom.add-to-cart');
+
+    Route::get('/pesanan', [FrontendController::class, 'pesanan'])
+        ->name('frontend.pesanan');
+
+    Route::get('/pesanan/{order}/invoice', [InvoiceController::class, 'download'])
+        ->name('frontend.invoice.download');
+
     Route::post('/pesanan/{order}/pay', [MidtransPaymentController::class, 'pay'])
         ->name('frontend.midtrans.pay');
 
     Route::post('/pesanan/{order}/check-status', [MidtransPaymentController::class, 'checkStatus'])
         ->name('frontend.midtrans.check-status');
+
+    Route::post('/pesanan/{order}/review', [ReviewController::class, 'store'])
+        ->name('frontend.review.store');
+
+    Route::get('/profile', [FrontendController::class, 'profile'])
+        ->name('frontend.profile');
+
+    Route::post('/profile/update', [FrontendController::class, 'updateProfile'])
+        ->name('frontend.profile.update');
+
+    Route::post('/profile/update-password', [FrontendController::class, 'updatePassword'])
+        ->name('frontend.profile.updatePassword');
+
+    Route::get('/history', [FrontendController::class, 'history'])
+        ->name('frontend.history');
 });
 
-Route::post('/pesanan/{order}/review', [ReviewController::class, 'store'])
-    ->middleware('auth')
-    ->name('frontend.review.store');
+/*
+|--------------------------------------------------------------------------
+| Midtrans Notification
+|--------------------------------------------------------------------------
+*/
 
 Route::post('/midtrans/notification', [MidtransPaymentController::class, 'notification'])
     ->name('midtrans.notification');
-
-Route::get('/history', [FrontendController::class, 'history'])
-    ->middleware('auth')
-    ->name('frontend.history');

@@ -1,26 +1,28 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
-use Throwable;
-use App\Models\User;
 use App\Models\Addon;
-use App\Models\Order;
-use App\Models\Review;
 use App\Models\Beranda;
-use App\Models\Package;
 use App\Models\CustomItem;
-use Illuminate\Support\Str;
+use App\Models\Order;
+use App\Models\Package;
+use App\Models\Review;
+use App\Models\User;
+use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Password;
-use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
+use Throwable;
 
-class FrontendController extends Controller
+final class FrontendController extends Controller
 {
     public function home()
     {
@@ -31,9 +33,9 @@ class FrontendController extends Controller
             ->get();
 
         $reviews = Review::with([
-                'user',
-                'order.package',
-            ])
+            'user',
+            'order.package',
+        ])
             ->where('is_visible', true)
             ->whereHas('order', function ($query) {
                 $query->where('status', 'completed')
@@ -73,11 +75,11 @@ class FrontendController extends Controller
         }
 
         $package = Package::with([
-                'items' => function ($query) {
-                    $query->where('is_active', true)
-                        ->orderBy('sort_order');
-                },
-            ])
+            'items' => function ($query) {
+                $query->where('is_active', true)
+                    ->orderBy('sort_order');
+            },
+        ])
             ->where('slug', $slug)
             ->where('type', 'fixed')
             ->where('is_active', true)
@@ -122,7 +124,7 @@ class FrontendController extends Controller
                 ->withInput($request->only('email'));
         }
 
-        $email = strtolower(trim((string) $request->email));
+        $email = mb_strtolower(mb_trim((string) $request->email));
         $password = (string) $request->password;
         $remember = $request->boolean('remember');
 
@@ -179,7 +181,7 @@ class FrontendController extends Controller
 
         $userData = [
             'name' => $validated['name'],
-            'email' => strtolower($validated['email']),
+            'email' => mb_strtolower($validated['email']),
             'password' => Hash::make($validated['password']),
         ];
 
@@ -364,7 +366,7 @@ class FrontendController extends Controller
 
         $user->update([
             'name' => $request->name,
-            'email' => strtolower($request->email),
+            'email' => mb_strtolower($request->email),
             'whatsapp' => $whatsapp,
             'phone' => $phone,
             'alamat' => $request->alamat,
@@ -405,19 +407,6 @@ class FrontendController extends Controller
             ->with('success', 'Password berhasil diperbarui.');
     }
 
-    private function authResponse(Request $request, string $message, string $redirect)
-    {
-        if ($request->expectsJson() || $request->ajax()) {
-            return response()->json([
-                'status' => true,
-                'message' => $message,
-                'redirect' => $redirect,
-            ]);
-        }
-
-        return redirect($redirect)->with('success', $message);
-    }
-
     public function pesanan()
     {
         if (! Auth::check()) {
@@ -427,12 +416,12 @@ class FrontendController extends Controller
         }
 
         $orders = Order::with([
-                'package',
-                'items',
-                'addons',
-                'review',
-                'payment',
-            ])
+            'package',
+            'items',
+            'addons',
+            'review',
+            'payment',
+        ])
             ->where('user_id', Auth::id())
             ->latest()
             ->get();
@@ -514,44 +503,6 @@ class FrontendController extends Controller
         return view('frontend.pesanan', compact('ordersForJs', 'cartCount'));
     }
 
-    private function normalizeOrderStatusForFrontend(?string $status, ?string $paymentStatus): string
-    {
-        if ($status === 'cancelled' || $paymentStatus === 'cancelled' || $paymentStatus === 'expired') {
-            return 'cancelled';
-        }
-
-        if ($status === 'completed') {
-            return 'completed';
-        }
-
-        if ($status === 'ongoing') {
-            return 'ongoing';
-        }
-
-        if ($status === 'processing' || $status === 'processed') {
-            return 'processing';
-        }
-
-        if ($status === 'confirmed' || $paymentStatus === 'paid') {
-            return 'confirmed';
-        }
-
-        return 'waiting_payment';
-    }
-
-    private function getOrderStatusLabel(string $statusCode): string
-    {
-        return match ($statusCode) {
-            'waiting_payment' => 'Menunggu Pembayaran',
-            'confirmed' => 'Dikonfirmasi',
-            'processing' => 'Pesanan Diproses',
-            'ongoing' => 'Pelaksanaan Acara',
-            'completed' => 'Selesai',
-            'cancelled' => 'Dibatalkan',
-            default => 'Menunggu Pembayaran',
-        };
-    }
-
     public function history()
     {
         if (! Auth::check()) {
@@ -561,12 +512,12 @@ class FrontendController extends Controller
         }
 
         $orders = Order::with([
-                'package',
-                'items',
-                'addons',
-                'review',
-                'payment',
-            ])
+            'package',
+            'items',
+            'addons',
+            'review',
+            'payment',
+        ])
             ->where('user_id', Auth::id())
             ->where(function ($query) {
                 $query->whereIn('status', ['completed', 'cancelled', 'expired'])
@@ -680,5 +631,56 @@ class FrontendController extends Controller
         $beranda = Beranda::all();
 
         return view('frontend.index', compact('beranda'));
+    }
+
+    private function authResponse(Request $request, string $message, string $redirect)
+    {
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'status' => true,
+                'message' => $message,
+                'redirect' => $redirect,
+            ]);
+        }
+
+        return redirect($redirect)->with('success', $message);
+    }
+
+    private function normalizeOrderStatusForFrontend(?string $status, ?string $paymentStatus): string
+    {
+        if ($status === 'cancelled' || $paymentStatus === 'cancelled' || $paymentStatus === 'expired') {
+            return 'cancelled';
+        }
+
+        if ($status === 'completed') {
+            return 'completed';
+        }
+
+        if ($status === 'ongoing') {
+            return 'ongoing';
+        }
+
+        if ($status === 'processing' || $status === 'processed') {
+            return 'processing';
+        }
+
+        if ($status === 'confirmed' || $paymentStatus === 'paid') {
+            return 'confirmed';
+        }
+
+        return 'waiting_payment';
+    }
+
+    private function getOrderStatusLabel(string $statusCode): string
+    {
+        return match ($statusCode) {
+            'waiting_payment' => 'Menunggu Pembayaran',
+            'confirmed' => 'Dikonfirmasi',
+            'processing' => 'Pesanan Diproses',
+            'ongoing' => 'Pelaksanaan Acara',
+            'completed' => 'Selesai',
+            'cancelled' => 'Dibatalkan',
+            default => 'Menunggu Pembayaran',
+        };
     }
 }

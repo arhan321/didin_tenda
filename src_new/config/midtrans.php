@@ -1,6 +1,6 @@
 <?php
 
-use Illuminate\Support\ServiceProvider;
+declare(strict_types=1);
 
 return [
     'is_production' => env('MIDTRANS_IS_PRODUCTION', false),

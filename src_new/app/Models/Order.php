@@ -1,17 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
-use App\Models\User;
-use App\Models\Review;
-use App\Models\Package;
-use App\Models\Payment;
-use App\Models\OrderItem;
-use App\Models\OrderAddon;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
-class Order extends Model
+final class Order extends Model
 {
     use HasFactory;
 

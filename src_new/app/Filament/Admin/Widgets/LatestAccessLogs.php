@@ -4,16 +4,20 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Widgets;
 
-use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Filament\Widgets\TableWidget as BaseWidget;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\Models\Activity;
+use Filament\Widgets\TableWidget as BaseWidget;
+use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 
 final class LatestAccessLogs extends BaseWidget
 {
+    public static function canView(): bool
+{
+    return false;
+}
     use HasWidgetShield;
 
     protected static ?int $sort = 100;

@@ -3,12 +3,10 @@
  * Versi backend session cart Laravel.
  * File ini aman dipakai untuk index, paket, cart, profile, pesanan, dan history.
  *
- * Fitur tambahan:
- * - Login/Register modal tab
- * - Auto buka modal ketika login/register/forgot/reset gagal
- * - Toggle password
- * - Quick check paket
- * - Cart badge dari backend session
+ * Catatan:
+ * - Efek modal Bootstrap tetap dipertahankan.
+ * - Tidak mematikan fade/backdrop animation.
+ * - Cleanup backdrop hanya dijalankan setelah modal benar-benar tertutup.
  */
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -22,6 +20,7 @@ document.addEventListener('DOMContentLoaded', function () {
     initPasswordToggle();
     initQuickCheck();
     initAutoOpenModals();
+    initModalCleanup();
     updateCartBadge();
 });
 
@@ -157,9 +156,44 @@ function initTooltips() {
 
 /**
  * ====================
+ * MODAL CLEANUP
+ * ====================
+ * Jangan dipanggil sebelum modal muncul,
+ * supaya efek fade/backdrop Bootstrap tetap jalan.
+ */
+
+function initModalCleanup() {
+    document.querySelectorAll('.modal').forEach(function (modalElement) {
+        modalElement.addEventListener('hidden.bs.modal', function () {
+            setTimeout(function () {
+                cleanupBootstrapModalArtifacts();
+            }, 350);
+        });
+    });
+}
+
+function cleanupBootstrapModalArtifacts() {
+    const visibleModal = document.querySelector('.modal.show');
+
+    if (visibleModal) {
+        return;
+    }
+
+    document.querySelectorAll('.modal-backdrop').forEach(function (backdrop) {
+        backdrop.remove();
+    });
+
+    document.body.classList.remove('modal-open');
+    document.body.style.removeProperty('overflow');
+    document.body.style.removeProperty('padding-right');
+}
+
+/**
+ * ====================
  * AUTH MODAL
  * ====================
  */
+
 function initAuthModal() {
     const loginForm = document.getElementById('loginForm');
     const registerForm = document.getElementById('registerForm');
@@ -167,10 +201,6 @@ function initAuthModal() {
     if (!loginForm || !registerForm) {
         return;
     }
-
-    const tabButtons = document.querySelectorAll(
-        '.modal-tab-btn, .switch-to-register, .switch-to-login, [data-auth-tab]'
-    );
 
     function activateTab(tab) {
         const isRegister = tab === 'register';
@@ -183,19 +213,19 @@ function initAuthModal() {
         });
     }
 
-    tabButtons.forEach(function (button) {
+    document.querySelectorAll('.modal-tab-btn, .switch-to-register, .switch-to-login, [data-auth-tab]').forEach(function (button) {
         button.addEventListener('click', function (event) {
             const tab = this.dataset.tab || this.dataset.authTab || 'login';
 
-            event.preventDefault();
+            /**
+             * Kalau tombol punya data-bs-toggle="modal",
+             * biarkan Bootstrap yang membuka modal agar efek fade tetap jalan.
+             */
+            if (!this.hasAttribute('data-bs-toggle')) {
+                event.preventDefault();
+            }
 
             activateTab(tab);
-
-            const authModalElement = document.getElementById('loginRegisterModal');
-
-            if (authModalElement && typeof bootstrap !== 'undefined') {
-                new bootstrap.Modal(authModalElement).show();
-            }
         });
     });
 
@@ -205,7 +235,7 @@ function initAuthModal() {
 /**
  * Auto open modal dari Blade.
  *
- * Supaya ini jalan, di index.blade.php pastikan ada script seperti:
+ * Pastikan di index.blade.php ada:
  *
  * <script>
  *     window.DIDIN_AUTH_MODAL = @json(session('open_auth_modal'));
@@ -224,7 +254,8 @@ function initAutoOpenModals() {
         const resetModalElement = document.getElementById('resetPasswordModal');
 
         if (resetModalElement) {
-            new bootstrap.Modal(resetModalElement).show();
+            const resetModal = bootstrap.Modal.getOrCreateInstance(resetModalElement);
+            resetModal.show();
         }
 
         return;
@@ -238,7 +269,8 @@ function initAutoOpenModals() {
         }
 
         if (authModalElement) {
-            new bootstrap.Modal(authModalElement).show();
+            const authModal = bootstrap.Modal.getOrCreateInstance(authModalElement);
+            authModal.show();
         }
 
         return;
@@ -248,7 +280,8 @@ function initAutoOpenModals() {
         const forgotModalElement = document.getElementById('forgotPasswordModal');
 
         if (forgotModalElement) {
-            new bootstrap.Modal(forgotModalElement).show();
+            const forgotModal = bootstrap.Modal.getOrCreateInstance(forgotModalElement);
+            forgotModal.show();
         }
     }
 }
@@ -278,6 +311,7 @@ function initPasswordToggle() {
  * QUICK CHECK
  * ====================
  */
+
 function initQuickCheck() {
     const quickCard = document.querySelector('.quick-check-card');
     const button = document.getElementById('quickCheckBtn');
@@ -346,6 +380,7 @@ function initQuickCheck() {
  * CART BADGE
  * ====================
  */
+
 function updateCartBadge() {
     const badges = document.querySelectorAll('.menu-badge');
 
@@ -375,6 +410,7 @@ function updateCartBadge() {
  * HELPERS
  * ====================
  */
+
 function getCsrfToken() {
     return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 }
