@@ -790,96 +790,159 @@
             </div>
         </section>
 
-        <footer id="kontak" class="footer-section footer-batik">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-4 mb-lg-0 mb-4">
-                        <h4>Didin Tenda Decoration</h4>
-                        <p class="footer-address">
-                            <i class="bi bi-geo-alt-fill"></i>
-                            Jl. Ki Mas Laeng Kp. Katomas, Tigaraksa, Kab. Tangerang, Banten
-                        </p>
-                        <p>
-                            <i class="bi bi-telephone-fill"></i>
-                            <a href="tel:088289258764">0882-8925-8764</a>
-                        </p>
-                        <p>
-                            <i class="bi bi-envelope-fill"></i>
-                            <a href="mailto:info@didintenda.com">info@didintenda.com</a>
-                        </p>
-                        <div class="social-links">
-                            <a href="#"><i class="bi bi-facebook"></i></a>
-                            <a href="#"><i class="bi bi-instagram"></i></a>
-                            <a href="#"><i class="bi bi-whatsapp"></i></a>
-                            <a href="#"><i class="bi bi-youtube"></i></a>
-                        </div>
-                    </div>
-                    <div class="col-lg-2 col-md-6 mb-md-0 mb-4">
-                        <h5>Menu Cepat</h5>
-                        <ul class="footer-links">
-                            <li><a href="{{ route('frontend.index') }}">Beranda</a></li>
-                            <li><a href="{{ route('frontend.index') }}#paket">Paket</a></li>
-                            <li><a href="{{ route('frontend.index') }}#galeri">Galeri</a></li>
-                            <li><a href="{{ route('frontend.index') }}#testimoni">Testimoni</a></li>
-                            <li><a href="{{ route('frontend.index') }}#kontak">Kontak</a></li>
-                        </ul>
-                    </div>
-                    <div class="col-lg-3 col-md-6 mb-md-0 mb-4">
-                        <h5>Layanan</h5>
-                        <ul class="footer-links">
-                            <li><a href="{{ route('frontend.index') }}#paket">Sewa Tenda</a></li>
-                            <li><a href="{{ route('frontend.index') }}#paket">Dekorasi Pernikahan</a></li>
-                            <li><a href="{{ route('frontend.index') }}#paket">Sewa Kursi</a></li>
-                            <li><a href="{{ route('frontend.index') }}#paket">Rigging & Lighting</a></li>
-                            <li><a href="{{ route('frontend.paket-custom') }}">Paket Custom</a></li>
-                        </ul>
-                    </div>
-                    <div class="col-lg-3">
-                        <h5>Metode Pembayaran</h5>
-                        <div class="payment-methods">
-                            <img
-                                src="https://placehold.co/60x40/2c3e50/white?text=BCA"
-                                alt="BCA"
-                                class="payment-logo"
-                            />
-                            <img
-                                src="https://placehold.co/60x40/2c3e50/white?text=Mandiri"
-                                alt="Mandiri"
-                                class="payment-logo"
-                            />
-                            <img
-                                src="https://placehold.co/60x40/2c3e50/white?text=BRI"
-                                alt="BRI"
-                                class="payment-logo"
-                            />
-                            <img
-                                src="https://placehold.co/60x40/2c3e50/white?text=QRIS"
-                                alt="QRIS"
-                                class="payment-logo"
-                            />
-                            <img
-                                src="https://placehold.co/60x40/2c3e50/white?text=GoPay"
-                                alt="GoPay"
-                                class="payment-logo"
-                            />
-                        </div>
-                        <p class="small text-white-50 mt-3">
-                            <i class="bi bi-shield-check"></i>
-                            Transaksi 100% aman via Midtrans
-                        </p>
-                    </div>
-                </div>
-                <hr class="footer-hr" />
-                <div class="row align-items-center">
-                    <div class="col-md-6 text-md-start text-center">
-                        <p class="copyright">© 2026 Didin Tenda Decoration. All rights reserved.</p>
-                    </div>
-                    <div class="col-md-6 text-md-end text-center">
-                        <p class="developer">Developed for Tugas Akhir - Muhamad Darlan (20220803005)</p>
-                    </div>
-                </div>
+       @php
+    $footer = \App\Models\Footer::query()
+        ->latest('id')
+        ->first();
+
+    $footerAlamat = $footer?->alamat
+        ?? 'Jl. Ki Mas Laeng Kp. Katomas, Tigaraksa, Kab. Tangerang, Banten';
+
+    $footerPhone = $footer?->nomor_telfon
+        ?? '0882-8925-8764';
+
+    $footerPhoneHref = preg_replace('/[^0-9+]/', '', $footerPhone);
+
+    $footerEmail = $footer?->email
+        ?? 'info@didintenda.com';
+
+    $footerCopyright = $footer?->copyright
+        ?? '© 2026 Didin Tenda Decoration. All rights reserved.';
+
+    $footerDevelopBy = $footer?->develop_by
+        ?? 'Developed for Tugas Akhir - Muhamad Darlan (20220803005)';
+@endphp
+
+<footer id="kontak" class="footer-section footer-batik">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-4 mb-lg-0 mb-4">
+                <h4>Didin Tenda Decoration</h4>
+
+                <p class="footer-address">
+                    <i class="bi bi-geo-alt-fill"></i>
+                    {{ $footerAlamat }}
+                </p>
+
+                <p>
+                    <i class="bi bi-telephone-fill"></i>
+                    <a href="tel:{{ $footerPhoneHref }}">
+                        {{ $footerPhone }}
+                    </a>
+                </p>
+
+                <p>
+                    <i class="bi bi-envelope-fill"></i>
+                    <a href="mailto:{{ $footerEmail }}">
+                        {{ $footerEmail }}
+                    </a>
+                </p>
+
+            @php
+                $sosialMedia = \App\Models\SosialMedia::query()
+                    ->latest('id')
+                    ->get();
+            @endphp
+
+            <div class="social-links">
+                @forelse ($sosialMedia as $sosmed)
+                    <a
+                        href="{{ $sosmed->link ?: '#' }}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        <i class="{{ $sosmed->icon ?: 'bi bi-link-45deg' }}"></i>
+                    </a>
+                @empty
+                    <a href="#"><i class="bi bi-facebook"></i></a>
+                    <a href="#"><i class="bi bi-instagram"></i></a>
+                    <a href="#"><i class="bi bi-whatsapp"></i></a>
+                    <a href="#"><i class="bi bi-youtube"></i></a>
+                @endforelse
             </div>
-        </footer>
+            </div>
+
+            <div class="col-lg-2 col-md-6 mb-md-0 mb-4">
+                <h5>Menu Cepat</h5>
+                <ul class="footer-links">
+                    <li><a href="{{ route('frontend.index') }}">Beranda</a></li>
+                    <li><a href="{{ route('frontend.index') }}#paket">Paket</a></li>
+                    <li><a href="{{ route('frontend.index') }}#galeri">Galeri</a></li>
+                    <li><a href="{{ route('frontend.index') }}#testimoni">Testimoni</a></li>
+                    <li><a href="{{ route('frontend.index') }}#kontak">Kontak</a></li>
+                </ul>
+            </div>
+
+            <div class="col-lg-3 col-md-6 mb-md-0 mb-4">
+                <h5>Layanan</h5>
+                <ul class="footer-links">
+                    <li><a href="{{ route('frontend.index') }}#paket">Sewa Tenda</a></li>
+                    <li><a href="{{ route('frontend.index') }}#paket">Dekorasi Pernikahan</a></li>
+                    <li><a href="{{ route('frontend.index') }}#paket">Sewa Kursi</a></li>
+                    <li><a href="{{ route('frontend.index') }}#paket">Rigging & Lighting</a></li>
+                    <li><a href="{{ route('frontend.paket-custom') }}">Paket Custom</a></li>
+                </ul>
+            </div>
+
+            <div class="col-lg-3">
+                <h5>Metode Pembayaran</h5>
+
+                <div class="payment-methods">
+                    <img
+                        src="https://placehold.co/60x40/2c3e50/white?text=BCA"
+                        alt="BCA"
+                        class="payment-logo"
+                    />
+
+                    <img
+                        src="https://placehold.co/60x40/2c3e50/white?text=Mandiri"
+                        alt="Mandiri"
+                        class="payment-logo"
+                    />
+
+                    <img
+                        src="https://placehold.co/60x40/2c3e50/white?text=BRI"
+                        alt="BRI"
+                        class="payment-logo"
+                    />
+
+                    <img
+                        src="https://placehold.co/60x40/2c3e50/white?text=QRIS"
+                        alt="QRIS"
+                        class="payment-logo"
+                    />
+
+                    <img
+                        src="https://placehold.co/60x40/2c3e50/white?text=GoPay"
+                        alt="GoPay"
+                        class="payment-logo"
+                    />
+                </div>
+
+                <p class="small text-white-50 mt-3">
+                    <i class="bi bi-shield-check"></i>
+                    Transaksi 100% aman via Midtrans
+                </p>
+            </div>
+        </div>
+
+        <hr class="footer-hr" />
+
+        <div class="row align-items-center">
+            <div class="col-md-6 text-md-start text-center">
+                <p class="copyright">
+                    {{ $footerCopyright }}
+                </p>
+            </div>
+
+            <div class="col-md-6 text-md-end text-center">
+                <p class="developer">
+                    {{ $footerDevelopBy }}
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
 
         <button id="backToTop" class="back-to-top" title="Kembali ke atas"><i class="bi bi-arrow-up"></i></button>
 
