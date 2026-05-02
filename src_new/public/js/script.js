@@ -25,15 +25,21 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 function initAOS() {
-    if (typeof AOS !== 'undefined' && window.innerWidth >= 768) {
-        AOS.init({
-            duration: 800,
-            once: true,
-            offset: 50,
-            easing: 'ease-out',
-            delay: 50
-        });
+    if (typeof AOS === 'undefined') {
+        return;
     }
+
+    AOS.init({
+        duration: 800,
+        once: true,
+        offset: 50,
+        easing: 'ease-out',
+        delay: 50
+    });
+
+    setTimeout(function () {
+        AOS.refreshHard();
+    }, 300);
 }
 
 function initNavbarScroll() {
