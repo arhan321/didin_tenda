@@ -2,7 +2,7 @@
 
 ### SPEC :
 ```
-laravel 10
+laravel 12
 ```
 ### untuk email :
 ```

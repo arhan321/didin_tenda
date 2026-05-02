@@ -944,7 +944,9 @@
     </div>
 </footer>
 
-        <button id="backToTop" class="back-to-top" title="Kembali ke atas"><i class="bi bi-arrow-up"></i></button>
+ <button id="backToTop" class="back-to-top" title="Kembali ke atas">
+            <i class="bi bi-arrow-up"></i>
+        </button>
 
         @guest
             @php
@@ -1070,7 +1072,9 @@
                                     </a>
                                 </div>
 
-                                <button type="submit" class="btn btn-primary mb-3 w-100 py-2">Login Sekarang</button>
+                                <button type="submit" class="btn btn-primary mb-3 w-100 py-2">
+                                    Login Sekarang
+                                </button>
 
                                 <div class="text-muted text-center">
                                     <small>
@@ -1224,7 +1228,9 @@
                                     </div>
                                 </div>
 
-                                <button type="submit" class="btn btn-primary mb-3 w-100 py-2">Daftar Sekarang</button>
+                                <button type="submit" class="btn btn-primary mb-3 w-100 py-2">
+                                    Daftar Sekarang
+                                </button>
 
                                 <div class="text-muted text-center">
                                     <small>
@@ -1283,13 +1289,17 @@
                                     />
                                 </div>
 
-                                <button type="submit" class="btn btn-primary w-100 py-2">Kirim Link Reset</button>
+                                <button type="submit" class="btn btn-primary w-100 py-2">
+                                    Kirim Link Reset
+                                </button>
                             </form>
                         </div>
                     </div>
                 </div>
             </div>
+        @endguest
 
+        @if (request()->filled('reset_token'))
             <div class="modal fade" id="resetPasswordModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered modal-sm">
                     <div class="modal-content">
@@ -1299,9 +1309,11 @@
                         </div>
 
                         <div class="modal-body p-4 pt-3">
-                            <p class="text-muted small mb-3">Masukkan password baru untuk akun Anda.</p>
+                            <p class="text-muted small mb-3">
+                                Masukkan password baru untuk akun Anda.
+                            </p>
 
-                            @if (request()->filled('reset_token') && $errors->any())
+                            @if ($errors->any())
                                 <div class="alert alert-danger">
                                     @foreach ($errors->all() as $error)
                                         <div>{{ $error }}</div>
@@ -1330,39 +1342,54 @@
                                 <div class="mb-3">
                                     <label class="form-label">Password Baru</label>
 
-                                    <input
-                                        type="password"
-                                        name="password"
-                                        class="form-control"
-                                        placeholder="Minimal 6 karakter"
-                                        required
-                                    />
+                                    <div class="input-group">
+                                        <input
+                                            type="password"
+                                            name="password"
+                                            class="form-control"
+                                            placeholder="Minimal 6 karakter"
+                                            required
+                                        />
+
+                                        <button class="btn btn-outline-secondary toggle-password" type="button">
+                                            <i class="bi bi-eye-slash"></i>
+                                        </button>
+                                    </div>
                                 </div>
 
                                 <div class="mb-3">
                                     <label class="form-label">Konfirmasi Password</label>
 
-                                    <input
-                                        type="password"
-                                        name="password_confirmation"
-                                        class="form-control"
-                                        placeholder="Ulangi password baru"
-                                        required
-                                    />
+                                    <div class="input-group">
+                                        <input
+                                            type="password"
+                                            name="password_confirmation"
+                                            class="form-control"
+                                            placeholder="Ulangi password baru"
+                                            required
+                                        />
+
+                                        <button class="btn btn-outline-secondary toggle-password" type="button">
+                                            <i class="bi bi-eye-slash"></i>
+                                        </button>
+                                    </div>
                                 </div>
 
-                                <button type="submit" class="btn btn-primary w-100 py-2">Simpan Password Baru</button>
+                                <button type="submit" class="btn btn-primary w-100 py-2">
+                                    Simpan Password Baru
+                                </button>
                             </form>
                         </div>
                     </div>
                 </div>
             </div>
-        @endguest
+        @endif
 
         <script>
-            window.DIDIN_AUTH_MODAL = @json(session('open_auth_modal'))
-            window.DIDIN_HAS_RESET_TOKEN = @json(request()->filled('reset_token'))
+            window.DIDIN_AUTH_MODAL = @json(session('open_auth_modal'));
+            window.DIDIN_HAS_RESET_TOKEN = @json(request()->filled('reset_token'));
         </script>
+
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
         <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
         <script src="{{ asset('js/script.js') }}?v={{ time() }}"></script>

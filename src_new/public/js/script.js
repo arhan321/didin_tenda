@@ -239,30 +239,59 @@ function initAuthModal() {
 }
 
 /**
- * Auto open modal dari Blade.
+ * ====================
+ * AUTO OPEN MODAL
+ * ====================
  *
- * Pastikan di index.blade.php ada:
- *
- * <script>
- *     window.DIDIN_AUTH_MODAL = @json(session('open_auth_modal'));
- *     window.DIDIN_HAS_RESET_TOKEN = @json(request()->filled('reset_token'));
- * </script>
+ * Fungsi ini akan:
+ * 1. Membuka reset password modal kalau URL punya reset_token.
+ * 2. Tetap support session open_auth_modal untuk login/register/forgot.
+ * 3. Mengisi hidden token dan email dari URL kalau field-nya tersedia.
  */
+
 function initAutoOpenModals() {
     if (typeof bootstrap === 'undefined') {
+        console.error('Bootstrap belum ter-load.');
         return;
     }
 
     const openAuthModal = window.DIDIN_AUTH_MODAL || null;
-    const hasResetToken = Boolean(window.DIDIN_HAS_RESET_TOKEN);
+
+    const params = new URLSearchParams(window.location.search);
+    const tokenFromUrl = params.get('reset_token');
+    const emailFromUrl = params.get('email');
+
+    const hasResetToken =
+        Boolean(window.DIDIN_HAS_RESET_TOKEN) ||
+        Boolean(tokenFromUrl && tokenFromUrl.trim() !== '');
 
     if (hasResetToken) {
         const resetModalElement = document.getElementById('resetPasswordModal');
 
-        if (resetModalElement) {
+        if (!resetModalElement) {
+            console.error('Modal resetPasswordModal tidak ditemukan. Kemungkinan user masih login atau modal tidak ter-render karena @guest.');
+            return;
+        }
+
+        const resetForm = document.getElementById('formResetPassword');
+
+        if (resetForm) {
+            const tokenInput = resetForm.querySelector('input[name="token"]');
+            const emailInput = resetForm.querySelector('input[name="email"]');
+
+            if (tokenInput && tokenFromUrl) {
+                tokenInput.value = tokenFromUrl;
+            }
+
+            if (emailInput && emailFromUrl) {
+                emailInput.value = emailFromUrl;
+            }
+        }
+
+        setTimeout(function () {
             const resetModal = bootstrap.Modal.getOrCreateInstance(resetModalElement);
             resetModal.show();
-        }
+        }, 150);
 
         return;
     }
