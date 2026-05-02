@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-use App\Http\Controllers\BookingController;
-use App\Http\Controllers\FrontendController;
-use App\Http\Controllers\InvoiceController;
-use App\Http\Controllers\MidtransPaymentController;
-use App\Http\Controllers\ReviewController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\BookingController;
+use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\FrontendController;
+use App\Http\Controllers\MidtransPaymentController;
 
 /*
 |--------------------------------------------------------------------------

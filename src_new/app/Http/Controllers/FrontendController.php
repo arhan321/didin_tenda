@@ -270,14 +270,13 @@ final class FrontendController extends Controller
             ->withInput($request->only('email'));
     }
 
-    public function showResetPasswordForm(Request $request, string $token)
-    {
-        return redirect()
-            ->route('frontend.index', [
-                'reset_token' => $token,
-                'email' => $request->query('email'),
-            ]);
-    }
+public function showResetPasswordForm(Request $request, string $token)
+{
+    return redirect()->route('frontend.index', [
+        'reset_token' => $token,
+        'email' => $request->query('email'),
+    ]);
+}
 
     public function resetPassword(Request $request)
     {
