@@ -69,7 +69,15 @@ final class AdminPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Admin/Widgets'), for: 'App\Filament\Admin\Widgets')
             ->widgets([
-                OverlookWidget::class,
+                // OverlookWidget::class,
+                 \App\Filament\Widgets\ConfirmedOrderStats::class,
+                 \App\Filament\Widgets\RevenueAndBestPackageStats::class,
+                 \App\Filament\Widgets\CustomerUserStats::class,
+                //   \App\Filament\Widgets\RevenueLineChart::class,
+                \App\Filament\Admin\Widgets\RevenueChartTitle::class,
+                \App\Filament\Widgets\WeeklyRevenueChart::class,
+                \App\Filament\Widgets\MonthlyRevenueChart::class,
+                \App\Filament\Widgets\YearlyRevenueChart::class,
             ])
             ->navigationGroups([
     NavigationGroup::make()
