@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use Exception;
+use Throwable;
 use App\Models\Addon;
-use App\Models\CustomItem;
 use App\Models\Order;
 use App\Models\Package;
-use Exception;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Http;
+use App\Models\CustomItem;
 use Illuminate\Support\Str;
-use Throwable;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 
 final class BookingController extends Controller
 {
@@ -504,9 +504,51 @@ final class BookingController extends Controller
         return $selected;
     }
 
+
+    private function decrementAddonStocksForBooking(array $addons): void
+    {
+        foreach ($addons as $addon) {
+            $addonId = (int) ($addon['addon_id'] ?? 0);
+            $quantity = (int) ($addon['quantity'] ?? 0);
+
+            if ($addonId <= 0 || $quantity <= 0) {
+                continue;
+            }
+
+            $addonModel = Addon::query()
+                ->whereKey($addonId)
+                ->where('is_active', true)
+                ->lockForUpdate()
+                ->first();
+
+            if (! $addonModel) {
+                throw new Exception('Add-on yang dipilih sudah tidak tersedia. Silakan refresh halaman dan pilih ulang add-on.');
+            }
+
+            // stock null berarti tidak dibatasi / unlimited.
+            if ($addonModel->stock === null) {
+                continue;
+            }
+
+            if ((int) $addonModel->stock < $quantity) {
+                throw new Exception(
+                    'Stok add-on '.$addonModel->name.' tidak mencukupi. Sisa stok: '.
+                    (int) $addonModel->stock.' '.($addonModel->unit ?? 'pcs').'.'
+                );
+            }
+
+            $addonModel->decrement('stock', $quantity);
+        }
+    }
+
     private function createOrderFromCartItem(array $cartItem): Order
     {
         $orderType = $cartItem['order_type'] ?? 'package';
+
+        // Kurangi stok add-on tepat saat booking/order dibuat.
+        // Method ini dipanggil dari dalam DB::transaction(), jadi kalau proses order gagal
+        // pengurangan stok ikut rollback.
+        $this->decrementAddonStocksForBooking($cartItem['addons'] ?? []);
 
         $order = Order::create([
             'invoice_number' => $this->generateInvoiceNumber(),

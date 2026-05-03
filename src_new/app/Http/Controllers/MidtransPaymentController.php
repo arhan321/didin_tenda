@@ -4,19 +4,20 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Mail\InvoicePaidMail;
+use Exception;
+use Throwable;
+use Midtrans\Snap;
+use Midtrans\Config;
+use App\Models\Addon;
 use App\Models\Order;
 use App\Models\Payment;
-use Exception;
+use Midtrans\Transaction;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use App\Mail\InvoicePaidMail;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
-use Midtrans\Config;
-use Midtrans\Snap;
-use Midtrans\Transaction;
-use Throwable;
 
 final class MidtransPaymentController extends Controller
 {
@@ -381,6 +382,9 @@ final class MidtransPaymentController extends Controller
             $transactionStatus,
             $fraudStatus
         ) {
+            $previousPaymentStatus = $order->payment_status;
+            $previousOrderStatus = $order->status;
+
             $vaData = $this->extractVaData($statusData);
 
             $paymentUpdate = [
@@ -450,8 +454,45 @@ final class MidtransPaymentController extends Controller
                 $orderUpdate['payment_status'] = 'refunded';
             }
 
+            // Jika pembayaran gagal/expired/cancelled, kembalikan stok add-on yang sebelumnya
+            // sudah dikurangi saat booking. Guard ini mencegah stok dikembalikan berkali-kali
+            // ketika callback/check-status dipanggil ulang.
+            if (
+                in_array($paymentStatus, ['expired', 'failed', 'cancelled'], true) &&
+                ! in_array($previousPaymentStatus, ['expired', 'failed', 'cancelled'], true) &&
+                ! in_array($previousOrderStatus, ['expired', 'cancelled'], true)
+            ) {
+                $this->restoreAddonStocksFromOrder($order);
+            }
+
             $order->update($orderUpdate);
         });
+    }
+
+    private function restoreAddonStocksFromOrder(Order $order): void
+    {
+        $order->loadMissing('addons');
+
+        foreach ($order->addons as $orderAddon) {
+            $addonId = (int) ($orderAddon->addon_id ?? 0);
+            $quantity = (int) ($orderAddon->quantity ?? 0);
+
+            if ($addonId <= 0 || $quantity <= 0) {
+                continue;
+            }
+
+            $addon = Addon::query()
+                ->whereKey($addonId)
+                ->whereNotNull('stock')
+                ->lockForUpdate()
+                ->first();
+
+            if (! $addon) {
+                continue;
+            }
+
+            $addon->increment('stock', $quantity);
+        }
     }
 
     /**
