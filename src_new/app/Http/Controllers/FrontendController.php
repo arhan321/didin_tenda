@@ -4,23 +4,23 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Models\Addon;
-use App\Models\Beranda;
-use App\Models\CustomItem;
-use App\Models\Order;
-use App\Models\Package;
-use App\Models\Review;
+use Throwable;
 use App\Models\User;
-use Illuminate\Auth\Events\PasswordReset;
+use App\Models\Addon;
+use App\Models\Order;
+use App\Models\Review;
+use App\Models\Beranda;
+use App\Models\Package;
+use App\Models\CustomItem;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
-use Illuminate\Validation\Rule;
-use Throwable;
 
 final class FrontendController extends Controller
 {
@@ -56,7 +56,9 @@ final class FrontendController extends Controller
 
     public function paket()
     {
-        return view('frontend.paket-custom');
+        // Fallback: kalau masih ada route lama yang memanggil method paket(),
+        // tetap arahkan ke method paketCustom() supaya data customItems/addons terkirim ke view.
+        return $this->paketCustom();
     }
 
     public function cart()

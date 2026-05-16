@@ -37,8 +37,15 @@ let eventMarker = null;
 let routeLine = null;
 
 document.addEventListener('DOMContentLoaded', function () {
-    customItems = Array.isArray(window.DIDIN_CUSTOM_ITEMS) ? window.DIDIN_CUSTOM_ITEMS : [];
-    addonsData = Array.isArray(window.DIDIN_ADDONS) ? window.DIDIN_ADDONS : [];
+    customItems = normalizeCustomItems(Array.isArray(window.DIDIN_CUSTOM_ITEMS) ? window.DIDIN_CUSTOM_ITEMS : []);
+
+    // Fallback penting: kalau data window.DIDIN_CUSTOM_ITEMS belum terbaca,
+    // item tetap bisa diambil dari atribut data-* di Blade.
+    if (!customItems.length) {
+        customItems = getCustomItemsFromDom();
+    }
+
+    addonsData = normalizeAddons(Array.isArray(window.DIDIN_ADDONS) ? window.DIDIN_ADDONS : []);
 
     initAosCustom();
     initMinDate();
@@ -47,7 +54,127 @@ document.addEventListener('DOMContentLoaded', function () {
     bindCustomEvents();
     updateAllTotals();
     updateCartBadge();
+
+    if (!customItems.length) {
+        console.warn('Data custom item kosong. Pastikan FrontendController mengirim $customItems ke view paket-custom.');
+    }
 });
+
+
+function normalizeCustomItems(items) {
+    return items
+        .map(item => normalizeCustomItem(item))
+        .filter(item => item.id !== null && item.id !== undefined && item.id !== '');
+}
+
+function normalizeCustomItem(item) {
+    if (!item || typeof item !== 'object') {
+        return {};
+    }
+
+    return {
+        id: item.id,
+        name: item.name || 'Item',
+        slug: item.slug || null,
+        description: item.description || null,
+        unit: item.unit || 'pcs',
+        price: toSafeNumber(item.price, 0),
+        minQuantity: toSafeNumber(item.minQuantity ?? item.min_quantity, 0),
+        maxQuantity: normalizeNullableNumber(item.maxQuantity ?? item.max_quantity),
+        image: item.image || null,
+        icon: item.icon || null,
+    };
+}
+
+function normalizeAddons(items) {
+    return items
+        .map(addon => ({
+            ...addon,
+            price: toSafeNumber(addon.price, 0),
+            stock: normalizeNullableNumber(addon.stock),
+            maxQuantity: normalizeNullableNumber(addon.maxQuantity ?? addon.max_quantity),
+        }))
+        .filter(addon => addon.id !== null && addon.id !== undefined && addon.id !== '');
+}
+
+function getCustomItemsFromDom() {
+    return Array.from(document.querySelectorAll('.custom-item-row[data-custom-id]'))
+        .map(row => normalizeCustomItem({
+            id: row.dataset.customId,
+            name: row.dataset.name,
+            slug: row.dataset.slug,
+            description: row.dataset.description,
+            price: row.dataset.price,
+            unit: row.dataset.unit,
+            minQuantity: row.dataset.minQuantity,
+            maxQuantity: row.dataset.maxQuantity || null,
+        }));
+}
+
+function getCustomItemFromDom(itemId) {
+    const row = document.querySelector(`.custom-item-row[data-custom-id="${cssEscapeValue(itemId)}"]`);
+
+    if (!row) {
+        return null;
+    }
+
+    return normalizeCustomItem({
+        id: row.dataset.customId,
+        name: row.dataset.name,
+        slug: row.dataset.slug,
+        description: row.dataset.description,
+        price: row.dataset.price,
+        unit: row.dataset.unit,
+        minQuantity: row.dataset.minQuantity,
+        maxQuantity: row.dataset.maxQuantity || null,
+    });
+}
+
+function bindCustomQtyEvents() {
+    document.querySelectorAll('[data-custom-qty-button]').forEach(button => {
+        if (button.dataset.bound === '1') return;
+
+        button.dataset.bound = '1';
+
+        button.addEventListener('click', function () {
+            updateCustomQty(this.dataset.customId, Number(this.dataset.delta || 0));
+        });
+    });
+
+    document.querySelectorAll('[data-custom-qty-input]').forEach(input => {
+        if (input.dataset.bound === '1') return;
+
+        input.dataset.bound = '1';
+
+        input.addEventListener('change', function () {
+            updateCustomQtyDirect(this.dataset.customId || String(this.id || '').replace('qty-custom-', ''));
+        });
+    });
+}
+
+function toSafeNumber(value, fallback = 0) {
+    const number = Number(value);
+
+    return Number.isFinite(number) ? number : fallback;
+}
+
+function normalizeNullableNumber(value) {
+    if (value === null || value === undefined || value === '') {
+        return null;
+    }
+
+    const number = Number(value);
+
+    return Number.isFinite(number) ? number : null;
+}
+
+function cssEscapeValue(value) {
+    if (window.CSS && typeof window.CSS.escape === 'function') {
+        return window.CSS.escape(String(value));
+    }
+
+    return String(value).replaceAll('"', '\\"');
+}
 
 // ==================== INIT ====================
 
@@ -77,11 +204,14 @@ function initMinDate() {
 
 function initCustomState() {
     customItems.forEach(item => {
-        customQty[getKey(item.id)] = 0;
+        const input = getCustomInput(item.id);
+        customQty[getKey(item.id)] = Number(input?.value || 0);
     });
 }
 
 function bindCustomEvents() {
+    bindCustomQtyEvents();
+
     const addToCartBtn = document.getElementById('addToCartBtn');
     const bookNowBtn = document.getElementById('bookNowBtn');
     const checkShippingBtn = document.getElementById('checkShippingBtn');
@@ -195,16 +325,14 @@ window.updateCustomQtyDirect = function (itemId) {
 };
 
 function normalizeCustomQuantity(item, qty) {
-    let value = Number(qty || 0);
+    let value = Math.floor(toSafeNumber(qty, 0));
 
     if (value < 0) {
         value = 0;
     }
 
-    const minQty = Number(item.minQuantity || 0);
-    const maxQty = item.maxQuantity !== null && item.maxQuantity !== undefined
-        ? Number(item.maxQuantity)
-        : null;
+    const minQty = toSafeNumber(item.minQuantity, 0);
+    const maxQty = normalizeNullableNumber(item.maxQuantity);
 
     if (value > 0 && minQty > 0 && value < minQty) {
         value = minQty;
@@ -226,10 +354,16 @@ function updateCustomTotalDisplay(itemId) {
     const key = getKey(itemId);
     const totalElement = document.getElementById(`total-custom-${itemId}`);
     const qty = Number(customQty[key] || 0);
-    const total = qty * Number(item.price || 0);
+    const total = qty * toSafeNumber(item.price, 0);
 
     if (totalElement) {
         totalElement.textContent = formatRupiah(total);
+    }
+
+    const row = document.querySelector(`.custom-item-row[data-custom-id="${cssEscapeValue(itemId)}"]`);
+
+    if (row) {
+        row.classList.toggle('selected', qty > 0);
     }
 }
 
@@ -238,7 +372,24 @@ function getCustomInput(itemId) {
 }
 
 function getCustomItem(itemId) {
-    return customItems.find(item => getKey(item.id) === getKey(itemId));
+    let item = customItems.find(item => getKey(item.id) === getKey(itemId));
+
+    if (item) {
+        return item;
+    }
+
+    item = getCustomItemFromDom(itemId);
+
+    if (item) {
+        customItems.push(item);
+        customQty[getKey(item.id)] = Number(getCustomInput(item.id)?.value || 0);
+
+        return item;
+    }
+
+    console.warn('Custom item tidak ditemukan:', itemId);
+
+    return null;
 }
 
 function getSelectedCustomItems() {
@@ -246,7 +397,7 @@ function getSelectedCustomItems() {
         .map(item => {
             const key = getKey(item.id);
             const quantity = Number(customQty[key] || 0);
-            const price = Number(item.price || 0);
+            const price = toSafeNumber(item.price, 0);
 
             return {
                 id: item.id,

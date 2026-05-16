@@ -254,7 +254,17 @@
                                 </h5>
 
                                 @forelse ($customItems ?? [] as $item)
-                                    <div class="custom-item-row" data-custom-id="{{ $item->id }}">
+                                    <div
+                                        class="custom-item-row"
+                                        data-custom-id="{{ $item->id }}"
+                                        data-name="{{ $item->name }}"
+                                        data-slug="{{ $item->slug }}"
+                                        data-description="{{ $item->description }}"
+                                        data-price="{{ (int) $item->price }}"
+                                        data-unit="{{ $item->unit }}"
+                                        data-min-quantity="{{ (int) $item->min_quantity }}"
+                                        data-max-quantity="{{ $item->max_quantity ? (int) $item->max_quantity : '' }}"
+                                    >
                                         <div class="custom-item-img">
                                             <img
                                                 src="{{ $item->image ? asset($item->image) : 'https://placehold.co/60x60/2c7be5/white?text=Item' }}"
@@ -288,7 +298,9 @@
                                             <button
                                                 type="button"
                                                 class="qty-btn-sm minus"
-                                                onclick="updateCustomQty({{ $item->id }}, -1)"
+                                                data-custom-qty-button
+                                                data-custom-id="{{ $item->id }}"
+                                                data-delta="-1"
                                             >
                                                 -
                                             </button>
@@ -301,13 +313,16 @@
                                                 min="0"
                                                 @if($item->max_quantity) max="{{ $item->max_quantity }}" @endif
                                                 step="1"
-                                                onchange="updateCustomQtyDirect({{ $item->id }})"
+                                                data-custom-qty-input
+                                                data-custom-id="{{ $item->id }}"
                                             />
 
                                             <button
                                                 type="button"
                                                 class="qty-btn-sm plus"
-                                                onclick="updateCustomQty({{ $item->id }}, 1)"
+                                                data-custom-qty-button
+                                                data-custom-id="{{ $item->id }}"
+                                                data-delta="1"
                                             >
                                                 +
                                             </button>
@@ -601,7 +616,7 @@
 
         <!-- ==================== DATA DARI LARAVEL ==================== -->
         @php
-            $customItemsForJs = ($customItems ?? collect())
+            $customItemsForJs = collect($customItems ?? [])
                 ->map(function ($item) {
                     return [
                         'id' => $item->id,
@@ -618,7 +633,7 @@
                 })
                 ->values();
 
-            $addonsForJs = ($addons ?? collect())
+            $addonsForJs = collect($addons ?? [])
                 ->map(function ($addon) {
                     return [
                         'id' => $addon->id,
@@ -654,10 +669,10 @@
         @endphp
 
         <script>
-            window.DIDIN_CUSTOM_ITEMS = @json($customItemsForJs)
-            window.DIDIN_ADDONS = @json($addonsForJs)
-            window.DIDIN_CUSTOM_ROUTES = @json($customRoutesForJs)
-            window.DIDIN_SHIPPING_CONFIG = @json($shippingConfigForJs)
+            window.DIDIN_CUSTOM_ITEMS = @json($customItemsForJs);
+            window.DIDIN_ADDONS = @json($addonsForJs);
+            window.DIDIN_CUSTOM_ROUTES = @json($customRoutesForJs);
+            window.DIDIN_SHIPPING_CONFIG = @json($shippingConfigForJs);
         </script>
 
         <!-- Scripts -->
