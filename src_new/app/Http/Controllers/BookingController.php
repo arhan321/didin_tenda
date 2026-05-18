@@ -18,6 +18,8 @@ use Illuminate\Support\Facades\Http;
 
 final class BookingController extends Controller
 {
+    private const MAX_ACTIVE_ORDERS_PER_EVENT_DATE = 4;
+
     public function index()
     {
         $cart = session('booking_cart', []);
@@ -62,10 +64,12 @@ final class BookingController extends Controller
             ->where('is_active', true)
             ->firstOrFail();
 
-        if ($this->isDateBooked($package->id, $validated['event_date'])) {
+        $cartForLimit = $request->boolean('checkout_now') ? [] : session('booking_cart', []);
+
+        if ($this->wouldExceedDailyOrderLimit($validated['event_date'], 1, $cartForLimit)) {
             return back()
                 ->withInput()
-                ->with('error', 'Tanggal tersebut sudah dibooking untuk paket ini. Silakan pilih tanggal lain.');
+                ->with('error', $this->dailyOrderLimitMessage($validated['event_date']));
         }
 
         $selectedAddons = $this->prepareSelectedAddons($request->input('addons', []));
@@ -216,6 +220,8 @@ final class BookingController extends Controller
             $orders = DB::transaction(function () use ($cart) {
                 $createdOrders = [];
 
+                $eventDateBookingCounts = [];
+
                 foreach ($cart as $cartItem) {
                     $orderType = $cartItem['order_type'] ?? 'package';
 
@@ -225,22 +231,24 @@ final class BookingController extends Controller
                         if (! $packageId) {
                             throw new Exception('Data paket tidak valid pada keranjang.');
                         }
-
-                        if ($this->isDateBooked((int) $packageId, $cartItem['event_date'], 'package')) {
-                            throw new Exception(
-                                'Tanggal '.$cartItem['event_date'].' sudah dibooking. Silakan hapus item tersebut dan pilih tanggal lain.'
-                            );
-                        }
                     }
 
-                    if ($orderType === 'custom') {
-                        if ($this->isDateBooked(null, $cartItem['event_date'], 'custom')) {
-                            throw new Exception(
-                                'Tanggal '.$cartItem['event_date'].' sudah digunakan untuk paket custom. Silakan pilih tanggal lain.'
-                            );
-                        }
+                    $eventDate = (string) ($cartItem['event_date'] ?? '');
+
+                    if ($eventDate === '') {
+                        throw new Exception('Tanggal acara pada keranjang tidak valid.');
                     }
 
+                    $eventDateBookingCounts[$eventDate] = ($eventDateBookingCounts[$eventDate] ?? 0) + 1;
+                }
+
+                foreach ($eventDateBookingCounts as $eventDate => $additionalBookings) {
+                    if ($this->wouldExceedDailyOrderLimit($eventDate, $additionalBookings)) {
+                        throw new Exception($this->dailyOrderLimitMessage($eventDate));
+                    }
+                }
+
+                foreach ($cart as $cartItem) {
                     $createdOrders[] = $this->createOrderFromCartItem($cartItem);
                 }
 
@@ -270,14 +278,20 @@ final class BookingController extends Controller
             ->where('is_active', true)
             ->firstOrFail();
 
-        $available = ! $this->isDateBooked($package->id, $validated['event_date']);
+        $bookedCount = $this->countActiveOrdersForDate($validated['event_date']);
+        $limit = $this->maxActiveOrdersPerEventDate();
+        $remainingQuota = max(0, $limit - $bookedCount);
+        $available = $remainingQuota > 0;
 
         return response()->json([
             'status' => true,
             'available' => $available,
+            'booked_count' => $bookedCount,
+            'limit' => $limit,
+            'remaining_quota' => $remainingQuota,
             'message' => $available
-                ? 'Tanggal tersedia. Silakan lanjut booking.'
-                : 'Tanggal sudah dibooking. Silakan pilih tanggal lain.',
+                ? 'Tanggal tersedia. Kuota tersisa '.$remainingQuota.' dari '.$limit.' pesanan.'
+                : $this->dailyOrderLimitMessage($validated['event_date']),
             'package' => [
                 'id' => $package->id,
                 'slug' => $package->slug,
@@ -321,6 +335,15 @@ final class BookingController extends Controller
 
             'checkout_now' => ['nullable'],
         ]);
+
+        $cartForLimit = $request->boolean('checkout_now') ? [] : session('booking_cart', []);
+
+        if ($this->wouldExceedDailyOrderLimit($validated['event_date'], 1, $cartForLimit)) {
+            return response()->json([
+                'status' => false,
+                'message' => $this->dailyOrderLimitMessage($validated['event_date']),
+            ], 422);
+        }
 
         $customItemsPayload = collect($validated['custom_items']);
 
@@ -544,6 +567,15 @@ final class BookingController extends Controller
     private function createOrderFromCartItem(array $cartItem): Order
     {
         $orderType = $cartItem['order_type'] ?? 'package';
+        $eventDate = (string) ($cartItem['event_date'] ?? '');
+
+        if ($eventDate === '') {
+            throw new Exception('Tanggal acara pada keranjang tidak valid.');
+        }
+
+        // Validasi terakhir sebelum order benar-benar dibuat.
+        // Jadi meskipun user melewati validasi frontend / cart, kuota 4 pesanan per tanggal tetap aman.
+        $this->ensureDailyOrderLimitAvailable($eventDate);
 
         // Kurangi stok add-on tepat saat booking/order dibuat.
         // Method ini dipanggil dari dalam DB::transaction(), jadi kalau proses order gagal
@@ -641,21 +673,64 @@ final class BookingController extends Controller
         ];
     }
 
-    private function isDateBooked(?int $packageId, string $eventDate, string $orderType = 'package'): bool
+    private function maxActiveOrdersPerEventDate(): int
+    {
+        $limit = (int) config('didin.max_active_orders_per_event_date', self::MAX_ACTIVE_ORDERS_PER_EVENT_DATE);
+
+        return max(1, $limit);
+    }
+
+    private function countActiveOrdersForDate(string $eventDate, bool $lockForUpdate = false): int
     {
         $query = Order::query()
             ->whereDate('event_date', $eventDate)
             ->whereNotIn('status', ['cancelled', 'expired']);
 
-        if ($orderType === 'package') {
-            $query->where('package_id', $packageId);
+        if ($lockForUpdate) {
+            return $query->lockForUpdate()->get(['id'])->count();
         }
 
-        if ($orderType === 'custom') {
-            $query->where('order_type', 'custom');
-        }
+        return (int) $query->count();
+    }
 
-        return $query->exists();
+    private function countCartBookingsForDate(array $cart, string $eventDate): int
+    {
+        return collect($cart)
+            ->filter(fn ($cartItem) => (string) ($cartItem['event_date'] ?? '') === $eventDate)
+            ->count();
+    }
+
+    private function wouldExceedDailyOrderLimit(string $eventDate, int $additionalBookings = 1, array $cart = []): bool
+    {
+        $usedBookings = $this->countActiveOrdersForDate($eventDate)
+            + $this->countCartBookingsForDate($cart, $eventDate);
+
+        return ($usedBookings + $additionalBookings) > $this->maxActiveOrdersPerEventDate();
+    }
+
+    private function ensureDailyOrderLimitAvailable(string $eventDate): void
+    {
+        if ($this->countActiveOrdersForDate($eventDate, true) >= $this->maxActiveOrdersPerEventDate()) {
+            throw new Exception($this->dailyOrderLimitMessage($eventDate));
+        }
+    }
+
+    private function remainingDailyOrderQuota(string $eventDate): int
+    {
+        return max(0, $this->maxActiveOrdersPerEventDate() - $this->countActiveOrdersForDate($eventDate));
+    }
+
+    private function dailyOrderLimitMessage(string $eventDate): string
+    {
+        return 'Kuota booking tanggal '.$eventDate.' sudah penuh. Maksimal '.
+            $this->maxActiveOrdersPerEventDate().' pesanan dalam 1 tanggal. Silakan pilih tanggal lain.';
+    }
+
+    private function isDateBooked(?int $packageId, string $eventDate, string $orderType = 'package'): bool
+    {
+        // Parameter packageId/orderType sengaja dipertahankan agar kompatibel dengan pemanggilan lama.
+        // Sekarang pengecekan kuota berlaku global per tanggal, bukan per paket/custom.
+        return $this->remainingDailyOrderQuota($eventDate) <= 0;
     }
 
     private function generateInvoiceNumber(): string

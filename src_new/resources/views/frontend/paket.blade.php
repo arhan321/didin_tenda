@@ -371,7 +371,7 @@
                                                 placeholder="Masukkan alamat lengkap acara (Jalan, RT/RW, Kelurahan, Kecamatan, Kota)"
                                                 required
                                             >
-{{ old('event_address') }}</textarea
+                                            {{ old('event_address') }}</textarea
                                             >
                                             <small class="text-muted">
                                                 Alamat akan digunakan sebagai keterangan lokasi acara
