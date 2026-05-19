@@ -8,9 +8,12 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
+use App\Filament\Widgets\Concerns\OnlySuperAdminWidget;
 
 final class CustomerUserStats extends BaseWidget
 {
+    use OnlySuperAdminWidget;
+
     protected ?string $heading = 'Informasi Customer';
 
     protected function getStats(): array

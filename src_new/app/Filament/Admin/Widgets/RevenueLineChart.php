@@ -7,9 +7,12 @@ namespace App\Filament\Widgets;
 use App\Models\Order;
 use Filament\Widgets\ChartWidget;
 use Illuminate\Database\Eloquent\Builder;
+use App\Filament\Widgets\Concerns\OnlySuperAdminWidget;
 
 final class RevenueLineChart extends ChartWidget
 {
+    use OnlySuperAdminWidget;
+
     protected ?string $heading = 'Grafik Pendapatan';
 
     protected ?string $description = 'Pendapatan dari order dengan status confirmed';
@@ -55,7 +58,7 @@ final class RevenueLineChart extends ChartWidget
 
             $labels[] = $date->translatedFormat('D, d M');
 
-            $data[] = $this->revenueQuery()
+            $data[] = (int) $this->revenueQuery()
                 ->whereDate('confirmed_at', $date)
                 ->sum('total_price');
         }
@@ -87,7 +90,7 @@ final class RevenueLineChart extends ChartWidget
 
             $labels[] = 'Minggu ' . $weekNumber;
 
-            $data[] = $this->revenueQuery()
+            $data[] = (int) $this->revenueQuery()
                 ->whereBetween('confirmed_at', [
                     $currentStart->copy()->startOfDay(),
                     $currentEnd->copy()->endOfDay(),
@@ -115,7 +118,7 @@ final class RevenueLineChart extends ChartWidget
 
             $labels[] = $date->translatedFormat('M');
 
-            $data[] = $this->revenueQuery()
+            $data[] = (int) $this->revenueQuery()
                 ->whereBetween('confirmed_at', [
                     $date->copy()->startOfMonth(),
                     $date->copy()->endOfMonth(),

@@ -7,9 +7,12 @@ namespace App\Filament\Widgets;
 use App\Models\Order;
 use Filament\Widgets\ChartWidget;
 use Illuminate\Database\Eloquent\Builder;
+use App\Filament\Widgets\Concerns\OnlySuperAdminWidget;
 
 final class WeeklyRevenueChart extends ChartWidget
 {
+    use OnlySuperAdminWidget;
+
     protected ?string $heading = 'Pendapatan Minggu Ini';
 
     protected ?string $description = 'Pendapatan harian dari order confirmed';
@@ -22,11 +25,6 @@ final class WeeklyRevenueChart extends ChartWidget
     {
         return 'full';
     }
-
-//     public function getColumnSpan(): int | string | array
-// {
-//     return 1;
-// }
 
     protected function getData(): array
     {

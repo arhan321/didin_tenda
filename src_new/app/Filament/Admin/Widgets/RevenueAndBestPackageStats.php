@@ -9,9 +9,12 @@ use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
+use App\Filament\Widgets\Concerns\OnlySuperAdminWidget;
 
 final class RevenueAndBestPackageStats extends BaseWidget
 {
+    use OnlySuperAdminWidget;
+
     protected ?string $heading = 'Pendapatan & Paket Terlaris';
 
     protected function getStats(): array

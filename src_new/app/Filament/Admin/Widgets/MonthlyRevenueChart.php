@@ -7,9 +7,12 @@ namespace App\Filament\Widgets;
 use App\Models\Order;
 use Filament\Widgets\ChartWidget;
 use Illuminate\Database\Eloquent\Builder;
+use App\Filament\Widgets\Concerns\OnlySuperAdminWidget;
 
 final class MonthlyRevenueChart extends ChartWidget
 {
+    use OnlySuperAdminWidget;
+
     protected ?string $heading = 'Pendapatan Bulan Ini';
 
     protected ?string $description = 'Pendapatan mingguan dari order confirmed';
