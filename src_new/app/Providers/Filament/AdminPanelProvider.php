@@ -70,7 +70,7 @@ final class AdminPanelProvider extends PanelProvider
             ->discoverWidgets(in: app_path('Filament/Admin/Widgets'), for: 'App\Filament\Admin\Widgets')
             ->widgets([
                 // OverlookWidget::class,
-                 \App\Filament\Widgets\ConfirmedOrderStats::class,
+                 \App\Filament\Admin\Resources\Orders\Widgets\ConfirmedOrderStats::class,
                  \App\Filament\Widgets\RevenueAndBestPackageStats::class,
                  \App\Filament\Widgets\CustomerUserStats::class,
                 //   \App\Filament\Widgets\RevenueLineChart::class,

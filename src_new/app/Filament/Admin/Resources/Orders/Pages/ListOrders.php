@@ -8,6 +8,7 @@ use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 use App\Filament\Admin\Resources\Orders\OrderResource;
+use App\Filament\Admin\Resources\Orders\Widgets\ConfirmedOrderStats;
 
 class ListOrders extends ListRecords
 {
@@ -25,6 +26,23 @@ class ListOrders extends ListRecords
             CreateAction::make()
                 ->label('Tambah Order')
                 ->icon('heroicon-o-plus'),
+        ];
+    }
+
+    protected function getHeaderWidgets(): array
+    {
+        $user = auth()->user();
+
+        if (! $user) {
+            return [];
+        }
+
+        if (method_exists($user, 'hasRole') && ! $user->hasRole('super_admin')) {
+            return [];
+        }
+
+        return [
+            ConfirmedOrderStats::class,
         ];
     }
 }
