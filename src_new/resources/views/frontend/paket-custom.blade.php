@@ -25,6 +25,111 @@
         <!-- Custom CSS -->
         <link rel="stylesheet" href="{{ asset('css/style.css') }}" />
         <link rel="stylesheet" href="{{ asset('css/paket-custom.css') }}" />
+
+
+        {{--
+            Helper khusus halaman ini:
+            - Menjadikan path gambar dari Filament disk public otomatis menjadi /storage/...
+            - Tetap support URL eksternal, path storage/, path assets/, dan path public/...
+            - CSS tambahan sengaja disatukan di Blade sesuai request agar tidak perlu edit file CSS terpisah.
+        --}}
+        @php
+            $resolveImageUrl = function (?string $path, ?string $fallback = null): ?string {
+                if (! $path) {
+                    return $fallback;
+                }
+
+                $path = trim($path);
+
+                if ($path === '') {
+                    return $fallback;
+                }
+
+                $path = ltrim($path, '/');
+
+                if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+                    return $path;
+                }
+
+                if (str_starts_with($path, 'storage/') || str_starts_with($path, 'assets/')) {
+                    return asset($path);
+                }
+
+                if (str_starts_with($path, 'public/')) {
+                    return asset('storage/' . substr($path, strlen('public/')));
+                }
+
+                return asset('storage/' . $path);
+            };
+
+            $customItemFallbackImage = 'https://placehold.co/120x120/f3f4f6/9ca3af?text=Item';
+            $addonFallbackImage = 'https://placehold.co/120x120/f3f4f6/9ca3af?text=Add-on';
+        @endphp
+
+        <style>
+            /* ==================== IMAGE CUSTOM ITEM & ADD-ONS ==================== */
+            .custom-item-row {
+                gap: 16px;
+            }
+
+            .custom-item-img,
+            .addon-image {
+                width: 76px;
+                height: 76px;
+                min-width: 76px;
+                border-radius: 18px;
+                overflow: hidden;
+                background: #f3f4f6;
+                border: 1px solid rgba(148, 163, 184, 0.28);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
+            }
+
+            .custom-item-img img,
+            .addon-image img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                display: block;
+            }
+
+            .addon-card-inner {
+                display: flex;
+                align-items: flex-start;
+                gap: 14px;
+            }
+
+            .addon-info {
+                flex: 1;
+                min-width: 0;
+            }
+
+            .addon-detail,
+            .custom-item-detail small {
+                line-height: 1.5;
+            }
+
+            @media (max-width: 575.98px) {
+                .custom-item-row {
+                    align-items: flex-start;
+                    gap: 12px;
+                }
+
+                .custom-item-img,
+                .addon-image {
+                    width: 64px;
+                    height: 64px;
+                    min-width: 64px;
+                    border-radius: 16px;
+                }
+
+                .addon-card-inner {
+                    gap: 12px;
+                }
+            }
+        </style>
     </head>
     <body>
         <!-- ==================== NAVBAR ==================== -->
@@ -254,6 +359,10 @@
                                 </h5>
 
                                 @forelse ($customItems ?? [] as $item)
+                                    @php
+                                        $itemImageUrl = $resolveImageUrl($item->image, $customItemFallbackImage);
+                                    @endphp
+
                                     <div
                                         class="custom-item-row"
                                         data-custom-id="{{ $item->id }}"
@@ -264,12 +373,14 @@
                                         data-unit="{{ $item->unit }}"
                                         data-min-quantity="{{ (int) $item->min_quantity }}"
                                         data-max-quantity="{{ $item->max_quantity ? (int) $item->max_quantity : '' }}"
+                                        data-image="{{ $itemImageUrl }}"
                                     >
                                         <div class="custom-item-img">
                                             <img
-                                                src="{{ $item->image ? asset($item->image) : 'https://placehold.co/60x60/2c7be5/white?text=Item' }}"
+                                                src="{{ $itemImageUrl }}"
                                                 alt="{{ $item->name }}"
-                                                onerror="this.src = 'https://placehold.co/60x60/2c7be5/white?text=Item'"
+                                                loading="lazy"
+                                                onerror="this.onerror = null; this.src = '{{ $customItemFallbackImage }}';"
                                             />
                                         </div>
 
@@ -617,7 +728,7 @@
         <!-- ==================== DATA DARI LARAVEL ==================== -->
         @php
             $customItemsForJs = collect($customItems ?? [])
-                ->map(function ($item) {
+                ->map(function ($item) use ($resolveImageUrl) {
                     return [
                         'id' => $item->id,
                         'name' => $item->name,
@@ -627,14 +738,14 @@
                         'unit' => $item->unit,
                         'minQuantity' => (int) $item->min_quantity,
                         'maxQuantity' => $item->max_quantity ? (int) $item->max_quantity : null,
-                        'image' => $item->image ? asset($item->image) : null,
+                        'image' => $resolveImageUrl($item->image, null),
                         'icon' => $item->icon,
                     ];
                 })
                 ->values();
 
             $addonsForJs = collect($addons ?? [])
-                ->map(function ($addon) {
+                ->map(function ($addon) use ($resolveImageUrl) {
                     return [
                         'id' => $addon->id,
                         'name' => $addon->name,
@@ -645,7 +756,7 @@
                         'unit' => $addon->unit ?? 'pcs',
                         'stock' => isset($addon->stock) ? (int) $addon->stock : null,
                         'maxQuantity' => isset($addon->max_quantity) && $addon->max_quantity ? (int) $addon->max_quantity : null,
-                        'image' => isset($addon->image) && $addon->image ? asset($addon->image) : null,
+                        'image' => $resolveImageUrl($addon->image ?? null, null),
                         'icon' => $addon->icon ?? null,
                     ];
                 })

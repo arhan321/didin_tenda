@@ -81,7 +81,7 @@ function normalizeCustomItem(item) {
         price: toSafeNumber(item.price, 0),
         minQuantity: toSafeNumber(item.minQuantity ?? item.min_quantity, 0),
         maxQuantity: normalizeNullableNumber(item.maxQuantity ?? item.max_quantity),
-        image: item.image || null,
+        image: item.image || item.image_url || null,
         icon: item.icon || null,
     };
 }
@@ -90,6 +90,7 @@ function normalizeAddons(items) {
     return items
         .map(addon => ({
             ...addon,
+            image: addon.image || addon.image_url || null,
             price: toSafeNumber(addon.price, 0),
             stock: normalizeNullableNumber(addon.stock),
             maxQuantity: normalizeNullableNumber(addon.maxQuantity ?? addon.max_quantity),
@@ -108,6 +109,7 @@ function getCustomItemsFromDom() {
             unit: row.dataset.unit,
             minQuantity: row.dataset.minQuantity,
             maxQuantity: row.dataset.maxQuantity || null,
+            image: row.dataset.image || null,
         }));
 }
 
@@ -127,6 +129,7 @@ function getCustomItemFromDom(itemId) {
         unit: row.dataset.unit,
         minQuantity: row.dataset.minQuantity,
         maxQuantity: row.dataset.maxQuantity || null,
+        image: row.dataset.image || null,
     });
 }
 
@@ -175,6 +178,47 @@ function cssEscapeValue(value) {
 
     return String(value).replaceAll('"', '\\"');
 }
+function getImageFallback(type = 'item') {
+    const label = type === 'addon' ? 'Add-on' : 'Item';
+
+    return `https://placehold.co/120x120/f3f4f6/9ca3af?text=${encodeURIComponent(label)}`;
+}
+
+function resolveImageUrl(value, fallback = getImageFallback()) {
+    if (!value) {
+        return fallback;
+    }
+
+    const url = String(value).trim();
+
+    if (!url) {
+        return fallback;
+    }
+
+    if (
+        url.startsWith('http://') ||
+        url.startsWith('https://') ||
+        url.startsWith('data:') ||
+        url.startsWith('blob:')
+    ) {
+        return url;
+    }
+
+    if (url.startsWith('/')) {
+        return url;
+    }
+
+    if (url.startsWith('storage/') || url.startsWith('assets/')) {
+        return `/${url}`;
+    }
+
+    if (url.startsWith('public/')) {
+        return `/storage/${url.replace(/^public\//, '')}`;
+    }
+
+    return `/storage/${url}`;
+}
+
 
 // ==================== INIT ====================
 
@@ -409,6 +453,8 @@ function getSelectedCustomItems() {
                 price: price,
                 totalPrice: price * quantity,
                 total_price: price * quantity,
+                image: item.image || null,
+                icon: item.icon || null,
             };
         })
         .filter(item => item.quantity > 0);
@@ -438,7 +484,8 @@ function renderAddonsCustom() {
         const isChecked = quantity > 0;
         const totalPrice = Number(addon.price || 0) * quantity;
 
-        const imageUrl = addon.image || `https://placehold.co/80x80/2c3e50/white?text=${encodeURIComponent(shortLabel(addon.name || 'Add'))}`;
+        const fallbackImage = getImageFallback('addon');
+        const imageUrl = resolveImageUrl(addon.image, fallbackImage);
         const addonIcon = addon.icon || 'bi-plus-circle';
         const addonDetail = addon.detail || addon.description || '';
         const addonUnit = addon.unit || 'pcs';
@@ -451,7 +498,8 @@ function renderAddonsCustom() {
                             <img
                                 src="${escapeAttribute(imageUrl)}"
                                 alt="${escapeAttribute(addon.name || 'Add-on')}"
-                                onerror="this.src='https://placehold.co/80x80/2c3e50/white?text=${encodeURIComponent(shortLabel(addon.name || 'Add'))}'"
+                                loading="lazy"
+                                onerror="this.onerror=null;this.src='${escapeAttribute(fallbackImage)}'"
                             >
                         </div>
 
@@ -619,11 +667,14 @@ function getSelectedAddons() {
         id: addon.id,
         name: addon.name,
         detail: addon.detail || addon.description || null,
+        description: addon.description || addon.detail || null,
         unit: addon.unit || 'pcs',
         quantity: Number(addon.quantity || 1),
         price: Number(addon.price || 0),
         totalPrice: Number(addon.totalPrice || addon.total_price || 0),
         total_price: Number(addon.totalPrice || addon.total_price || 0),
+        image: addon.image || null,
+        icon: addon.icon || null,
     }));
 }
 
