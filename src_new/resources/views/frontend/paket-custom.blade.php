@@ -136,6 +136,12 @@
         <nav class="navbar navbar-expand-lg navbar-dark fixed-top navbar-batik">
             <div class="container">
                 <a class="navbar-brand" href="{{ route('frontend.index') }}">
+                      <img 
+                        src="{{ asset('img_logoo/logo1.png') }}" 
+                        alt="Didin Tenda Decoration Logo" 
+                        class="navbar-logo-img"
+                        onerror="this.style.display='none'"
+                    >
                     <span class="brand-text">Didin Tenda</span>
                     <span class="brand-sub">Decoration</span>
                 </a>
@@ -628,13 +634,23 @@
                         </ul>
                     </div>
 
-                    <div class="col-lg-3">
+                 <div class="col-lg-3">
                         <h5>Metode Pembayaran</h5>
 
                         <div class="payment-methods">
                             <img
                                 src="https://placehold.co/60x40/2c3e50/white?text=BCA"
                                 alt="BCA"
+                                class="payment-logo"
+                            />
+                            <img
+                                src="https://placehold.co/60x40/2c3e50/white?text=Mandiri"
+                                alt="Mandiri"
+                                class="payment-logo"
+                            />
+                            <img
+                                src="https://placehold.co/60x40/2c3e50/white?text=BRI"
+                                alt="BRI"
                                 class="payment-logo"
                             />
                             <img
@@ -647,6 +663,22 @@
                                 alt="GoPay"
                                 class="payment-logo"
                             />
+                        </div>
+
+                        <p class="small text-white-50 mt-3">
+                            <i class="bi bi-shield-check"></i>
+                            Transaksi 100% aman via Midtrans
+                        </p>
+
+                        <!-- LOGO 2 DI FOOTER -->
+                        <div class="mt-3 text-center">
+                            <img 
+                                src="{{ asset('img_logoo/logo2.png') }}" 
+                                alt="Partner Logo" 
+                                class="footer-logo-img"
+                                style="height: 90px; width: auto;"
+                                onerror="this.style.display='none'"
+                            >
                         </div>
                     </div>
                 </div>

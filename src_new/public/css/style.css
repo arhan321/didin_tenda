@@ -66,10 +66,134 @@ a:hover {
     color: var(--primary-dark);
 }
 
-img {
-    max-width: 100%;
-    height: auto;
+
+/* ============================================
+   PERBAIKAN LOGO NAVBAR - FORCE HORIZONTAL
+   ============================================ */
+
+/* Force navbar-brand menjadi horizontal */
+.navbar .navbar-brand {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    min-height: auto !important;
 }
+
+/* Force logo image */
+.navbar .navbar-brand .navbar-logo-img {
+    height: 40px !important;
+    width: auto !important;
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    position: relative !important;
+    top: 0 !important;
+    left: 0 !important;
+    float: none !important;
+}
+
+/* Force container teks */
+.navbar .navbar-brand .brand-text-container {
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 1.2 !important;
+}
+
+/* Force teks */
+.navbar .navbar-brand .brand-text {
+    font-size: 1.2rem !important;
+    font-weight: bold !important;
+    display: block !important;
+    line-height: 1.2 !important;
+}
+
+.navbar .navbar-brand .brand-sub {
+    font-size: 0.7rem !important;
+    opacity: 0.9 !important;
+    display: block !important;
+    line-height: 1.2 !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .navbar .navbar-brand .navbar-logo-img {
+        height: 32px !important;
+    }
+    .navbar .navbar-brand .brand-text {
+        font-size: 1rem !important;
+    }
+    .navbar .navbar-brand .brand-sub {
+        font-size: 0.6rem !important;
+    }
+}
+
+/* Footer payment logo tambahan - PERBAIKAN */
+.payment-methods {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.payment-logo {
+    height: 35px;
+    width: auto;
+    background: white;
+    border-radius: 8px;
+    padding: 5px;
+    object-fit: contain;
+}
+
+/* PERBAIKAN: Logo tambahan di footer - HAPUS background putih */
+.payment-logo-extra {
+    height: 50px;
+    width: auto;
+    background: transparent !important;  /* Ganti dari white ke transparent */
+    border-radius: 8px;
+    padding: 0px;  /* Hapus padding */
+    object-fit: contain;
+}
+
+/* Atau jika ingin dengan background putih tapi rapi */
+.payment-logo-extra-white {
+    height: 50px;
+    width: auto;
+    background: white;
+    border-radius: 8px;
+    padding: 5px;
+    object-fit: contain;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .navbar-logo-img {
+        height: 32px;
+    }
+    
+    .brand-text {
+        font-size: 1rem;
+    }
+    
+    .brand-sub {
+        font-size: 0.6rem;
+    }
+    
+    .payment-logo,
+    .payment-logo-extra {
+        height: 30px;
+    }
+    
+    .payment-logo-extra {
+        height: 40px;
+    }
+}
+
 
 /* ===== UTILITY CLASSES ===== */
 .text-primary {

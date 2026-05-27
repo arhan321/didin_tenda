@@ -31,10 +31,18 @@
         <!-- ==================== NAVBAR DENGAN MOTIF BATIK ==================== -->
         <nav class="navbar navbar-expand-lg navbar-dark fixed-top navbar-batik">
             <div class="container">
-                <a class="navbar-brand" href="{{ route('frontend.index') }}">
+            <a class="navbar-brand" href="{{ route('frontend.index') }}">
+                <img 
+                    src="{{ asset('img_logoo/logo1.png') }}" 
+                    alt="Didin Tenda Decoration Logo" 
+                    class="navbar-logo-img"
+                    onerror="this.style.display='none'"
+                >
+                <div class="brand-text-container">
                     <span class="brand-text">Didin Tenda</span>
                     <span class="brand-sub">Decoration</span>
-                </a>
+                </div>
+            </a>
 
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                     <span class="navbar-toggler-icon"></span>
@@ -525,6 +533,14 @@
                             <i class="bi bi-shield-check"></i>
                             Transaksi 100% aman via Midtrans
                         </p>
+                        <div class="mt-3 text-center">
+                        <img 
+                            src="{{ asset('img_logoo/logo2.png') }}" 
+                            alt="Partner Logo" 
+                            style="height: 90px; width: auto;"
+                            onerror="this.style.display='none'"
+                        >
+                        </div>
                     </div>
                 </div>
 

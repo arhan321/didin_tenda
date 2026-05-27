@@ -32,13 +32,22 @@
         <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
         <link rel="stylesheet" href="{{ asset('css/style.css') }}" />
         <link rel="stylesheet" href="{{ asset('css/profile.css') }}" />
+    
     </head>
     <body>
         <nav class="navbar navbar-expand-lg navbar-dark fixed-top navbar-batik">
             <div class="container">
                 <a class="navbar-brand" href="{{ route('frontend.index') }}">
-                    <span class="brand-text">Didin Tenda</span>
-                    <span class="brand-sub">Decoration</span>
+                    <img 
+                        src="{{ asset('img_logoo/logo1.png') }}" 
+                        alt="Didin Tenda Decoration Logo" 
+                        class="navbar-logo-img"
+                        onerror="this.style.display='none'"
+                    >
+                    <div class="brand-text-container">
+                        <span class="brand-text">Didin Tenda</span>
+                        <span class="brand-sub">Decoration</span>
+                    </div>
                 </a>
 
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -545,60 +554,61 @@
                 </div>
             </div>
         </section>
-<section id="galeri" class="galeri-section">
-    <div class="container">
-        <div class="section-header text-center" data-aos="fade-up">
-            <h5 class="section-subtitle">Portofolio</h5>
-            <h2 class="section-title">
-                Galeri
-                <span class="text-primary">Dekorasi</span>
-            </h2>
-            <p class="section-description">Beberapa hasil karya terbaik kami</p>
-        </div>
 
-        @php
-            $galeries = \App\Models\Galery::query()
-                ->latest('id')
-                ->get();
-        @endphp
+        <section id="galeri" class="galeri-section">
+            <div class="container">
+                <div class="section-header text-center" data-aos="fade-up">
+                    <h5 class="section-subtitle">Portofolio</h5>
+                    <h2 class="section-title">
+                        Galeri
+                        <span class="text-primary">Dekorasi</span>
+                    </h2>
+                    <p class="section-description">Beberapa hasil karya terbaik kami</p>
+                </div>
 
-        <div class="row g-3">
-            @forelse ($galeries as $gallery)
-                <div class="col-lg-4 col-md-6" data-aos="zoom-in">
-                    <div class="galeri-item">
-                        @if ($gallery->image)
-                            <img
-                                src="{{ asset('storage/' . $gallery->image) }}"
-                                alt="{{ $gallery->title ?? 'Galeri Dekorasi' }}"
-                                class="img-fluid"
-                            />
-                        @else
-                            <img
-                                src="https://placehold.co/600x400/3498db/ffffff?text={{ urlencode($gallery->title ?? 'Galeri Dekorasi') }}"
-                                alt="{{ $gallery->title ?? 'Galeri Dekorasi' }}"
-                                class="img-fluid"
-                            />
-                        @endif
+                @php
+                    $galeries = \App\Models\Galery::query()
+                        ->latest('id')
+                        ->get();
+                @endphp
 
-                        <div class="galeri-overlay">
-                            <h4>{{ $gallery->title ?? 'Galeri Dekorasi' }}</h4>
-                            <p>{{ $gallery->deskripsi ?? '-' }}</p>
+                <div class="row g-3">
+                    @forelse ($galeries as $gallery)
+                        <div class="col-lg-4 col-md-6" data-aos="zoom-in">
+                            <div class="galeri-item">
+                                @if ($gallery->image)
+                                    <img
+                                        src="{{ asset('storage/' . $gallery->image) }}"
+                                        alt="{{ $gallery->title ?? 'Galeri Dekorasi' }}"
+                                        class="img-fluid"
+                                    />
+                                @else
+                                    <img
+                                        src="https://placehold.co/600x400/3498db/ffffff?text={{ urlencode($gallery->title ?? 'Galeri Dekorasi') }}"
+                                        alt="{{ $gallery->title ?? 'Galeri Dekorasi' }}"
+                                        class="img-fluid"
+                                    />
+                                @endif
+
+                                <div class="galeri-overlay">
+                                    <h4>{{ $gallery->title ?? 'Galeri Dekorasi' }}</h4>
+                                    <p>{{ $gallery->deskripsi ?? '-' }}</p>
+                                </div>
+                            </div>
                         </div>
-                    </div>
+                    @empty
+                        <div class="col-12">
+                            <div class="text-center py-5">
+                                <p class="text-muted mb-0">
+                                    Belum ada data galeri yang ditampilkan.
+                                </p>
+                            </div>
+                        </div>
+                    @endforelse
                 </div>
-            @empty
-                <div class="col-12">
-                    <div class="text-center py-5">
-                        <p class="text-muted mb-0">
-                            Belum ada data galeri yang ditampilkan.
-                        </p>
-                    </div>
-                </div>
-            @endforelse
-        </div>
-    </div>
-</section>
-        <!-- TESTIMONI SECTION START -->
+            </div>
+        </section>
+
         <section id="testimoni" class="testimoni-section">
             <div class="container">
                 <div class="section-header text-center" data-aos="fade-up">
@@ -679,7 +689,6 @@
                 @endif
             </div>
         </section>
-        <!-- TESTIMONI SECTION END -->
 
         <section id="faq" class="faq-section">
             <div class="container">
@@ -790,161 +799,168 @@
             </div>
         </section>
 
-       @php
-    $footer = \App\Models\Footer::query()
-        ->latest('id')
-        ->first();
+        @php
+            $footer = \App\Models\Footer::query()
+                ->latest('id')
+                ->first();
 
-    $footerAlamat = $footer?->alamat
-        ?? 'Jl. Ki Mas Laeng Kp. Katomas, Tigaraksa, Kab. Tangerang, Banten';
+            $footerAlamat = $footer?->alamat
+                ?? 'Jl. Ki Mas Laeng Kp. Katomas, Tigaraksa, Kab. Tangerang, Banten';
 
-    $footerPhone = $footer?->nomor_telfon
-        ?? '0882-8925-8764';
+            $footerPhone = $footer?->nomor_telfon
+                ?? '0882-8925-8764';
 
-    $footerPhoneHref = preg_replace('/[^0-9+]/', '', $footerPhone);
+            $footerPhoneHref = preg_replace('/[^0-9+]/', '', $footerPhone);
 
-    $footerEmail = $footer?->email
-        ?? 'info@didintenda.com';
+            $footerEmail = $footer?->email
+                ?? 'info@didintenda.com';
 
-    $footerCopyright = $footer?->copyright
-        ?? '© 2026 Didin Tenda Decoration. All rights reserved.';
+            $footerCopyright = $footer?->copyright
+                ?? '© 2026 Didin Tenda Decoration. All rights reserved.';
 
-    $footerDevelopBy = $footer?->develop_by
-        ?? 'Developed for Tugas Akhir - Muhamad Darlan (20220803005)';
-@endphp
+            $footerDevelopBy = $footer?->develop_by
+                ?? 'Developed for Tugas Akhir - Muhamad Darlan (20220803005)';
+        @endphp
 
-<footer id="kontak" class="footer-section footer-batik">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-4 mb-lg-0 mb-4">
-                <h4>Didin Tenda Decoration</h4>
+        <footer id="kontak" class="footer-section footer-batik">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-4 mb-lg-0 mb-4">
+                        <h4>Didin Tenda Decoration</h4>
 
-                <p class="footer-address">
-                    <i class="bi bi-geo-alt-fill"></i>
-                    {{ $footerAlamat }}
-                </p>
+                        <p class="footer-address">
+                            <i class="bi bi-geo-alt-fill"></i>
+                            {{ $footerAlamat }}
+                        </p>
 
-                <p>
-                    <i class="bi bi-telephone-fill"></i>
-                    <a href="tel:{{ $footerPhoneHref }}">
-                        {{ $footerPhone }}
-                    </a>
-                </p>
+                        <p>
+                            <i class="bi bi-telephone-fill"></i>
+                            <a href="tel:{{ $footerPhoneHref }}">
+                                {{ $footerPhone }}
+                            </a>
+                        </p>
 
-                <p>
-                    <i class="bi bi-envelope-fill"></i>
-                    <a href="mailto:{{ $footerEmail }}">
-                        {{ $footerEmail }}
-                    </a>
-                </p>
+                        <p>
+                            <i class="bi bi-envelope-fill"></i>
+                            <a href="mailto:{{ $footerEmail }}">
+                                {{ $footerEmail }}
+                            </a>
+                        </p>
 
-            @php
-                $sosialMedia = \App\Models\SosialMedia::query()
-                    ->latest('id')
-                    ->get();
-            @endphp
+                        @php
+                            $sosialMedia = \App\Models\SosialMedia::query()
+                                ->latest('id')
+                                ->get();
+                        @endphp
 
-            <div class="social-links">
-                @forelse ($sosialMedia as $sosmed)
-                    <a
-                        href="{{ $sosmed->link ?: '#' }}"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                    >
-                        <i class="{{ $sosmed->icon ?: 'bi bi-link-45deg' }}"></i>
-                    </a>
-                @empty
-                    <a href="#"><i class="bi bi-facebook"></i></a>
-                    <a href="#"><i class="bi bi-instagram"></i></a>
-                    <a href="#"><i class="bi bi-whatsapp"></i></a>
-                    <a href="#"><i class="bi bi-youtube"></i></a>
-                @endforelse
-            </div>
-            </div>
+                        <div class="social-links">
+                            @forelse ($sosialMedia as $sosmed)
+                                <a
+                                    href="{{ $sosmed->link ?: '#' }}"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    <i class="{{ $sosmed->icon ?: 'bi bi-link-45deg' }}"></i>
+                                </a>
+                            @empty
+                                <a href="#"><i class="bi bi-facebook"></i></a>
+                                <a href="#"><i class="bi bi-instagram"></i></a>
+                                <a href="#"><i class="bi bi-whatsapp"></i></a>
+                                <a href="#"><i class="bi bi-youtube"></i></a>
+                            @endforelse
+                        </div>
+                    </div>
 
-            <div class="col-lg-2 col-md-6 mb-md-0 mb-4">
-                <h5>Menu Cepat</h5>
-                <ul class="footer-links">
-                    <li><a href="{{ route('frontend.index') }}">Beranda</a></li>
-                    <li><a href="{{ route('frontend.index') }}#paket">Paket</a></li>
-                    <li><a href="{{ route('frontend.index') }}#galeri">Galeri</a></li>
-                    <li><a href="{{ route('frontend.index') }}#testimoni">Testimoni</a></li>
-                    <li><a href="{{ route('frontend.index') }}#kontak">Kontak</a></li>
-                </ul>
-            </div>
+                    <div class="col-lg-2 col-md-6 mb-md-0 mb-4">
+                        <h5>Menu Cepat</h5>
+                        <ul class="footer-links">
+                            <li><a href="{{ route('frontend.index') }}">Beranda</a></li>
+                            <li><a href="{{ route('frontend.index') }}#paket">Paket</a></li>
+                            <li><a href="{{ route('frontend.index') }}#galeri">Galeri</a></li>
+                            <li><a href="{{ route('frontend.index') }}#testimoni">Testimoni</a></li>
+                            <li><a href="{{ route('frontend.index') }}#kontak">Kontak</a></li>
+                        </ul>
+                    </div>
 
-            <div class="col-lg-3 col-md-6 mb-md-0 mb-4">
-                <h5>Layanan</h5>
-                <ul class="footer-links">
-                    <li><a href="{{ route('frontend.index') }}#paket">Sewa Tenda</a></li>
-                    <li><a href="{{ route('frontend.index') }}#paket">Dekorasi Pernikahan</a></li>
-                    <li><a href="{{ route('frontend.index') }}#paket">Sewa Kursi</a></li>
-                    <li><a href="{{ route('frontend.index') }}#paket">Rigging & Lighting</a></li>
-                    <li><a href="{{ route('frontend.paket-custom') }}">Paket Custom</a></li>
-                </ul>
-            </div>
+                    <div class="col-lg-3 col-md-6 mb-md-0 mb-4">
+                        <h5>Layanan</h5>
+                        <ul class="footer-links">
+                            <li><a href="{{ route('frontend.index') }}#paket">Sewa Tenda</a></li>
+                            <li><a href="{{ route('frontend.index') }}#paket">Dekorasi Pernikahan</a></li>
+                            <li><a href="{{ route('frontend.index') }}#paket">Sewa Kursi</a></li>
+                            <li><a href="{{ route('frontend.index') }}#paket">Rigging & Lighting</a></li>
+                            <li><a href="{{ route('frontend.paket-custom') }}">Paket Custom</a></li>
+                        </ul>
+                    </div>
 
             <div class="col-lg-3">
-                <h5>Metode Pembayaran</h5>
+    <h5>Metode Pembayaran</h5>
 
-                <div class="payment-methods">
-                    <img
-                        src="https://placehold.co/60x40/2c3e50/white?text=BCA"
-                        alt="BCA"
-                        class="payment-logo"
-                    />
+    <div class="payment-methods">
+        <img
+            src="https://placehold.co/60x40/2c3e50/white?text=BCA"
+            alt="BCA"
+            class="payment-logo"
+        />
 
-                    <img
-                        src="https://placehold.co/60x40/2c3e50/white?text=Mandiri"
-                        alt="Mandiri"
-                        class="payment-logo"
-                    />
+        <img
+            src="https://placehold.co/60x40/2c3e50/white?text=Mandiri"
+            alt="Mandiri"
+            class="payment-logo"
+        />
 
-                    <img
-                        src="https://placehold.co/60x40/2c3e50/white?text=BRI"
-                        alt="BRI"
-                        class="payment-logo"
-                    />
+        <img
+            src="https://placehold.co/60x40/2c3e50/white?text=BRI"
+            alt="BRI"
+            class="payment-logo"
+        />
 
-                    <img
-                        src="https://placehold.co/60x40/2c3e50/white?text=QRIS"
-                        alt="QRIS"
-                        class="payment-logo"
-                    />
+        <img
+            src="https://placehold.co/60x40/2c3e50/white?text=QRIS"
+            alt="QRIS"
+            class="payment-logo"
+        />
 
-                    <img
-                        src="https://placehold.co/60x40/2c3e50/white?text=GoPay"
-                        alt="GoPay"
-                        class="payment-logo"
-                    />
-                </div>
-
-                <p class="small text-white-50 mt-3">
-                    <i class="bi bi-shield-check"></i>
-                    Transaksi 100% aman via Midtrans
-                </p>
-            </div>
-        </div>
-
-        <hr class="footer-hr" />
-
-        <div class="row align-items-center">
-            <div class="col-md-6 text-md-start text-center">
-                <p class="copyright">
-                    {{ $footerCopyright }}
-                </p>
-            </div>
-
-            <div class="col-md-6 text-md-end text-center">
-                <p class="developer">
-                    {{ $footerDevelopBy }}
-                </p>
-            </div>
-        </div>
+        <img
+            src="https://placehold.co/60x40/2c3e50/white?text=GoPay"
+            alt="GoPay"
+            class="payment-logo"
+        />
     </div>
-</footer>
 
- <button id="backToTop" class="back-to-top" title="Kembali ke atas">
+    <p class="small text-white-50 mt-3">
+        <i class="bi bi-shield-check"></i>
+        Transaksi 100% aman via Midtrans
+    </p>
+    <div class="mt-3 text-center">
+        <img 
+            src="{{ asset('img_logoo/logo2.png') }}" 
+            alt="Partner Logo" 
+            style="height: 90px; width: auto;"
+            onerror="this.style.display='none'"
+        >
+             </div>
+         </div>
+    </div>
+                <hr class="footer-hr" />
+
+                <div class="row align-items-center">
+                    <div class="col-md-6 text-md-start text-center">
+                        <p class="copyright">
+                            {{ $footerCopyright }}
+                        </p>
+                    </div>
+
+                    <div class="col-md-6 text-md-end text-center">
+                        <p class="developer">
+                            {{ $footerDevelopBy }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </footer>
+
+        <button id="backToTop" class="back-to-top" title="Kembali ke atas">
             <i class="bi bi-arrow-up"></i>
         </button>
 
