@@ -466,3 +466,12 @@
     "rows": 585,
     "size_bytes": 216533
 }
+{
+    "status": "success",
+    "message": "Backup database berhasil dibuat.",
+    "file_name": "backup_didin_tendav2_didin_tendav2_2026-06-02_11-23-02.sql",
+    "file_path": "/var/www/html/upload/uploads/backup/backup_didin_tendav2_didin_tendav2_2026-06-02_11-23-02.sql",
+    "tables": 29,
+    "rows": 585,
+    "size_bytes": 216533
+}
