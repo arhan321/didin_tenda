@@ -1,0 +1,6 @@
+Options +Indexes
+
+AuthType Basic
+AuthName "Backup Database"
+AuthUserFile /etc/apache2/.htpasswd
+Require valid-user

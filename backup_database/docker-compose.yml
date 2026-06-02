@@ -1,12 +1,12 @@
 version: '3'
 
 services:
-  php_backup_sastra:
+  php_backup_tenda:
     build: .
-    container_name: php_backup_sastra
+    container_name: php_backup_tenda
     image: latest
     volumes:
       - ./src:/var/www/html
       - ./httpd.vhost.conf:/etc/apache2/sites-available/000-default.conf
     ports:
-      - 46:80
+      - 42:80
