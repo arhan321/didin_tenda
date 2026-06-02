@@ -9,4 +9,4 @@ services:
       - ./src:/var/www/html
       - ./httpd.vhost.conf:/etc/apache2/sites-available/000-default.conf
     ports:
-      - 42:80
+      - 40:80
