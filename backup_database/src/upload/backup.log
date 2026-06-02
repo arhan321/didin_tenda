@@ -4372,3 +4372,48 @@
     "rows": 586,
     "size_bytes": 217528
 }
+{
+    "status": "success",
+    "message": "Backup database berhasil dibuat.",
+    "file_name": "backup_didin_tendav2_didin_tendav2_2026-06-02_18-37-26.sql",
+    "file_path": "/var/www/html/upload/uploads/backup/backup_didin_tendav2_didin_tendav2_2026-06-02_18-37-26.sql",
+    "tables": 29,
+    "rows": 586,
+    "size_bytes": 217528
+}
+{
+    "status": "success",
+    "message": "Backup database berhasil dibuat.",
+    "file_name": "backup_didin_tendav2_didin_tendav2_2026-06-02_18-38-02.sql",
+    "file_path": "/var/www/html/upload/uploads/backup/backup_didin_tendav2_didin_tendav2_2026-06-02_18-38-02.sql",
+    "tables": 29,
+    "rows": 586,
+    "size_bytes": 217528
+}
+{
+    "status": "success",
+    "message": "Backup database berhasil dibuat.",
+    "file_name": "backup_didin_tendav2_didin_tendav2_2026-06-02_18-39-01.sql",
+    "file_path": "/var/www/html/upload/uploads/backup/backup_didin_tendav2_didin_tendav2_2026-06-02_18-39-01.sql",
+    "tables": 29,
+    "rows": 586,
+    "size_bytes": 217528
+}
+{
+    "status": "success",
+    "message": "Backup database berhasil dibuat.",
+    "file_name": "backup_didin_tendav2_didin_tendav2_2026-06-02_18-40-02.sql",
+    "file_path": "/var/www/html/upload/uploads/backup/backup_didin_tendav2_didin_tendav2_2026-06-02_18-40-02.sql",
+    "tables": 29,
+    "rows": 586,
+    "size_bytes": 217528
+}
+{
+    "status": "success",
+    "message": "Backup database berhasil dibuat.",
+    "file_name": "backup_didin_tendav2_didin_tendav2_2026-06-02_18-41-01.sql",
+    "file_path": "/var/www/html/upload/uploads/backup/backup_didin_tendav2_didin_tendav2_2026-06-02_18-41-01.sql",
+    "tables": 29,
+    "rows": 586,
+    "size_bytes": 217528
+}
