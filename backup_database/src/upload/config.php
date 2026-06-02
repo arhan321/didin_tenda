@@ -13,7 +13,7 @@ return [
     ],
 
     'backup_dir' => __DIR__ . '/uploads/backup',
-    'backup_prefix' => 'backup_sdk_db_',
+    'backup_prefix' => 'backup_didin_tendav2_',
     'keep_last_files' => 12,
     'timezone' => 'Asia/Jakarta',
 ];
