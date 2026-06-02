@@ -5,8 +5,8 @@ declare(strict_types=1);
 return [
     'db' => [
         'host' => '100.100.55.22',
-        'port' => 62307,
-        'name' => 'sdk_db',
+        'port' => 32346,
+        'name' => 'didin_tendav2',
         'username' => 'root',
         'password' => '123',
         'charset' => 'utf8mb4',
