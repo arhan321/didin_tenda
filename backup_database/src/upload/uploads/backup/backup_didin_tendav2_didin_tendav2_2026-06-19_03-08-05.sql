@@ -404,3 +404,929 @@ INSERT INTO `addons` (`id`, `name`, `slug`, `detail`, `price`, `unit`, `is_quant
 -- Table structure for berandas
 -- ----------------------------
 DROP TABLE IF EXISTS `berandas`;
+CREATE TABLE `berandas` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `title_1` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `title_2` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `deskripsi` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `image` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ----------------------------
+-- Records of berandas
+-- ----------------------------
+INSERT INTO `berandas` (`id`, `title_1`, `title_2`, `deskripsi`, `image`, `created_at`, `updated_at`) VALUES
+(1, 'Sejak 1996 • Terpercaya', 'Sewakan Tenda & Dekorasi Impian untuk Acara Istimewa Anda', 'Booking online 24/7, cek ketersediaan real-time, dan pembayaran aman via berbagai metode. Wujudkan acara impian bersama Didin Tenda Decoration.', 'beranda/01KS5DPRXQX15Z5DGD6Q5WG4Q2.jpeg', '2026-05-02 04:42:21', '2026-05-21 21:05:52');
+
+-- ----------------------------
+-- Table structure for cache
+-- ----------------------------
+DROP TABLE IF EXISTS `cache`;
+CREATE TABLE `cache` (
+  `key` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `value` mediumtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `expiration` int(11) NOT NULL,
+  PRIMARY KEY (`key`),
+  KEY `cache_expiration_index` (`expiration`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ----------------------------
+-- Records of cache
+-- ----------------------------
+INSERT INTO `cache` (`key`, `value`, `expiration`) VALUES
+('pt-didin-tenda-cache-356a192b7913b04c54574d18c28d46e6395428ab', 'i:1;', 1780144003),
+('pt-didin-tenda-cache-356a192b7913b04c54574d18c28d46e6395428ab:timer', 'i:1780144003;', 1780144003),
+('pt-didin-tenda-cache-livewire-rate-limiter:5365e54bead5e0059562d73e32883eda662ec400', 'i:1;', 1781437008),
+('pt-didin-tenda-cache-livewire-rate-limiter:5365e54bead5e0059562d73e32883eda662ec400:timer', 'i:1781437008;', 1781437008),
+('pt-didin-tenda-cache-spatie.permission.cache', 'a:3:{s:5:\"alias\";a:4:{s:1:\"a\";s:2:\"id\";s:1:\"b\";s:4:\"name\";s:1:\"c\";s:10:\"guard_name\";s:1:\"r\";s:5:\"roles\";}s:11:\"permissions\";a:73:{i:0;a:4:{s:1:\"a\";i:1;s:1:\"b\";s:12:\"ViewAny:User\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:1;a:4:{s:1:\"a\";i:2;s:1:\"b\";s:9:\"View:User\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:2;a:4:{s:1:\"a\";i:3;s:1:\"b\";s:11:\"Create:User\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:3;a:4:{s:1:\"a\";i:4;s:1:\"b\";s:11:\"Update:User\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:4;a:4:{s:1:\"a\";i:5;s:1:\"b\";s:11:\"Delete:User\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:5;a:4:{s:1:\"a\";i:6;s:1:\"b\";s:12:\"ViewAny:Role\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:6;a:4:{s:1:\"a\";i:7;s:1:\"b\";s:9:\"View:Role\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:7;a:4:{s:1:\"a\";i:8;s:1:\"b\";s:11:\"Create:Role\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:8;a:4:{s:1:\"a\";i:9;s:1:\"b\";s:11:\"Update:Role\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:9;a:4:{s:1:\"a\";i:10;s:1:\"b\";s:11:\"Delete:Role\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:10;a:4:{s:1:\"a\";i:11;s:1:\"b\";s:16:\"ViewAny:Activity\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:11;a:4:{s:1:\"a\";i:12;s:1:\"b\";s:13:\"View:Activity\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:12;a:4:{s:1:\"a\";i:13;s:1:\"b\";s:15:\"Create:Activity\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:13;a:4:{s:1:\"a\";i:14;s:1:\"b\";s:15:\"Update:Activity\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:14;a:4:{s:1:\"a\";i:15;s:1:\"b\";s:15:\"Delete:Activity\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:15;a:4:{s:1:\"a\";i:16;s:1:\"b\";s:18:\"View:MyProfilePage\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:16;a:4:{s:1:\"a\";i:17;s:1:\"b\";s:19:\"View:OverlookWidget\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:17;a:4:{s:1:\"a\";i:18;s:1:\"b\";s:21:\"View:LatestAccessLogs\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:18;a:4:{s:1:\"a\";i:19;s:1:\"b\";s:13:\"ViewAny:Addon\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:19;a:4:{s:1:\"a\";i:20;s:1:\"b\";s:10:\"View:Addon\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:20;a:4:{s:1:\"a\";i:21;s:1:\"b\";s:12:\"Create:Addon\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:21;a:4:{s:1:\"a\";i:22;s:1:\"b\";s:12:\"Update:Addon\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:22;a:4:{s:1:\"a\";i:23;s:1:\"b\";s:12:\"Delete:Addon\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:23;a:4:{s:1:\"a\";i:24;s:1:\"b\";s:18:\"ViewAny:CustomItem\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:24;a:4:{s:1:\"a\";i:25;s:1:\"b\";s:15:\"View:CustomItem\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:25;a:4:{s:1:\"a\";i:26;s:1:\"b\";s:17:\"Create:CustomItem\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:26;a:4:{s:1:\"a\";i:27;s:1:\"b\";s:17:\"Update:CustomItem\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:27;a:4:{s:1:\"a\";i:28;s:1:\"b\";s:17:\"Delete:CustomItem\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:28;a:4:{s:1:\"a\";i:29;s:1:\"b\";s:19:\"ViewAny:PackageItem\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:29;a:4:{s:1:\"a\";i:30;s:1:\"b\";s:16:\"View:PackageItem\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:30;a:4:{s:1:\"a\";i:31;s:1:\"b\";s:18:\"Create:PackageItem\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:31;a:4:{s:1:\"a\";i:32;s:1:\"b\";s:18:\"Update:PackageItem\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:32;a:4:{s:1:\"a\";i:33;s:1:\"b\";s:18:\"Delete:PackageItem\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:33;a:4:{s:1:\"a\";i:34;s:1:\"b\";s:15:\"ViewAny:Package\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:34;a:4:{s:1:\"a\";i:35;s:1:\"b\";s:12:\"View:Package\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:35;a:4:{s:1:\"a\";i:36;s:1:\"b\";s:14:\"Create:Package\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:36;a:4:{s:1:\"a\";i:37;s:1:\"b\";s:14:\"Update:Package\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:37;a:4:{s:1:\"a\";i:38;s:1:\"b\";s:14:\"Delete:Package\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:38;a:4:{s:1:\"a\";i:39;s:1:\"b\";s:15:\"ViewAny:Beranda\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:39;a:4:{s:1:\"a\";i:40;s:1:\"b\";s:12:\"View:Beranda\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:40;a:4:{s:1:\"a\";i:41;s:1:\"b\";s:14:\"Create:Beranda\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:41;a:4:{s:1:\"a\";i:42;s:1:\"b\";s:14:\"Update:Beranda\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:42;a:4:{s:1:\"a\";i:43;s:1:\"b\";s:14:\"Delete:Beranda\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:43;a:4:{s:1:\"a\";i:44;s:1:\"b\";s:18:\"ViewAny:OrderAddon\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:44;a:4:{s:1:\"a\";i:45;s:1:\"b\";s:15:\"View:OrderAddon\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:45;a:4:{s:1:\"a\";i:46;s:1:\"b\";s:17:\"Create:OrderAddon\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:46;a:4:{s:1:\"a\";i:47;s:1:\"b\";s:17:\"Update:OrderAddon\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:47;a:4:{s:1:\"a\";i:48;s:1:\"b\";s:17:\"Delete:OrderAddon\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:48;a:4:{s:1:\"a\";i:49;s:1:\"b\";s:17:\"ViewAny:OrderItem\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:49;a:4:{s:1:\"a\";i:50;s:1:\"b\";s:14:\"View:OrderItem\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:50;a:4:{s:1:\"a\";i:51;s:1:\"b\";s:16:\"Create:OrderItem\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:51;a:4:{s:1:\"a\";i:52;s:1:\"b\";s:16:\"Update:OrderItem\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:52;a:4:{s:1:\"a\";i:53;s:1:\"b\";s:16:\"Delete:OrderItem\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:53;a:4:{s:1:\"a\";i:54;s:1:\"b\";s:13:\"ViewAny:Order\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:54;a:4:{s:1:\"a\";i:55;s:1:\"b\";s:10:\"View:Order\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:55;a:4:{s:1:\"a\";i:56;s:1:\"b\";s:12:\"Create:Order\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:56;a:4:{s:1:\"a\";i:57;s:1:\"b\";s:12:\"Update:Order\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:57;a:4:{s:1:\"a\";i:58;s:1:\"b\";s:12:\"Delete:Order\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:58;a:4:{s:1:\"a\";i:59;s:1:\"b\";s:14:\"ViewAny:Galery\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:59;a:4:{s:1:\"a\";i:60;s:1:\"b\";s:11:\"View:Galery\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:60;a:4:{s:1:\"a\";i:61;s:1:\"b\";s:13:\"Create:Galery\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:61;a:4:{s:1:\"a\";i:62;s:1:\"b\";s:13:\"Update:Galery\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:62;a:4:{s:1:\"a\";i:63;s:1:\"b\";s:13:\"Delete:Galery\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:63;a:4:{s:1:\"a\";i:64;s:1:\"b\";s:14:\"ViewAny:Footer\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:64;a:4:{s:1:\"a\";i:65;s:1:\"b\";s:11:\"View:Footer\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:65;a:4:{s:1:\"a\";i:66;s:1:\"b\";s:13:\"Create:Footer\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:66;a:4:{s:1:\"a\";i:67;s:1:\"b\";s:13:\"Update:Footer\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:67;a:4:{s:1:\"a\";i:68;s:1:\"b\";s:13:\"Delete:Footer\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:68;a:4:{s:1:\"a\";i:69;s:1:\"b\";s:19:\"ViewAny:SosialMedia\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:69;a:4:{s:1:\"a\";i:70;s:1:\"b\";s:16:\"View:SosialMedia\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:70;a:4:{s:1:\"a\";i:71;s:1:\"b\";s:18:\"Create:SosialMedia\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:71;a:4:{s:1:\"a\";i:72;s:1:\"b\";s:18:\"Update:SosialMedia\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}i:72;a:4:{s:1:\"a\";i:73;s:1:\"b\";s:18:\"Delete:SosialMedia\";s:1:\"c\";s:3:\"web\";s:1:\"r\";a:1:{i:0;i:1;}}}s:5:\"roles\";a:1:{i:0;a:3:{s:1:\"a\";i:1;s:1:\"b\";s:11:\"super_admin\";s:1:\"c\";s:3:\"web\";}}}', 1781523337);
+
+-- ----------------------------
+-- Table structure for cache_locks
+-- ----------------------------
+DROP TABLE IF EXISTS `cache_locks`;
+CREATE TABLE `cache_locks` (
+  `key` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `owner` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `expiration` int(11) NOT NULL,
+  PRIMARY KEY (`key`),
+  KEY `cache_locks_expiration_index` (`expiration`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ----------------------------
+-- Records of cache_locks
+-- ----------------------------
+-- ----------------------------
+-- Table structure for custom_items
+-- ----------------------------
+DROP TABLE IF EXISTS `custom_items`;
+CREATE TABLE `custom_items` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `slug` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `price` bigint(20) unsigned NOT NULL DEFAULT 0,
+  `unit` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pcs',
+  `min_quantity` int(10) unsigned NOT NULL DEFAULT 0,
+  `max_quantity` int(10) unsigned DEFAULT NULL,
+  `image` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `icon` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `sort_order` int(10) unsigned NOT NULL DEFAULT 0,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `custom_items_slug_unique` (`slug`)
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ----------------------------
+-- Records of custom_items
+-- ----------------------------
+INSERT INTO `custom_items` (`id`, `name`, `slug`, `description`, `price`, `unit`, `min_quantity`, `max_quantity`, `image`, `icon`, `is_active`, `sort_order`, `created_at`, `updated_at`) VALUES
+(1, 'Tenda Per Meter²', 'tenda-per-meter2', 'Sewa tenda berdasarkan luas kebutuhan acara plus dekorasi kain dan penyesuaian pernak pernik dekorasi. tersedia semua warna ( hubungi admin untuk pemilihan warna )', 60000, 'meter persegi', 10, 600, 'custom-items/01KSEKCQM647HFY6ME3381YCK4.jpeg', NULL, 1, 1, '2026-05-01 23:11:28', '2026-05-25 10:39:29'),
+(2, 'Kursi Plastik', 'kursi-plastik', 'Kursi tamu standar untuk acara plastik napolly.', 7000, 'pcs', 20, 500, 'custom-items/01KSEJDASKTWPE273NR71G7YCV.webp', NULL, 1, 2, '2026-05-01 23:11:28', '2026-05-25 10:21:15'),
+(3, 'Meja Prasmanan Atau Meja Tamu ( Plus Cover )', 'meja-prasmanan-atau-meja-tamu-plus-cover', 'Meja untuk area hidangan dan konsumsi ukuran 1.75 meter x 1 meter ', 50000, 'pcs', 5, 80, 'custom-items/01KSEJJCXKC5TC504G8379PXKD.webp', 'bi-table', 1, 6, '2026-05-01 23:11:28', '2026-05-25 10:29:41'),
+(4, 'Kursi Lipat Stainless', 'kursi-lipat-stainless', 'Kursi Lipat Merk Chitosse ', 10000, 'pcs', 50, 500, 'custom-items/01KSEJNZJJB8HJGWN2XD5AZ2QH.webp', NULL, 1, 4, '2026-05-01 23:11:28', '2026-05-25 10:34:37'),
+(5, 'Kursi Merah Merk Futura', 'kursi-merah-merk-futura', 'Kursi Sofa empuk merk Futura', 12000, 'pcs', 30, 400, 'custom-items/01KSEJVAWB46YV2D4G8ZN3JWN5.jpg', 'bi-image', 1, 5, '2026-05-01 23:11:28', '2026-05-25 10:34:58'),
+(6, 'Meja Bundar Kapassitas 5 Atau 6 Orang ( Plus Cover )', 'meja-bundar-kapassitas-5-atau-6-orang-plus-cover', 'Meja bundar untuk acara formal, rapat dan tamu', 50000, 'pcs', 20, 88, 'custom-items/01KSEK488DB0TDTK0SQS88ZNAX.avif', 'bi-easel', 1, 7, '2026-05-01 23:11:28', '2026-05-25 10:35:20');
+
+-- ----------------------------
+-- Table structure for failed_jobs
+-- ----------------------------
+DROP TABLE IF EXISTS `failed_jobs`;
+CREATE TABLE `failed_jobs` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `uuid` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `connection` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `queue` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `payload` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `exception` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `failed_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `failed_jobs_uuid_unique` (`uuid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ----------------------------
+-- Records of failed_jobs
+-- ----------------------------
+-- ----------------------------
+-- Table structure for footers
+-- ----------------------------
+DROP TABLE IF EXISTS `footers`;
+CREATE TABLE `footers` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `alamat` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `nomor_telfon` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `email` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `copyright` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `develop_by` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ----------------------------
+-- Records of footers
+-- ----------------------------
+INSERT INTO `footers` (`id`, `alamat`, `nomor_telfon`, `email`, `copyright`, `develop_by`, `created_at`, `updated_at`) VALUES
+(1, 'Jl. Ki Mas Laeng Kp. Katomas, Tigaraksa, Kab. Tangerang, Banten', '0882-8925-8764', 'info@didintenda.com', '© 2026 Didin Tenda Decoration. All rights reserved.', 'Developed for Tugas Akhir - Muhamad Darlan (20220803005)', '2026-05-02 05:19:22', '2026-05-02 05:22:00');
+
+-- ----------------------------
+-- Table structure for galeries
+-- ----------------------------
+DROP TABLE IF EXISTS `galeries`;
+CREATE TABLE `galeries` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `deskripsi` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `image` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ----------------------------
+-- Records of galeries
+-- ----------------------------
+INSERT INTO `galeries` (`id`, `title`, `deskripsi`, `image`, `created_at`, `updated_at`) VALUES
+(1, 'Pelaminan Minimalis 8 Meter', 'pelaminan mewah - 2025', 'galeries/01KS5B29G7X444JE0C6PEESA96.jpg', '2026-05-02 05:08:21', '2026-05-22 19:24:32'),
+(2, 'pelaminan 8 meter Premium', NULL, 'galeries/01KS7SFGMX22V2J5P3ZAHGQQ8F.jpeg', '2026-05-02 05:09:25', '2026-05-22 19:24:03'),
+(3, 'Pelaminan dengan lebar 5 meter Minimalis', NULL, 'galeries/01KS7SK59Q88WHKMJFNH8272K3.jpeg', '2026-05-22 19:09:12', '2026-05-22 19:12:05');
+
+-- ----------------------------
+-- Table structure for job_batches
+-- ----------------------------
+DROP TABLE IF EXISTS `job_batches`;
+CREATE TABLE `job_batches` (
+  `id` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `total_jobs` int(11) NOT NULL,
+  `pending_jobs` int(11) NOT NULL,
+  `failed_jobs` int(11) NOT NULL,
+  `failed_job_ids` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `options` mediumtext COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `cancelled_at` int(11) DEFAULT NULL,
+  `created_at` int(11) NOT NULL,
+  `finished_at` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ----------------------------
+-- Records of job_batches
+-- ----------------------------
+-- ----------------------------
+-- Table structure for jobs
+-- ----------------------------
+DROP TABLE IF EXISTS `jobs`;
+CREATE TABLE `jobs` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `queue` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `payload` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `attempts` tinyint(3) unsigned NOT NULL,
+  `reserved_at` int(10) unsigned DEFAULT NULL,
+  `available_at` int(10) unsigned NOT NULL,
+  `created_at` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `jobs_queue_index` (`queue`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ----------------------------
+-- Records of jobs
+-- ----------------------------
+-- ----------------------------
+-- Table structure for migrations
+-- ----------------------------
+DROP TABLE IF EXISTS `migrations`;
+CREATE TABLE `migrations` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `migration` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `batch` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ----------------------------
+-- Records of migrations
+-- ----------------------------
+INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
+(1, '0001_01_01_000000_create_users_table', 1),
+(2, '0001_01_01_000001_create_cache_table', 1),
+(3, '0001_01_01_000002_create_jobs_table', 1),
+(4, '0001_01_01_000003_create_notifications_table', 1),
+(5, '0001_01_01_000004_create_permission_tables', 1),
+(6, '0001_01_01_000005_create_activity_log_table', 1),
+(7, '0001_01_01_000006_add_event_column_to_activity_log_table', 1),
+(8, '0001_01_01_000007_add_batch_uuid_column_to_activity_log_table', 1),
+(9, '2026_04_28_070543_create_packages_table', 1),
+(10, '2026_04_28_070548_create_package_items_table', 1),
+(11, '2026_04_28_070552_create_addons_table', 1),
+(12, '2026_04_28_070556_create_custom_items_table', 1),
+(13, '2026_04_28_070630_create_orders_table', 1),
+(14, '2026_04_28_070635_create_order_items_table', 1),
+(15, '2026_04_28_070639_create_order_addons_table', 1),
+(16, '2026_04_28_070650_create_reviews_table', 1),
+(17, '2026_04_28_070832_create_payments_table', 1),
+(18, '2026_04_30_080827_create_berandas_table', 1),
+(19, '2026_05_02_045124_create_galeries_table', 2),
+(20, '2026_05_02_051237_create_footers_table', 3),
+(21, '2026_05_02_052236_create_sosial_media_table', 4);
+
+-- ----------------------------
+-- Table structure for model_has_permissions
+-- ----------------------------
+DROP TABLE IF EXISTS `model_has_permissions`;
+CREATE TABLE `model_has_permissions` (
+  `permission_id` bigint(20) unsigned NOT NULL,
+  `model_type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `model_id` bigint(20) unsigned NOT NULL,
+  PRIMARY KEY (`permission_id`,`model_id`,`model_type`),
+  KEY `model_has_permissions_model_id_model_type_index` (`model_id`,`model_type`),
+  CONSTRAINT `model_has_permissions_permission_id_foreign` FOREIGN KEY (`permission_id`) REFERENCES `permissions` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ----------------------------
+-- Records of model_has_permissions
+-- ----------------------------
+-- ----------------------------
+-- Table structure for model_has_roles
+-- ----------------------------
+DROP TABLE IF EXISTS `model_has_roles`;
+CREATE TABLE `model_has_roles` (
+  `role_id` bigint(20) unsigned NOT NULL,
+  `model_type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `model_id` bigint(20) unsigned NOT NULL,
+  PRIMARY KEY (`role_id`,`model_id`,`model_type`),
+  KEY `model_has_roles_model_id_model_type_index` (`model_id`,`model_type`),
+  CONSTRAINT `model_has_roles_role_id_foreign` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ----------------------------
+-- Records of model_has_roles
+-- ----------------------------
+INSERT INTO `model_has_roles` (`role_id`, `model_type`, `model_id`) VALUES
+(1, 'App\\Models\\User', 1);
+
+-- ----------------------------
+-- Table structure for notifications
+-- ----------------------------
+DROP TABLE IF EXISTS `notifications`;
+CREATE TABLE `notifications` (
+  `id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `notifiable_type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `notifiable_id` bigint(20) unsigned NOT NULL,
+  `data` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `read_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `notifications_notifiable_type_notifiable_id_index` (`notifiable_type`,`notifiable_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ----------------------------
+-- Records of notifications
+-- ----------------------------
+-- ----------------------------
+-- Table structure for order_addons
+-- ----------------------------
+DROP TABLE IF EXISTS `order_addons`;
+CREATE TABLE `order_addons` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `order_id` bigint(20) unsigned NOT NULL,
+  `addon_id` bigint(20) unsigned DEFAULT NULL,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `detail` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `unit` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `quantity` int(10) unsigned NOT NULL DEFAULT 1,
+  `price` bigint(20) unsigned NOT NULL DEFAULT 0,
+  `total_price` bigint(20) unsigned NOT NULL DEFAULT 0,
+  `snapshot` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `order_addons_addon_id_foreign` (`addon_id`),
+  KEY `order_addons_order_id_addon_id_index` (`order_id`,`addon_id`),
+  CONSTRAINT `order_addons_addon_id_foreign` FOREIGN KEY (`addon_id`) REFERENCES `addons` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `order_addons_order_id_foreign` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ----------------------------
+-- Records of order_addons
+-- ----------------------------
+INSERT INTO `order_addons` (`id`, `order_id`, `addon_id`, `name`, `detail`, `unit`, `quantity`, `price`, `total_price`, `snapshot`, `created_at`, `updated_at`) VALUES
+(1, 1, 1, 'Sound System', 'Speaker aktif, mixer, dan microphone untuk kebutuhan acara.', 'set', 2, 750000, 1500000, '{\"slug\":\"sound-system\",\"image\":\"https:\\/\\/placehold.co\\/600x400\\/2c3e50\\/ffffff?text=Sound+System\",\"icon\":\"bi-speaker\",\"is_quantity_based\":true}', '2026-05-01 23:20:26', '2026-05-01 23:20:26'),
+(2, 1, 3, 'Photobooth', 'Area foto dekoratif untuk tamu undangan.', 'set', 2, 1200000, 2400000, '{\"slug\":\"photobooth\",\"image\":\"https:\\/\\/placehold.co\\/600x400\\/9b59b6\\/ffffff?text=Photobooth\",\"icon\":\"bi-camera\",\"is_quantity_based\":true}', '2026-05-01 23:20:26', '2026-05-01 23:20:26'),
+(3, 1, 5, 'Genset', 'Genset cadangan listrik untuk acara outdoor.', 'unit', 2, 1000000, 2000000, '{\"slug\":\"genset\",\"image\":\"https:\\/\\/placehold.co\\/600x400\\/34495e\\/ffffff?text=Genset\",\"icon\":\"bi-lightning-charge\",\"is_quantity_based\":true}', '2026-05-01 23:20:26', '2026-05-01 23:20:26'),
+(4, 1, 6, 'Kipas Blower', 'Kipas blower untuk area tenda agar lebih nyaman.', 'unit', 2, 150000, 300000, '{\"slug\":\"kipas-blower\",\"image\":\"https:\\/\\/placehold.co\\/600x400\\/17a2b8\\/ffffff?text=Kipas+Blower\",\"icon\":\"bi-wind\",\"is_quantity_based\":true}', '2026-05-01 23:20:26', '2026-05-01 23:20:26'),
+(5, 2, 1, 'Sound System', 'Speaker aktif, mixer, dan microphone untuk kebutuhan acara.', 'set', 1, 750000, 750000, '{\"slug\":\"sound-system\",\"image\":\"https:\\/\\/placehold.co\\/600x400\\/2c3e50\\/ffffff?text=Sound+System\",\"icon\":\"bi-speaker\",\"is_quantity_based\":true}', '2026-05-01 23:25:15', '2026-05-01 23:25:15'),
+(6, 2, 2, 'Lighting Dekorasi', 'Lampu dekorasi untuk mempercantik area acara.', 'set', 1, 500000, 500000, '{\"slug\":\"lighting-dekorasi\",\"image\":\"https:\\/\\/placehold.co\\/600x400\\/f1c40f\\/000000?text=Lighting\",\"icon\":\"bi-lightbulb\",\"is_quantity_based\":true}', '2026-05-01 23:25:15', '2026-05-01 23:25:15'),
+(7, 2, 3, 'Photobooth', 'Area foto dekoratif untuk tamu undangan.', 'set', 1, 1200000, 1200000, '{\"slug\":\"photobooth\",\"image\":\"https:\\/\\/placehold.co\\/600x400\\/9b59b6\\/ffffff?text=Photobooth\",\"icon\":\"bi-camera\",\"is_quantity_based\":true}', '2026-05-01 23:25:15', '2026-05-01 23:25:15'),
+(8, 2, 4, 'Panggung Rigging', 'Panggung dan rigging untuk acara besar atau outdoor.', 'set', 1, 2500000, 2500000, '{\"slug\":\"panggung-rigging\",\"image\":\"https:\\/\\/placehold.co\\/600x400\\/e74c3c\\/ffffff?text=Panggung+Rigging\",\"icon\":\"bi-grid-3x3-gap\",\"is_quantity_based\":true}', '2026-05-01 23:25:15', '2026-05-01 23:25:15'),
+(9, 2, 5, 'Genset', 'Genset cadangan listrik untuk acara outdoor.', 'unit', 1, 1000000, 1000000, '{\"slug\":\"genset\",\"image\":\"https:\\/\\/placehold.co\\/600x400\\/34495e\\/ffffff?text=Genset\",\"icon\":\"bi-lightning-charge\",\"is_quantity_based\":true}', '2026-05-01 23:25:15', '2026-05-01 23:25:15'),
+(10, 2, 6, 'Kipas Blower', 'Kipas blower untuk area tenda agar lebih nyaman.', 'unit', 1, 150000, 150000, '{\"slug\":\"kipas-blower\",\"image\":\"https:\\/\\/placehold.co\\/600x400\\/17a2b8\\/ffffff?text=Kipas+Blower\",\"icon\":\"bi-wind\",\"is_quantity_based\":true}', '2026-05-01 23:25:15', '2026-05-01 23:25:15'),
+(11, 3, 1, 'Sound System', 'Speaker aktif, mixer, dan microphone untuk kebutuhan acara.', 'pcs', 2, 750000, 1500000, '{\"slug\":\"sound-system\",\"image\":null,\"icon\":\"bi-speaker\",\"is_quantity_based\":true}', '2026-05-03 19:38:26', '2026-05-03 19:38:26'),
+(12, 3, 2, 'Lighting Dekorasi', 'Lampu dekorasi untuk mempercantik area acara.', 'set', 2, 500000, 1000000, '{\"slug\":\"lighting-dekorasi\",\"image\":\"https:\\/\\/placehold.co\\/600x400\\/f1c40f\\/000000?text=Lighting\",\"icon\":\"bi-lightbulb\",\"is_quantity_based\":true}', '2026-05-03 19:38:26', '2026-05-03 19:38:26'),
+(13, 3, 3, 'Photobooth', 'Area foto dekoratif untuk tamu undangan.', 'set', 2, 1200000, 2400000, '{\"slug\":\"photobooth\",\"image\":\"https:\\/\\/placehold.co\\/600x400\\/9b59b6\\/ffffff?text=Photobooth\",\"icon\":\"bi-camera\",\"is_quantity_based\":true}', '2026-05-03 19:38:26', '2026-05-03 19:38:26'),
+(14, 3, 4, 'Panggung Rigging', 'Panggung dan rigging untuk acara besar atau outdoor.', 'set', 2, 2500000, 5000000, '{\"slug\":\"panggung-rigging\",\"image\":\"https:\\/\\/placehold.co\\/600x400\\/e74c3c\\/ffffff?text=Panggung+Rigging\",\"icon\":\"bi-grid-3x3-gap\",\"is_quantity_based\":true}', '2026-05-03 19:38:26', '2026-05-03 19:38:26'),
+(15, 3, 5, 'Genset', 'Genset cadangan listrik untuk acara outdoor.', 'pcs', 2, 1000000, 2000000, '{\"slug\":\"genset\",\"image\":null,\"icon\":\"bi-lightning-charge\",\"is_quantity_based\":true}', '2026-05-03 19:38:26', '2026-05-03 19:38:26'),
+(16, 3, 6, 'Kipas Blower', 'Kipas blower untuk area tenda agar lebih nyaman.', 'pcs', 2, 150000, 300000, '{\"slug\":\"kipas-blower\",\"image\":null,\"icon\":\"bi-wind\",\"is_quantity_based\":true}', '2026-05-03 19:38:26', '2026-05-03 19:38:26'),
+(17, 4, 2, 'Lighting Dekorasi', 'Lampu dekorasi untuk mempercantik area acara.', 'set', 2, 500000, 1000000, '{\"slug\":\"lighting-dekorasi\",\"image\":\"https:\\/\\/placehold.co\\/600x400\\/f1c40f\\/000000?text=Lighting\",\"icon\":\"bi-lightbulb\",\"is_quantity_based\":true}', '2026-05-03 19:40:16', '2026-05-03 19:40:16'),
+(18, 6, 3, 'Photobooth', 'Area foto dekoratif untuk tamu undangan.', 'set', 1, 1200000, 1200000, '{\"slug\":\"photobooth\",\"image\":\"https:\\/\\/placehold.co\\/600x400\\/9b59b6\\/ffffff?text=Photobooth\",\"icon\":\"bi-camera\",\"is_quantity_based\":true}', '2026-05-15 12:21:20', '2026-05-15 12:21:20'),
+(19, 7, 1, 'Sound System', 'Speaker aktif, mixer, dan microphone untuk kebutuhan acara.', 'pcs', 1, 750000, 750000, '{\"slug\":\"sound-system\",\"image\":null,\"icon\":\"bi-speaker\",\"is_quantity_based\":true}', '2026-05-15 12:23:25', '2026-05-15 12:23:25'),
+(20, 8, 1, 'Sound System', 'Speaker aktif, mixer, dan microphone untuk kebutuhan acara.', 'pcs', 1, 750000, 750000, '{\"slug\":\"sound-system\",\"image\":null,\"icon\":\"bi-speaker\",\"is_quantity_based\":true}', '2026-05-15 14:01:08', '2026-05-15 14:01:08'),
+(21, 8, 2, 'Lighting Dekorasi', 'Lampu dekorasi untuk mempercantik area acara.', 'set', 1, 500000, 500000, '{\"slug\":\"lighting-dekorasi\",\"image\":\"https:\\/\\/placehold.co\\/600x400\\/f1c40f\\/000000?text=Lighting\",\"icon\":\"bi-lightbulb\",\"is_quantity_based\":true}', '2026-05-15 14:01:08', '2026-05-15 14:01:08'),
+(22, 8, 3, 'Photobooth', 'Area foto dekoratif untuk tamu undangan.', 'set', 1, 1200000, 1200000, '{\"slug\":\"photobooth\",\"image\":\"https:\\/\\/placehold.co\\/600x400\\/9b59b6\\/ffffff?text=Photobooth\",\"icon\":\"bi-camera\",\"is_quantity_based\":true}', '2026-05-15 14:01:08', '2026-05-15 14:01:08'),
+(23, 11, 6, 'Kipas Blower', 'Kipas blower untuk area tenda agar lebih nyaman.', 'pcs', 8, 150000, 1200000, '{\"slug\":\"kipas-blower\",\"image\":null,\"icon\":\"bi-wind\",\"is_quantity_based\":true}', '2026-05-18 18:51:22', '2026-05-18 18:51:22'),
+(24, 12, 5, 'Genset', 'Genset cadangan listrik untuk acara outdoor.', 'pcs', 1, 1000000, 1000000, '{\"slug\":\"genset\",\"image\":null,\"icon\":\"bi-lightning-charge\",\"is_quantity_based\":true}', '2026-05-18 18:53:41', '2026-05-18 18:53:41'),
+(25, 14, 3, 'Photobooth drevary 3x3 meter', 'Area foto dekoratif untuk tamu undangan.', 'set', 1, 1200000, 1200000, '{\"slug\":\"photobooth-drevary-3x3-meter\",\"image\":\"addons\\/01KSD5AVVT1Z6XKR6875QDZ74F.jpg\",\"icon\":\"bi-camera\",\"is_quantity_based\":true}', '2026-06-03 14:27:26', '2026-06-03 14:27:26'),
+(26, 14, 4, 'Panggung Rigging', 'Panggung dan rigging untuk acara besar atau outdoor.', 'unit', 4, 2000000, 8000000, '{\"slug\":\"panggung-rigging\",\"image\":\"addons\\/01KSD3SJYPZQEBVD0YS5X5WJRH.png\",\"icon\":\"bi-grid-3x3-gap\",\"is_quantity_based\":true}', '2026-06-03 14:27:26', '2026-06-03 14:27:26'),
+(27, 15, 1, 'Sound System', 'Speaker aktif, mixer, dan microphone untuk kebutuhan berbagai acara.', 'set', 2, 1000000, 2000000, '{\"slug\":\"sound-system\",\"image\":\"addons\\/01KS7XRW8SPWYX87HEK77D4923.png\",\"icon\":\"bi-speaker\",\"is_quantity_based\":true}', '2026-06-03 14:37:57', '2026-06-03 14:37:57'),
+(28, 16, 2, 'lampu Gantung besar berbagai model', 'Lampu dekorasi untuk mempercantik area acara.', 'Unit', 1, 750000, 750000, '{\"slug\":\"lampu-gantung-besar-berbagai-model\",\"image\":\"addons\\/01KSD54TM5YWJTMGHWVR47H4P2.avif\",\"icon\":\"bi-lightbulb\",\"is_quantity_based\":true}', '2026-06-10 11:01:44', '2026-06-10 11:01:44'),
+(29, 16, 4, 'Panggung Rigging', 'Panggung dan rigging untuk acara besar atau outdoor.', 'unit', 1, 2000000, 2000000, '{\"slug\":\"panggung-rigging\",\"image\":\"addons\\/01KSD3SJYPZQEBVD0YS5X5WJRH.png\",\"icon\":\"bi-grid-3x3-gap\",\"is_quantity_based\":true}', '2026-06-10 11:01:44', '2026-06-10 11:01:44');
+
+-- ----------------------------
+-- Table structure for order_items
+-- ----------------------------
+DROP TABLE IF EXISTS `order_items`;
+CREATE TABLE `order_items` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `order_id` bigint(20) unsigned NOT NULL,
+  `item_type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'package',
+  `source_id` bigint(20) unsigned DEFAULT NULL,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `unit` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `quantity` int(10) unsigned NOT NULL DEFAULT 1,
+  `price` bigint(20) unsigned NOT NULL DEFAULT 0,
+  `total_price` bigint(20) unsigned NOT NULL DEFAULT 0,
+  `snapshot` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `order_items_order_id_item_type_index` (`order_id`,`item_type`),
+  CONSTRAINT `order_items_order_id_foreign` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ----------------------------
+-- Records of order_items
+-- ----------------------------
+INSERT INTO `order_items` (`id`, `order_id`, `item_type`, `source_id`, `name`, `unit`, `quantity`, `price`, `total_price`, `snapshot`, `created_at`, `updated_at`) VALUES
+(1, 1, 'package', 4, 'Paket Event Kantor', 'paket', 1, 7500000, 7500000, '{\"id\":4,\"slug\":\"paket-event-kantor\",\"name\":\"Paket Event Kantor\",\"price\":7500000,\"price_unit\":\"paket\",\"main_image\":\"https:\\/\\/placehold.co\\/800x500\\/34495e\\/ffffff?text=Paket+Event+Kantor\",\"short_description\":\"Paket tenda dan perlengkapan untuk acara kantor atau perusahaan.\"}', '2026-05-01 23:20:26', '2026-05-01 23:20:26'),
+(2, 2, 'package', 5, 'Paket Tenda Akbar', 'paket', 1, 12000000, 12000000, '{\"id\":5,\"slug\":\"paket-tenda-akbar\",\"name\":\"Paket Tenda Akbar\",\"price\":12000000,\"price_unit\":\"paket\",\"main_image\":\"https:\\/\\/placehold.co\\/800x500\\/e67e22\\/ffffff?text=Paket+Tenda+Akbar\",\"short_description\":\"Paket tenda besar untuk acara outdoor dan acara skala besar.\"}', '2026-05-01 23:25:15', '2026-05-01 23:25:15'),
+(3, 3, 'package', 5, 'Paket Tenda Akbar', 'paket', 1, 12000000, 12000000, '{\"id\":5,\"slug\":\"paket-tenda-akbar\",\"name\":\"Paket Tenda Akbar\",\"price\":12000000,\"price_unit\":\"paket\",\"main_image\":\"https:\\/\\/placehold.co\\/800x500\\/e67e22\\/ffffff?text=Paket+Tenda+Akbar\",\"short_description\":\"Paket tenda besar untuk acara outdoor dan acara skala besar.\"}', '2026-05-03 19:38:26', '2026-05-03 19:38:26'),
+(4, 4, 'package', 5, 'Paket Tenda Akbar', 'paket', 1, 12000000, 12000000, '{\"id\":5,\"slug\":\"paket-tenda-akbar\",\"name\":\"Paket Tenda Akbar\",\"price\":12000000,\"price_unit\":\"paket\",\"main_image\":\"https:\\/\\/placehold.co\\/800x500\\/e67e22\\/ffffff?text=Paket+Tenda+Akbar\",\"short_description\":\"Paket tenda besar untuk acara outdoor dan acara skala besar.\"}', '2026-05-03 19:40:16', '2026-05-03 19:40:16'),
+(5, 5, 'package', 1, 'Paket Wedding Premium', 'paket', 1, 15000000, 15000000, '{\"id\":1,\"slug\":\"paket-wedding-premium\",\"name\":\"Paket Wedding Premium\",\"price\":15000000,\"price_unit\":\"paket\",\"main_image\":\"packages\\/main\\/01KQJC5FAAV75D9A575Y96J1D6.jpg\",\"short_description\":\"Paket dekorasi pernikahan lengkap untuk acara resepsi besar.\"}', '2026-05-03 22:36:36', '2026-05-03 22:36:36'),
+(6, 6, 'package', 3, 'Paket Lamaran', 'paket', 1, 4500000, 4500000, '{\"id\":3,\"slug\":\"paket-lamaran\",\"name\":\"Paket Lamaran\",\"price\":4500000,\"price_unit\":\"paket\",\"main_image\":\"https:\\/\\/placehold.co\\/800x500\\/9b59b6\\/ffffff?text=Paket+Lamaran\",\"short_description\":\"Paket dekorasi untuk acara lamaran dan pertunangan.\"}', '2026-05-15 12:21:20', '2026-05-15 12:21:20'),
+(7, 7, 'package', 3, 'Paket Lamaran', 'paket', 1, 4500000, 4500000, '{\"id\":3,\"slug\":\"paket-lamaran\",\"name\":\"Paket Lamaran\",\"price\":4500000,\"price_unit\":\"paket\",\"main_image\":\"https:\\/\\/placehold.co\\/800x500\\/9b59b6\\/ffffff?text=Paket+Lamaran\",\"short_description\":\"Paket dekorasi untuk acara lamaran dan pertunangan.\"}', '2026-05-15 12:23:25', '2026-05-15 12:23:25'),
+(8, 8, 'package', 5, 'Paket Tenda Akbar', 'paket', 1, 12000000, 12000000, '{\"id\":5,\"slug\":\"paket-tenda-akbar\",\"name\":\"Paket Tenda Akbar\",\"price\":12000000,\"price_unit\":\"paket\",\"main_image\":\"https:\\/\\/placehold.co\\/800x500\\/e67e22\\/ffffff?text=Paket+Tenda+Akbar\",\"short_description\":\"Paket tenda besar untuk acara outdoor dan acara skala besar.\"}', '2026-05-15 14:01:08', '2026-05-15 14:01:08'),
+(9, 9, 'custom', 1, 'Tenda Per Meter', 'meter', 14, 75000, 1050000, '{\"slug\":\"tenda-per-meter\",\"image\":\"https:\\/\\/placehold.co\\/600x400\\/2c7be5\\/ffffff?text=Tenda+Per+Meter\",\"icon\":\"bi-house\",\"unit\":\"meter\"}', '2026-05-15 14:16:38', '2026-05-15 14:16:38'),
+(10, 10, 'package', 1, 'Paket Wedding Premium', 'paket', 1, 15000000, 15000000, '{\"id\":1,\"slug\":\"paket-wedding-premium\",\"name\":\"Paket Wedding Premium\",\"price\":15000000,\"price_unit\":\"paket\",\"main_image\":\"packages\\/main\\/01KQJC5FAAV75D9A575Y96J1D6.jpg\",\"short_description\":\"Paket dekorasi pernikahan lengkap untuk acara resepsi besar.\"}', '2026-05-18 18:49:52', '2026-05-18 18:49:52'),
+(11, 11, 'package', 2, 'Paket Wedding Standar', 'paket', 1, 9500000, 9500000, '{\"id\":2,\"slug\":\"paket-wedding-standar\",\"name\":\"Paket Wedding Standar\",\"price\":9500000,\"price_unit\":\"paket\",\"main_image\":\"https:\\/\\/placehold.co\\/800x500\\/3498db\\/ffffff?text=Paket+Wedding+Standar\",\"short_description\":\"Paket dekorasi pernikahan standar untuk acara keluarga.\"}', '2026-05-18 18:51:22', '2026-05-18 18:51:22'),
+(12, 12, 'package', 3, 'Paket Lamaran', 'paket', 1, 4500000, 4500000, '{\"id\":3,\"slug\":\"paket-lamaran\",\"name\":\"Paket Lamaran\",\"price\":4500000,\"price_unit\":\"paket\",\"main_image\":\"https:\\/\\/placehold.co\\/800x500\\/9b59b6\\/ffffff?text=Paket+Lamaran\",\"short_description\":\"Paket dekorasi untuk acara lamaran dan pertunangan.\"}', '2026-05-18 18:53:41', '2026-05-18 18:53:41'),
+(13, 13, 'package', 9, 'PAKET AKAD PREMIUM RP.9.000.000', 'paket', 1, 9000000, 9000000, '{\"id\":9,\"slug\":\"paket-akad-premium-rp9000000\",\"name\":\"PAKET AKAD PREMIUM RP.9.000.000\",\"price\":9000000,\"price_unit\":\"paket\",\"main_image\":\"packages\\/main\\/01KSVE2DNXZKCMWQCY302DGT4W.png\",\"short_description\":\"Paket pernikahan premium dari Decoration Kab. Tangerang yang menghadirkan dekorasi mewah tenda 4\\u00d712, backdrop rumahan elegan, make-up & busana premium lengkap dengan bonus fresh melati, henna, dan softlens, serta dokumentasi 4 jam. Bebas pilih warna kain \"}', '2026-05-30 13:47:35', '2026-05-30 13:47:35'),
+(14, 14, 'custom', 1, 'Tenda Per Meter²', 'meter persegi', 10, 60000, 600000, '{\"slug\":\"tenda-per-meter2\",\"image\":\"custom-items\\/01KSEKCQM647HFY6ME3381YCK4.jpeg\",\"icon\":null,\"unit\":\"meter persegi\"}', '2026-06-03 14:27:26', '2026-06-03 14:27:26'),
+(15, 14, 'custom', 2, 'Kursi Plastik', 'pcs', 20, 7000, 140000, '{\"slug\":\"kursi-plastik\",\"image\":\"custom-items\\/01KSEJDASKTWPE273NR71G7YCV.webp\",\"icon\":null,\"unit\":\"pcs\"}', '2026-06-03 14:27:26', '2026-06-03 14:27:26'),
+(16, 15, 'package', 10, 'PAKET AKAD MINIMALIS RP.8.500.000', 'paket', 1, 8500000, 8500000, '{\"id\":10,\"slug\":\"paket-akad-minimalis-rp8500000\",\"name\":\"PAKET AKAD MINIMALIS RP.8.500.000\",\"price\":8500000,\"price_unit\":\"paket\",\"main_image\":\"packages\\/main\\/01KSW8ZQ6E40FV4Z5T8GQH5MMP.png\",\"short_description\":\"Paket pernikahan elegan dan berkesan dari PT. Didin Tenda Decoration dengan dekorasi tenda 4\\u00d712 lengkap panggung pelaminan 4m, backdrop panggung, make-up & busana standar plus bonus fresh melati, softlens, dan henna, serta dokumentasi 6 jam. \"}', '2026-06-03 14:37:57', '2026-06-03 14:37:57'),
+(17, 16, 'custom', 1, 'Tenda Per Meter²', 'meter persegi', 10, 60000, 600000, '{\"slug\":\"tenda-per-meter2\",\"image\":\"custom-items\\/01KSEKCQM647HFY6ME3381YCK4.jpeg\",\"icon\":null,\"unit\":\"meter persegi\"}', '2026-06-10 11:01:44', '2026-06-10 11:01:44'),
+(18, 16, 'custom', 2, 'Kursi Plastik', 'pcs', 20, 7000, 140000, '{\"slug\":\"kursi-plastik\",\"image\":\"custom-items\\/01KSEJDASKTWPE273NR71G7YCV.webp\",\"icon\":null,\"unit\":\"pcs\"}', '2026-06-10 11:01:44', '2026-06-10 11:01:44'),
+(19, 17, 'package', 10, 'PAKET AKAD MINIMALIS RP.8.500.000', 'paket', 1, 8500000, 8500000, '{\"id\":10,\"slug\":\"paket-akad-minimalis-rp8500000\",\"name\":\"PAKET AKAD MINIMALIS RP.8.500.000\",\"price\":8500000,\"price_unit\":\"paket\",\"main_image\":\"packages\\/main\\/01KSW8ZQ6E40FV4Z5T8GQH5MMP.png\",\"short_description\":\"Paket pernikahan elegan dan berkesan dari PT. Didin Tenda Decoration dengan dekorasi tenda 4\\u00d712 lengkap panggung pelaminan 4m, backdrop panggung, make-up & busana standar plus bonus fresh melati, softlens, dan henna, serta dokumentasi 6 jam. \"}', '2026-06-14 18:34:33', '2026-06-14 18:34:33');
+
+-- ----------------------------
+-- Table structure for orders
+-- ----------------------------
+DROP TABLE IF EXISTS `orders`;
+CREATE TABLE `orders` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `invoice_number` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `user_id` bigint(20) unsigned DEFAULT NULL,
+  `package_id` bigint(20) unsigned DEFAULT NULL,
+  `order_type` enum('package','custom') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'package',
+  `customer_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `customer_phone` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `customer_email` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `event_date` date NOT NULL,
+  `event_location_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `event_address` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `event_latitude` decimal(10,7) DEFAULT NULL,
+  `event_longitude` decimal(10,7) DEFAULT NULL,
+  `distance_km` decimal(8,2) DEFAULT NULL,
+  `shipping_fee` bigint(20) unsigned NOT NULL DEFAULT 0,
+  `subtotal_package` bigint(20) unsigned NOT NULL DEFAULT 0,
+  `subtotal_custom` bigint(20) unsigned NOT NULL DEFAULT 0,
+  `subtotal_addons` bigint(20) unsigned NOT NULL DEFAULT 0,
+  `total_price` bigint(20) unsigned NOT NULL DEFAULT 0,
+  `status` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'waiting_payment',
+  `payment_status` enum('unpaid','pending','paid','expired','failed','cancelled','refunded') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'unpaid',
+  `payment_deadline` timestamp NULL DEFAULT NULL,
+  `paid_at` timestamp NULL DEFAULT NULL,
+  `confirmed_at` timestamp NULL DEFAULT NULL,
+  `invoice_sent_at` timestamp NULL DEFAULT NULL,
+  `processed_at` timestamp NULL DEFAULT NULL,
+  `completed_at` timestamp NULL DEFAULT NULL,
+  `cancelled_at` timestamp NULL DEFAULT NULL,
+  `cancelled_reason` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `notes` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `orders_invoice_number_unique` (`invoice_number`),
+  KEY `orders_package_id_foreign` (`package_id`),
+  KEY `orders_event_date_status_index` (`event_date`,`status`),
+  KEY `orders_user_id_status_index` (`user_id`,`status`),
+  KEY `orders_payment_status_index` (`payment_status`),
+  CONSTRAINT `orders_package_id_foreign` FOREIGN KEY (`package_id`) REFERENCES `packages` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `orders_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ----------------------------
+-- Records of orders
+-- ----------------------------
+INSERT INTO `orders` (`id`, `invoice_number`, `user_id`, `package_id`, `order_type`, `customer_name`, `customer_phone`, `customer_email`, `event_date`, `event_location_name`, `event_address`, `event_latitude`, `event_longitude`, `distance_km`, `shipping_fee`, `subtotal_package`, `subtotal_custom`, `subtotal_addons`, `total_price`, `status`, `payment_status`, `payment_deadline`, `paid_at`, `confirmed_at`, `invoice_sent_at`, `processed_at`, `completed_at`, `cancelled_at`, `cancelled_reason`, `notes`, `created_at`, `updated_at`) VALUES
+(1, 'INV/2026/0001-HAZU', 2, NULL, 'package', 'ARHAN MALIK ALRASYID', '082112123333', 'arhanmali96@gmail.com', '2026-05-14', 'ACARA NIKAHAN WAHYU', 'Panongan, Kabupaten Tangerang, Banten, Jawa, 15711, Indonesia', '-6.2795471', '106.5304957', '13.84', 20000, 7500000, 0, 6200000, 13720000, 'confirmed', 'paid', '2026-05-02 23:20:26', '2026-05-01 23:20:56', '2026-05-01 23:20:56', '2026-05-01 23:20:56', NULL, NULL, NULL, NULL, NULL, '2026-05-01 23:20:26', '2026-05-01 23:20:56'),
+(2, 'INV/2026/0002-FDED', 2, NULL, 'package', 'ARHAN MALIK ALRASYID', '082112123333', 'arhanmali96@gmail.com', '2026-05-19', 'DJNCLOUD HOSTING', 'Balaraja, Kabupaten Tangerang, Banten, Jawa, Indonesia', '-6.1911184', '106.4627867', '11.69', 10000, 12000000, 0, 6100000, 18110000, 'confirmed', 'paid', '2026-05-02 23:25:15', '2026-05-01 23:26:03', '2026-05-01 23:26:03', '2026-05-01 23:26:03', NULL, NULL, NULL, NULL, NULL, '2026-05-01 23:25:15', '2026-05-01 23:26:03'),
+(3, 'INV/2026/0003-XXAJ', 3, NULL, 'package', 'JACOBI JAWARNA', '082123333344', 'arhanmcz@gmail.com', '2026-05-27', 'GEDUNG BIRAWA CAKRA', 'Bursa Efek Jakarta, Kav 52-53, Sudirman Central Business District Northway, RW 03, Senayan, Kebayoran Baru, Jakarta Selatan, Daerah Khusus Ibukota Jakarta, Jawa, 12190, Indonesia', '-6.2236851', '106.8086123', '48.06', 290000, 12000000, 0, 12200000, 24490000, 'confirmed', 'paid', '2026-05-04 19:38:26', '2026-05-03 19:38:42', '2026-05-03 19:38:42', '2026-05-03 19:38:42', NULL, NULL, NULL, NULL, NULL, '2026-05-03 19:38:26', '2026-05-03 19:38:42'),
+(4, 'INV/2026/0004-LQ6G', 3, NULL, 'package', 'arhan malik', '082222222211', 'arhanmcz@gmail.com', '2026-05-15', 'ESA UNGGUL LEADERSHIP', 'Universitas Esa Unggul, Jalan Arjuna Utara, RW 02, Duri Kepa, Kebon Jeruk, Jakarta Barat, Daerah Khusus Ibukota Jakarta, Jawa, 11430, Indonesia', '-6.1856846', '106.7789088', '39.68', 200000, 12000000, 0, 1000000, 13200000, 'confirmed', 'paid', '2026-05-04 19:40:16', '2026-05-03 19:40:28', '2026-05-03 19:40:28', '2026-05-03 19:40:28', NULL, NULL, NULL, NULL, NULL, '2026-05-03 19:40:16', '2026-05-03 19:40:28'),
+(5, 'INV/2026/0005-C6XS', 3, NULL, 'package', 'arhan malik', '089966669999', 'arhanmcz@gmail.com', '2026-05-20', 'ATHAR NIKAH SAMA AVERY', 'Universitas Esa Unggul, Jalan Arjuna Utara, RW 02, Duri Kepa, Kebon Jeruk, Jakarta Barat, Daerah Khusus Ibukota Jakarta, Jawa, 11430, Indonesia', '-6.1856846', '106.7789088', '39.68', 200000, 15000000, 0, 0, 15200000, 'confirmed', 'paid', '2026-05-04 22:36:36', '2026-05-03 22:37:18', '2026-05-03 22:37:18', '2026-05-03 22:37:18', NULL, NULL, NULL, NULL, NULL, '2026-05-03 22:36:36', '2026-05-03 22:37:18'),
+(6, 'INV/2026/0006-UJYE', 2, NULL, 'package', 'ARHAN MALIK ALRASYID', '082112123333', 'arhanmali96@gmail.com', '2026-05-28', 'testtttt', 'Universitas Esa Unggul, Jalan Arjuna Utara, RW 02, Duri Kepa, Kebon Jeruk, Jakarta Barat, Daerah Khusus Ibukota Jakarta, Jawa, 11430, Indonesia', '-6.1856846', '106.7789088', '39.68', 200000, 4500000, 0, 1200000, 5900000, 'confirmed', 'paid', '2026-05-16 12:21:20', '2026-05-15 12:21:43', '2026-05-15 12:21:43', '2026-05-15 12:21:43', NULL, NULL, NULL, NULL, NULL, '2026-05-15 12:21:20', '2026-05-15 12:21:43'),
+(7, 'INV/2026/0007-HXDX', 3, NULL, 'package', 'arhan malik', '082122222222', 'arhanmcz@gmail.com', '2026-05-22', 'ESA UNGGUL LEADERSHIP', 'Universitas Esa Unggul, Jalan Inspeksi BKT, RW 03, Ujung Menteng, Cilincing, Jakarta Utara, Pusakarakyat, Kab Bekasi, Jawa Barat, Jawa, 17214, Indonesia', '-6.1582481', '106.9728742', '68.13', 490000, 4500000, 0, 750000, 5740000, 'confirmed', 'paid', '2026-05-16 12:23:25', '2026-05-15 12:23:47', '2026-05-15 12:23:47', '2026-05-15 12:23:47', NULL, NULL, NULL, NULL, NULL, '2026-05-15 12:23:25', '2026-05-15 12:23:47'),
+(8, 'INV/2026/0008-MRPN', 6, NULL, 'package', 'Muhamad Darlan', '088289258764', 'muhamaddarlan76@gmail.com', '2026-05-22', 'gedung serbaguna tangerang', 'Universitas Esa Unggul, Jalan Inspeksi BKT, RW 03, Ujung Menteng, Cilincing, Jakarta Utara, Pusakarakyat, Kab Bekasi, Jawa Barat, Jawa, 17214, Indonesia', '-6.1582481', '106.9728742', '68.13', 490000, 12000000, 0, 2450000, 14940000, 'confirmed', 'paid', '2026-05-16 14:01:08', '2026-05-15 14:03:05', '2026-05-15 14:03:05', '2026-05-15 14:03:05', NULL, NULL, NULL, NULL, NULL, '2026-05-15 14:01:08', '2026-05-15 14:03:05'),
+(9, 'INV/2026/0009-E9SH', 1, NULL, 'custom', 'Admin', '088289258764', 'admin@admin.com', '2026-05-27', 'gedung serbaguna tangerang', 'Esa Unggul University, Jalan Arjuna Utara, RW 02, Duri Kepa, Kebon Jeruk, West Jakarta, Special Capital Region of Jakarta, Java, 11430, Indonesia', '-6.1856846', '106.7789088', '39.88', 150000, 0, 1050000, 0, 1200000, 'confirmed', 'paid', '2026-05-16 14:16:38', '2026-05-15 14:19:01', '2026-05-15 14:19:01', '2026-05-15 14:19:01', NULL, NULL, NULL, NULL, NULL, '2026-05-15 14:16:38', '2026-05-15 14:19:01'),
+(10, 'INV/2026/0010-MDXD', 3, NULL, 'package', 'athar suki', '082122222222', 'arhanmcz@gmail.com', '2026-05-19', 'test', 'Universitas Esa Unggul, Jalan Arjuna Utara, RW 02, Duri Kepa, Kebon Jeruk, Jakarta Barat, Daerah Khusus Ibukota Jakarta, Jawa, 11430, Indonesia', '-6.1856846', '106.7789088', '39.68', 200000, 15000000, 0, 0, 15200000, 'confirmed', 'paid', '2026-05-19 18:49:52', '2026-05-18 18:50:12', '2026-05-18 18:50:12', '2026-05-18 18:50:12', NULL, NULL, NULL, NULL, NULL, '2026-05-18 18:49:52', '2026-05-18 18:50:12'),
+(11, 'INV/2026/0011-D33K', 3, NULL, 'package', 'FATHAN SUKI', '082233333333', 'arhanmcz@gmail.com', '2026-05-19', 'test', 'Universitas Esa Unggul, Jalan Inspeksi BKT, RW 03, Ujung Menteng, Cilincing, Jakarta Utara, Pusakarakyat, Kab Bekasi, Jawa Barat, Jawa, 17214, Indonesia', '-6.1582481', '106.9728742', '68.13', 490000, 9500000, 0, 1200000, 11190000, 'confirmed', 'paid', '2026-05-19 18:51:22', '2026-05-18 18:51:43', '2026-05-18 18:51:43', '2026-05-18 18:51:43', NULL, NULL, NULL, NULL, NULL, '2026-05-18 18:51:22', '2026-05-18 18:51:43'),
+(12, 'INV/2026/0012-GE4R', 3, NULL, 'package', 'DARLAN SUKI', '089909999999', 'arhanmcz@gmail.com', '2026-05-19', 'test', 'Jalan Krama Yudha Kampung Petukangan, RW 05, Rawa Terate, Cakung, Jakarta Timur, Daerah Khusus Ibukota Jakarta, Jawa, 13920, Indonesia', '-6.1798055', '106.9221190', '58.18', 390000, 4500000, 0, 1000000, 5890000, 'confirmed', 'paid', '2026-05-19 18:53:41', '2026-05-18 18:53:59', '2026-05-18 18:53:59', '2026-05-18 18:53:59', NULL, NULL, NULL, NULL, NULL, '2026-05-18 18:53:41', '2026-05-18 18:53:59'),
+(13, 'INV/2026/0013-DTC8', 3, 9, 'package', 'arhan malik', '082111565144', 'arhanmcz@gmail.com', '2026-06-03', 'gedung vincent', 'West Jakarta City', '-6.1856846', '106.7789088', '39.68', 200000, 9000000, 0, 0, 9200000, 'confirmed', 'paid', '2026-05-31 13:47:35', '2026-05-30 13:48:25', '2026-05-30 13:48:25', '2026-05-30 13:48:25', NULL, NULL, NULL, NULL, NULL, '2026-05-30 13:47:35', '2026-05-30 13:48:25'),
+(14, 'INV/2026/0014-KXZZ', 1, NULL, 'custom', 'darlan', '088289258764', 'admin@admin.com', '2026-06-04', 'Masjid Universitas Esa Unggul', 'Masjid Universitas Esa Unggul, Jalan Haji Niming, RW 02, Duri Kepa, Kebon Jeruk, West Jakarta, Special Capital Region of Jakarta, Java, 11430, Indonesia', '-6.1836986', '106.7795913', '40.13', 155000, 0, 740000, 9200000, 10095000, 'confirmed', 'paid', '2026-06-04 14:27:26', '2026-06-03 14:28:38', '2026-06-03 14:28:38', '2026-06-03 14:28:38', NULL, NULL, NULL, NULL, NULL, '2026-06-03 14:27:26', '2026-06-03 14:28:38'),
+(15, 'INV/2026/0015-T6CA', 9, 10, 'package', 'abcdef', '088289258764', 'didintendaa@gmail.com', '2026-06-05', 'Masjid Universitas Esa Unggul', 'Masjid Universitas Esa Unggul, Jalan Haji Niming, RW 02, Duri Kepa, Kebon Jeruk, Jakarta Barat, Daerah Khusus Ibukota Jakarta, Jawa, 11430, Indonesia', '-6.1836986', '106.7795913', '39.93', 200000, 8500000, 0, 2000000, 10700000, 'confirmed', 'paid', '2026-06-04 14:37:57', '2026-06-03 14:38:34', '2026-06-03 14:38:34', '2026-06-03 14:38:34', NULL, NULL, NULL, NULL, NULL, '2026-06-03 14:37:57', '2026-06-03 14:38:34'),
+(16, 'INV/2026/0016-MZDE', 9, NULL, 'custom', 'Muhamad Darlan', '088289258764', 'didintendaa@gmail.com', '2026-06-11', 'Masjid Universitas Esa Unggul', 'Kampus Gunadarma, Jalan Boulevard Raya, RW 14, Cengkareng Timur, Cengkareng, West Jakarta, Special Capital Region of Jakarta, 11730, Indonesia', '-6.1344655', '106.7333605', '39.63', 150000, 0, 740000, 2750000, 3640000, 'confirmed', 'paid', '2026-06-11 11:01:44', '2026-06-10 11:03:12', '2026-06-10 11:03:12', '2026-06-10 11:03:12', NULL, NULL, NULL, NULL, NULL, '2026-06-10 11:01:44', '2026-06-10 11:03:12'),
+(17, 'INV/2026/0017-CMFO', 3, 10, 'package', 'arhan malik alrasyid', '082111565144', 'arhanmcz@gmail.com', '2026-08-14', 'GEDUNG PAK ANGGARA', 'West Jakarta City', '-6.1856846', '106.7789088', '39.68', 200000, 8500000, 0, 0, 8700000, 'confirmed', 'paid', '2026-06-15 18:34:33', '2026-06-14 18:34:49', '2026-06-14 18:34:49', '2026-06-14 18:34:49', NULL, NULL, NULL, NULL, NULL, '2026-06-14 18:34:33', '2026-06-14 18:34:49');
+
+-- ----------------------------
+-- Table structure for package_items
+-- ----------------------------
+DROP TABLE IF EXISTS `package_items`;
+CREATE TABLE `package_items` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `package_id` bigint(20) unsigned NOT NULL,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `quantity` int(10) unsigned DEFAULT NULL,
+  `unit` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `sort_order` int(10) unsigned NOT NULL DEFAULT 0,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `package_items_package_id_foreign` (`package_id`),
+  CONSTRAINT `package_items_package_id_foreign` FOREIGN KEY (`package_id`) REFERENCES `packages` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=47 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ----------------------------
+-- Records of package_items
+-- ----------------------------
+INSERT INTO `package_items` (`id`, `package_id`, `name`, `quantity`, `unit`, `description`, `sort_order`, `is_active`, `created_at`, `updated_at`) VALUES
+(30, 8, 'Tenda 8x4 dan Prasmaann set full dekorasi', 1, 'unit', 'warna bebas pilih', 0, 1, '2026-05-30 09:53:04', '2026-05-30 09:53:04'),
+(31, 8, 'Kipas Blower', 1, 'unit', NULL, 0, 1, '2026-05-30 09:53:25', '2026-05-30 09:53:25'),
+(32, 8, 'make up dan busana', 1, 'paket', '\n\n1 sesi make-up, kebaya akad, beskap akad, siger atau mahkota, dan artificial melati.', 0, 1, '2026-05-30 09:54:16', '2026-05-30 09:59:53'),
+(33, 8, 'Kipas Blower', 1, 'pcs', NULL, 0, 1, '2026-05-30 10:00:38', '2026-05-30 10:00:38'),
+(34, 9, 'tenda dekorasi 4x12 full dekorasi lengkap prasmanan set', 1, 'set', NULL, 0, 1, '2026-05-30 10:16:58', '2026-05-30 10:16:58'),
+(35, 9, 'Kipas Blower', 1, 'pcs', NULL, 0, 1, '2026-05-30 10:22:26', '2026-05-30 10:22:26'),
+(36, 9, 'kursi tamu ', 50, 'pcs', NULL, 0, 1, '2026-05-30 10:23:36', '2026-05-30 10:23:36'),
+(37, 9, 'backdrop rumahan 1 set', NULL, NULL, NULL, 0, 1, '2026-05-30 10:24:19', '2026-05-30 10:24:19'),
+(38, 9, 'makeup dan busana 1xmakeup dan kebaya akad dan beskap akad', 1, 'hari', NULL, 0, 1, '2026-05-30 10:25:28', '2026-05-30 10:25:28'),
+(39, 9, 'Dokumentasi Fotograper ', 4, 'jam', NULL, 0, 1, '2026-05-30 10:26:07', '2026-05-30 10:26:07'),
+(40, 10, 'tenda dekorasi 4x12m lengkap dekorasi prasmanan set', 1, 'set', NULL, 0, 1, '2026-05-30 18:11:30', '2026-05-30 18:11:30'),
+(41, 10, 'Satu set Backdrop panggung lengkap Ukuran tersedia: 2×2, 3×3, atau 2×3', 1, 'set', NULL, 0, 1, '2026-05-30 18:13:40', '2026-05-30 18:13:40'),
+(42, 10, 'Make-up & busana 1 sesi make-up, kebaya akad, beskap akad, siger/mahkota, fresh melati. ', NULL, '1 set', NULL, 0, 1, '2026-05-30 18:14:33', '2026-05-30 18:14:33'),
+(43, 10, '1 fotografer, file dokumen dalam flashdisk, dengan  6 jam.', NULL, NULL, NULL, 0, 1, '2026-05-30 18:15:02', '2026-05-30 18:16:17'),
+(44, 11, 'Tenda 5x12 full dekorasi dan prasmanan set', 1, 'set', NULL, 0, 1, '2026-05-30 19:42:23', '2026-05-30 19:42:23'),
+(45, 11, 'kursi meja dan lainnya untuk 100 orang', NULL, NULL, NULL, 0, 1, '2026-05-30 19:59:33', '2026-05-30 19:59:33'),
+(46, 11, '1 sesi make-up, kebaya akad, beskap akad, siger/solo putri/modern', 1, 'set', NULL, 0, 1, '2026-05-30 20:01:58', '2026-05-30 20:01:58');
+
+-- ----------------------------
+-- Table structure for packages
+-- ----------------------------
+DROP TABLE IF EXISTS `packages`;
+CREATE TABLE `packages` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `slug` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `type` enum('fixed','custom') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'fixed',
+  `short_description` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `price` bigint(20) unsigned NOT NULL DEFAULT 0,
+  `price_unit` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'paket',
+  `main_image` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `images` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `color` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `badge` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `is_popular` tinyint(1) NOT NULL DEFAULT 0,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `sort_order` int(10) unsigned NOT NULL DEFAULT 0,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `packages_slug_unique` (`slug`)
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ----------------------------
+-- Records of packages
+-- ----------------------------
+INSERT INTO `packages` (`id`, `name`, `slug`, `type`, `short_description`, `description`, `price`, `price_unit`, `main_image`, `images`, `color`, `badge`, `is_popular`, `is_active`, `sort_order`, `created_at`, `updated_at`) VALUES
+(8, 'PAKET AKAD MINIMALIS RP.7.500.000', 'paket-akad-minimalis-rp7500000', 'fixed', 'Paket lengkap pernikahan dari PT. Didin Tenda Decoration yang mencakup dekorasi tenda (4×8), backdrop rumahan, make-up & busana pengantin, serta dokumentasi 6 jam. Bebas pilih warna kain dan tema backdrop. ', 'Paket Akad Minimalis — Rp 7.500.000\n\nDekorasi\n\nTenda ukuran 4×8 lengkap dengan dekorasi kain dan lampu, 5 meja kotak, 2 meja bulat, karpet tenda, lighting tenda, kotak uang, 40 kursi dengan sarung, 1 set perasmanan minimalis, dan 100 set alat makan.\n\nAlat pendukung\n\nBlower atau kipas angin. Klien bebas memilih warna kain dan tema backdrop yang telah disediakan.\n\nBackdrop rumahan\n\nUkuran tersedia: 2×2, 3×3, atau 2×3 (disesuaikan foto dan lokasi). Termasuk backdrop rumahan, sofa/kursi pengantin, flower artificial, karpet, standing flower, standing foto, dan lighting backdrop.\n\nMake-up & busana\n\n1 sesi make-up, kebaya akad, beskap akad, siger atau mahkota, dan artificial melati.\n\nDokumentasi\n\n1 fotografer profesional, file dokumen disimpan dalam flashdisk, dengan durasi kerja 6 jam.\n\n', 7500000, 'paket', 'packages/main/01KSVC3DZWS1PGBKRCD9ETM31E.png', '[]', NULL, NULL, 0, 1, 0, '2026-05-30 09:41:07', '2026-05-30 18:07:50'),
+(9, 'PAKET AKAD PREMIUM RP.9.000.000', 'paket-akad-premium-rp9000000', 'fixed', 'Paket pernikahan premium dari PT. Didin Tenda Decoration yang menghadirkan dekorasi mewah tenda 4×12, backdrop rumahan elegan, make-up & busana premium lengkap dengan bonus fresh melati, henna, dan softlens, serta dokumentasi 4 jam. ', 'Dekorasi\n\nTenda ukuran 4×12 dengan dekorasi kain dan lampu, meja prasmanan, pagar ayu, meja buah, karpet full, lighting tenda, 50 kursi dengan sarung, 1 set perasmanan, 100 set alat makan, gapura depan, dan kotak uang.\n\nAlat pendukung\n\nKipas angin atau blower. Klien bebas memilih warna kain dan tema backdrop yang telah disediakan.\n\nBackdrop rumahan\n\nUkuran tersedia: 2×2, 3×3, atau 2×3 (disesuaikan foto dan lokasi). Termasuk sofa/kursi pengantin, flower artificial, karpet, standing flower, standing foto, dan lighting backdrop.\n\nMake-up & busana premium\n\n1 sesi make-up, kebaya akad, beskap akad, siger/sulo putri/modern. FREE fresh melati, henna white tangan, dan softlens minus/normal.\n\nDokumentasi premium\n\n1 fotografer profesional, file dokumen tersimpan dalam flashdisk, dengan durasi kerja 4 jam.', 9000000, 'paket', 'packages/main/01KSVE2DNXZKCMWQCY302DGT4W.png', '[]', NULL, NULL, 0, 1, 3, '2026-05-30 10:15:31', '2026-05-30 20:19:34'),
+(10, 'PAKET AKAD MINIMALIS RP.8.500.000', 'paket-akad-minimalis-rp8500000', 'fixed', 'Paket pernikahan elegan dan berkesan dari PT. Didin Tenda Decoration dengan dekorasi tenda 4×12 lengkap panggung pelaminan 4m, backdrop panggung, make-up & busana standar plus bonus fresh melati, softlens, dan henna, serta dokumentasi 6 jam. ', '\nTenda 36 m² (4×12) dengan dekorasi kain dan lampu, panggung pelaminan 4m, 5 meja kotak, 3 meja bulat, karpet full, kotak uang, lighting tenda, 70 kursi plastik dengan sarung, 1 set perasmanan minimalis, dan 100 set alat makan.\n\nAlat pendukung\n\nBlower atau kipas angin. Klien bebas memilih warna kain dan tema backdrop yang telah disediakan.\n\nBackdrop panggung\n\nUkuran tersedia: 2×2, 3×3, atau 2×3 (disesuaikan foto dan lokasi). Termasuk backdrop panggung, sofa/kursi pengantin, flower artificial over, karpet, standing flower, standing foto, dan lighting backdrop.\n\nMake-up & busana standar\n\n1 sesi make-up, kebaya akad, beskap akad, siger/mahkota, fresh melati. FREE softlens normal/minus dan henna white tempel.\n\nDokumentasi standar\n\n1 fotografer profesional, file dokumen tersimpan dalam flashdisk, dengan durasi kerja 6 jam.', 8500000, 'paket', 'packages/main/01KSW8ZQ6E40FV4Z5T8GQH5MMP.png', '[]', NULL, NULL, 0, 1, 0, '2026-05-30 18:05:54', '2026-05-30 20:20:13'),
+(11, 'PAKET AKAD PREMIUM RP.11.500.000', 'paket-akad-premium-rp11500000', 'fixed', 'Paket pernikahan paling lengkap dan mewah dari PT. Didin Tenda Decoration Hadir dengan dekorasi tenda 5×12 + panggung pelaminan 5m, backdrop panggung elegan, make-up & busana premium, dokumentasi foto 4 jam, plus Wedding Content Creator ', NULL, 11500000, 'paket', 'packages/main/01KSWDMGRD0DRJMY3G7KQ7E8CD.png', '[]', NULL, NULL, 0, 1, 4, '2026-05-30 19:27:10', '2026-05-30 20:21:34');
+
+-- ----------------------------
+-- Table structure for password_reset_tokens
+-- ----------------------------
+DROP TABLE IF EXISTS `password_reset_tokens`;
+CREATE TABLE `password_reset_tokens` (
+  `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `token` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ----------------------------
+-- Records of password_reset_tokens
+-- ----------------------------
+INSERT INTO `password_reset_tokens` (`email`, `token`, `created_at`) VALUES
+('arhanmali96@gmail.com', '$2y$12$TUB55dYV5RY0GI34ErgyTuCYMJccmKIJAbEBjdDEwLuQ/pSkNwuiG', '2026-05-02 13:02:57'),
+('arhanmcz@gmail.com', '$2y$12$NBnJEI712Shk7Lt/qRF0x.zbzI2xMrSaE0/Ern9ylRNxRgtfNlZJe', '2026-05-03 22:38:43'),
+('rasyidmalik456@gmail.com', '$2y$12$iP89ckqm4qet7t14bhNGWewD.g8BvNrXaIGFH65.rttX4mjrSAIW.', '2026-05-02 05:45:17');
+
+-- ----------------------------
+-- Table structure for payments
+-- ----------------------------
+DROP TABLE IF EXISTS `payments`;
+CREATE TABLE `payments` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `order_id` bigint(20) unsigned NOT NULL,
+  `payment_gateway` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'midtrans',
+  `midtrans_order_id` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `transaction_id` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `snap_token` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `redirect_url` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `gross_amount` bigint(20) unsigned NOT NULL DEFAULT 0,
+  `currency` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'IDR',
+  `payment_type` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `bank` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `va_number` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `permata_va_number` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `bill_key` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `biller_code` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `pdf_url` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `transaction_status` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
+  `fraud_status` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `status_code` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `status_message` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `payment_status` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
+  `paid_at` timestamp NULL DEFAULT NULL,
+  `expired_at` timestamp NULL DEFAULT NULL,
+  `cancelled_at` timestamp NULL DEFAULT NULL,
+  `raw_response` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `payments_order_id_unique` (`order_id`),
+  UNIQUE KEY `payments_midtrans_order_id_unique` (`midtrans_order_id`),
+  KEY `payments_order_id_index` (`order_id`),
+  KEY `payments_midtrans_order_id_index` (`midtrans_order_id`),
+  KEY `payments_transaction_id_index` (`transaction_id`),
+  KEY `payments_transaction_status_index` (`transaction_status`),
+  KEY `payments_payment_status_index` (`payment_status`),
+  CONSTRAINT `payments_order_id_foreign` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ----------------------------
+-- Records of payments
+-- ----------------------------
+INSERT INTO `payments` (`id`, `order_id`, `payment_gateway`, `midtrans_order_id`, `transaction_id`, `snap_token`, `redirect_url`, `gross_amount`, `currency`, `payment_type`, `bank`, `va_number`, `permata_va_number`, `bill_key`, `biller_code`, `pdf_url`, `transaction_status`, `fraud_status`, `status_code`, `status_message`, `payment_status`, `paid_at`, `expired_at`, `cancelled_at`, `raw_response`, `created_at`, `updated_at`) VALUES
+(1, 1, 'midtrans', 'DT-1-20260501232034', 'b019f821-7687-45eb-a3f6-c0f1dc1bf29e', '015e88fa-5d25-4263-8342-2251aea12584', 'https://app.sandbox.midtrans.com/snap/v4/redirection/015e88fa-5d25-4263-8342-2251aea12584', 13720000, 'IDR', 'bank_transfer', 'bca', '26955753869186737873479', NULL, NULL, NULL, NULL, 'settlement', 'accept', '200', 'Success, transaction is found', 'paid', '2026-05-01 23:20:56', NULL, NULL, '{\"status_code\":\"200\",\"transaction_id\":\"b019f821-7687-45eb-a3f6-c0f1dc1bf29e\",\"gross_amount\":\"13720000.00\",\"currency\":\"IDR\",\"order_id\":\"DT-1-20260501232034\",\"payment_type\":\"bank_transfer\",\"signature_key\":\"779c286f0783200d66d5dad0f21c6a7004189978626cd8ddf0086497639d3262fe0c3403e1630e553b1b6ba725afbaa0e25f219736c5e7f3f72a2c449bbcd4d5\",\"transaction_status\":\"settlement\",\"fraud_status\":\"accept\",\"status_message\":\"Success, transaction is found\",\"merchant_id\":\"G110926955\",\"va_numbers\":[{\"bank\":\"bca\",\"va_number\":\"26955753869186737873479\"}],\"payment_amounts\":[],\"transaction_time\":\"2026-05-01 23:20:36\",\"settlement_time\":\"2026-05-01 23:20:52\",\"expiry_time\":\"2026-05-02 23:20:36\"}', '2026-05-01 23:20:34', '2026-05-01 23:20:56'),
+(2, 2, 'midtrans', 'DT-2-20260501232525', '630deefb-dd51-4451-8a0e-873231d1580d', '6f465237-980e-40f3-a932-7050ca8e886c', 'https://app.sandbox.midtrans.com/snap/v4/redirection/6f465237-980e-40f3-a932-7050ca8e886c', 18110000, 'IDR', 'bank_transfer', 'bca', '26955399346659351177003', NULL, NULL, NULL, NULL, 'settlement', 'accept', '200', 'Success, transaction is found', 'paid', '2026-05-01 23:26:03', NULL, NULL, '{\"status_code\":\"200\",\"transaction_id\":\"630deefb-dd51-4451-8a0e-873231d1580d\",\"gross_amount\":\"18110000.00\",\"currency\":\"IDR\",\"order_id\":\"DT-2-20260501232525\",\"payment_type\":\"bank_transfer\",\"signature_key\":\"4b702022d104427ee3a9704a46fa1d960b53bd7a10790c85b4aff249b8bd61e6d051fed9a3a6366b48109ba05cd9bc31e5a1ad42aed077a4762d9920d2d28267\",\"transaction_status\":\"settlement\",\"fraud_status\":\"accept\",\"status_message\":\"Success, transaction is found\",\"merchant_id\":\"G110926955\",\"va_numbers\":[{\"bank\":\"bca\",\"va_number\":\"26955399346659351177003\"}],\"payment_amounts\":[],\"transaction_time\":\"2026-05-01 23:25:27\",\"settlement_time\":\"2026-05-01 23:25:43\",\"expiry_time\":\"2026-05-02 23:25:27\"}', '2026-05-01 23:25:26', '2026-05-01 23:26:03'),
+(3, 3, 'midtrans', 'DT-3-20260503193829', '6acd75b0-1412-41ee-bbfa-0b5c91ff02c8', '6f4f55d1-8bf4-440e-aa55-ac4c65ae5fb4', 'https://app.sandbox.midtrans.com/snap/v4/redirection/6f4f55d1-8bf4-440e-aa55-ac4c65ae5fb4', 24490000, 'IDR', 'bank_transfer', 'bca', '26955862653666003980094', NULL, NULL, NULL, NULL, 'settlement', 'accept', '200', 'Success, transaction is found', 'paid', '2026-05-03 19:38:42', NULL, NULL, '{\"status_code\":\"200\",\"transaction_id\":\"6acd75b0-1412-41ee-bbfa-0b5c91ff02c8\",\"gross_amount\":\"24490000.00\",\"currency\":\"IDR\",\"order_id\":\"DT-3-20260503193829\",\"payment_type\":\"bank_transfer\",\"signature_key\":\"2262d6f8761efdc66bc3b8278929c0cef5a39206a2099bcf34a0e7d0541701cc43365fc9cfd69be16826b533d7fcb65ffe58f56990f59394afa7fcf75dda0f40\",\"transaction_status\":\"settlement\",\"fraud_status\":\"accept\",\"status_message\":\"Success, transaction is found\",\"merchant_id\":\"G110926955\",\"va_numbers\":[{\"bank\":\"bca\",\"va_number\":\"26955862653666003980094\"}],\"payment_amounts\":[],\"transaction_time\":\"2026-05-03 19:38:31\",\"settlement_time\":\"2026-05-03 19:38:39\",\"expiry_time\":\"2026-05-04 19:38:31\"}', '2026-05-03 19:38:30', '2026-05-03 19:38:42'),
+(4, 4, 'midtrans', 'DT-4-20260503194018', '9810e6ef-3156-464d-bb35-0803c883eeba', '3faeabf4-1f8f-49c0-b353-027791573ca8', 'https://app.sandbox.midtrans.com/snap/v4/redirection/3faeabf4-1f8f-49c0-b353-027791573ca8', 13200000, 'IDR', 'bank_transfer', 'bca', '26955936753534774327806', NULL, NULL, NULL, NULL, 'settlement', 'accept', '200', 'Success, transaction is found', 'paid', '2026-05-03 19:40:28', NULL, NULL, '{\"status_code\":\"200\",\"transaction_id\":\"9810e6ef-3156-464d-bb35-0803c883eeba\",\"gross_amount\":\"13200000.00\",\"currency\":\"IDR\",\"order_id\":\"DT-4-20260503194018\",\"payment_type\":\"bank_transfer\",\"signature_key\":\"284e87fc1affb38f876f2e172c4715edff2710f1a2f2532f405eae8eae71e51f758cb65750a0f2bf016695e4026e48ebc1a04ab7460251e314d492bd0da33f20\",\"transaction_status\":\"settlement\",\"fraud_status\":\"accept\",\"status_message\":\"Success, transaction is found\",\"merchant_id\":\"G110926955\",\"va_numbers\":[{\"bank\":\"bca\",\"va_number\":\"26955936753534774327806\"}],\"payment_amounts\":[],\"transaction_time\":\"2026-05-03 19:40:20\",\"settlement_time\":\"2026-05-03 19:40:24\",\"expiry_time\":\"2026-05-04 19:40:20\"}', '2026-05-03 19:40:18', '2026-05-03 19:40:28'),
+(5, 5, 'midtrans', 'DT-5-20260503223638', 'b668fb23-6a32-4624-941a-4ed179f2e2df', 'e529cf05-c5ea-4a0c-a7e1-6c9f546131b0', 'https://app.sandbox.midtrans.com/snap/v4/redirection/e529cf05-c5ea-4a0c-a7e1-6c9f546131b0', 15200000, 'IDR', 'bank_transfer', 'bca', '26955896399274394524193', NULL, NULL, NULL, NULL, 'settlement', 'accept', '200', 'Success, transaction is found', 'paid', '2026-05-03 22:37:18', NULL, NULL, '{\"status_code\":\"200\",\"transaction_id\":\"b668fb23-6a32-4624-941a-4ed179f2e2df\",\"gross_amount\":\"15200000.00\",\"currency\":\"IDR\",\"order_id\":\"DT-5-20260503223638\",\"payment_type\":\"bank_transfer\",\"signature_key\":\"c0d440c2569a2d247c1b0939a87738863cf1d5294f05eb4b3770d2c5a5c1f5af25ab078e26e58bd52ede97223f0a42cfa698fa991c68a798b29a37f842b28569\",\"transaction_status\":\"settlement\",\"fraud_status\":\"accept\",\"status_message\":\"Success, transaction is found\",\"merchant_id\":\"G110926955\",\"va_numbers\":[{\"bank\":\"bca\",\"va_number\":\"26955896399274394524193\"}],\"payment_amounts\":[],\"transaction_time\":\"2026-05-03 22:36:43\",\"settlement_time\":\"2026-05-03 22:37:11\",\"expiry_time\":\"2026-05-04 22:36:43\"}', '2026-05-03 22:36:38', '2026-05-03 22:37:18'),
+(6, 6, 'midtrans', 'DT-6-20260515122123', 'b0e801f1-28c6-471a-a11f-0842a33a6e26', 'da6f9bd3-66ed-4f27-8ebc-365dd98291cd', 'https://app.sandbox.midtrans.com/snap/v4/redirection/da6f9bd3-66ed-4f27-8ebc-365dd98291cd', 5900000, 'IDR', 'bank_transfer', 'bca', '26955834636105355480605', NULL, NULL, NULL, NULL, 'settlement', 'accept', '200', 'Success, transaction is found', 'paid', '2026-05-15 12:21:43', NULL, NULL, '{\"status_code\":\"200\",\"transaction_id\":\"b0e801f1-28c6-471a-a11f-0842a33a6e26\",\"gross_amount\":\"5900000.00\",\"currency\":\"IDR\",\"order_id\":\"DT-6-20260515122123\",\"payment_type\":\"bank_transfer\",\"signature_key\":\"476a5a9a586e0cca1479429f6e5f384b1e5741bf219be707f1f92bce2710ff1e4cd508038b9fa7f076a0d5b4be4194c6b4dfdc1f2956b3c57adf7ee06d91fcc6\",\"transaction_status\":\"settlement\",\"fraud_status\":\"accept\",\"status_message\":\"Success, transaction is found\",\"merchant_id\":\"G110926955\",\"va_numbers\":[{\"bank\":\"bca\",\"va_number\":\"26955834636105355480605\"}],\"payment_amounts\":[],\"transaction_time\":\"2026-05-15 12:21:24\",\"settlement_time\":\"2026-05-15 12:21:38\",\"expiry_time\":\"2026-05-16 12:21:24\"}', '2026-05-15 12:21:23', '2026-05-15 12:21:43'),
+(7, 7, 'midtrans', 'DT-7-20260515122334', 'a5179a41-835c-417c-8d35-de8e43f57654', '8187bf59-c1f3-43a4-82c1-bd64fdb7e56b', 'https://app.sandbox.midtrans.com/snap/v4/redirection/8187bf59-c1f3-43a4-82c1-bd64fdb7e56b', 5740000, 'IDR', 'bank_transfer', 'bca', '26955046819426732603046', NULL, NULL, NULL, NULL, 'settlement', 'accept', '200', 'Success, transaction is found', 'paid', '2026-05-15 12:23:47', NULL, NULL, '{\"status_code\":\"200\",\"transaction_id\":\"a5179a41-835c-417c-8d35-de8e43f57654\",\"gross_amount\":\"5740000.00\",\"currency\":\"IDR\",\"order_id\":\"DT-7-20260515122334\",\"payment_type\":\"bank_transfer\",\"signature_key\":\"0bc9dfa11277efc2c4e60fa448cdf303615e33dcfd036cd9e9ccfacee22edaacefc7a29cb93af4b5555a39ba3f0c782d7eb20e37109abccbc807206d4fdd2020\",\"transaction_status\":\"settlement\",\"fraud_status\":\"accept\",\"status_message\":\"Success, transaction is found\",\"merchant_id\":\"G110926955\",\"va_numbers\":[{\"bank\":\"bca\",\"va_number\":\"26955046819426732603046\"}],\"payment_amounts\":[],\"transaction_time\":\"2026-05-15 12:23:36\",\"settlement_time\":\"2026-05-15 12:23:40\",\"expiry_time\":\"2026-05-16 12:23:35\"}', '2026-05-15 12:23:34', '2026-05-15 12:23:47'),
+(8, 8, 'midtrans', 'DT-8-20260515140112', '0f862022-744c-4296-a488-21c47620629b', '706abeaa-cb8f-4c76-aa29-7c5708ad4813', 'https://app.sandbox.midtrans.com/snap/v4/redirection/706abeaa-cb8f-4c76-aa29-7c5708ad4813', 14940000, 'IDR', 'bank_transfer', 'bca', '26955637708049115735371', NULL, NULL, NULL, NULL, 'settlement', 'accept', '200', 'Success, transaction is found', 'paid', '2026-05-15 14:03:05', NULL, NULL, '{\"status_code\":\"200\",\"transaction_id\":\"0f862022-744c-4296-a488-21c47620629b\",\"gross_amount\":\"14940000.00\",\"currency\":\"IDR\",\"order_id\":\"DT-8-20260515140112\",\"payment_type\":\"bank_transfer\",\"signature_key\":\"4c218db81bc0d87b03887b10ba4430d61c912c1f241f5368a9cbc86f0fb4f2e1546a5f5939357f8cc19ae30747abb041cea89a91e48894b9073f124f1ad5cf2e\",\"transaction_status\":\"settlement\",\"fraud_status\":\"accept\",\"status_message\":\"Success, transaction is found\",\"merchant_id\":\"G110926955\",\"va_numbers\":[{\"bank\":\"bca\",\"va_number\":\"26955637708049115735371\"}],\"payment_amounts\":[],\"transaction_time\":\"2026-05-15 14:02:04\",\"settlement_time\":\"2026-05-15 14:02:53\",\"expiry_time\":\"2026-05-16 14:02:04\"}', '2026-05-15 14:01:13', '2026-05-15 14:03:05'),
+(9, 9, 'midtrans', 'DT-9-20260515141643', 'f1b8ce15-627e-444a-be9e-4177186f71fb', '3ac28132-bece-4bd9-adda-0f53fad89238', 'https://app.sandbox.midtrans.com/snap/v4/redirection/3ac28132-bece-4bd9-adda-0f53fad89238', 1200000, 'IDR', 'bank_transfer', 'bca', '26955607098177636364293', NULL, NULL, NULL, NULL, 'settlement', 'accept', '200', 'Success, transaction is found', 'paid', '2026-05-15 14:19:01', NULL, NULL, '{\"status_code\":\"200\",\"transaction_id\":\"f1b8ce15-627e-444a-be9e-4177186f71fb\",\"gross_amount\":\"1200000.00\",\"currency\":\"IDR\",\"order_id\":\"DT-9-20260515141643\",\"payment_type\":\"bank_transfer\",\"signature_key\":\"98f51bc73c6acd188090b32e3439343ada3a4b26b306ec432db5d5e80a5d1ee3e28a6eb13e08f9de1b4a756201217da1063424507f135e062ca5503d36876334\",\"transaction_status\":\"settlement\",\"fraud_status\":\"accept\",\"status_message\":\"Success, transaction is found\",\"merchant_id\":\"G110926955\",\"va_numbers\":[{\"bank\":\"bca\",\"va_number\":\"26955607098177636364293\"}],\"payment_amounts\":[],\"transaction_time\":\"2026-05-15 14:16:54\",\"settlement_time\":\"2026-05-15 14:18:45\",\"expiry_time\":\"2026-05-16 14:16:54\"}', '2026-05-15 14:16:44', '2026-05-15 14:19:01'),
+(10, 10, 'midtrans', 'DT-10-20260518184956', 'cc952f71-6f3b-4337-be67-121baa5e29dd', '33df1bec-321a-4763-a1be-e8c85a7cb154', 'https://app.sandbox.midtrans.com/snap/v4/redirection/33df1bec-321a-4763-a1be-e8c85a7cb154', 15200000, 'IDR', 'bank_transfer', 'bca', '26955275844354036124292', NULL, NULL, NULL, NULL, 'settlement', 'accept', '200', 'Success, transaction is found', 'paid', '2026-05-18 18:50:12', NULL, NULL, '{\"status_code\":\"200\",\"transaction_id\":\"cc952f71-6f3b-4337-be67-121baa5e29dd\",\"gross_amount\":\"15200000.00\",\"currency\":\"IDR\",\"order_id\":\"DT-10-20260518184956\",\"payment_type\":\"bank_transfer\",\"signature_key\":\"fbe7a75a6b944d336c259b5ff4e15beb0c3e93e2ab755adaf10d49ccd531181bd33d9c028242ff487ad0167f4286b40f6e09bbf7fbf6c053eecb2e1f7c8d4a4b\",\"transaction_status\":\"settlement\",\"fraud_status\":\"accept\",\"status_message\":\"Success, transaction is found\",\"merchant_id\":\"G110926955\",\"va_numbers\":[{\"bank\":\"bca\",\"va_number\":\"26955275844354036124292\"}],\"payment_amounts\":[],\"transaction_time\":\"2026-05-18 18:50:01\",\"settlement_time\":\"2026-05-18 18:50:04\",\"expiry_time\":\"2026-05-19 18:50:01\"}', '2026-05-18 18:49:59', '2026-05-18 18:50:12'),
+(11, 11, 'midtrans', 'DT-11-20260518185124', '6904bb71-4231-4782-93a4-54d584fbbef8', '6bd041a5-661b-4657-9740-8ce346b0fce7', 'https://app.sandbox.midtrans.com/snap/v4/redirection/6bd041a5-661b-4657-9740-8ce346b0fce7', 11190000, 'IDR', 'bank_transfer', 'bca', '26955431067460901105451', NULL, NULL, NULL, NULL, 'settlement', 'accept', '200', 'Success, transaction is found', 'paid', '2026-05-18 18:51:43', NULL, NULL, '{\"status_code\":\"200\",\"transaction_id\":\"6904bb71-4231-4782-93a4-54d584fbbef8\",\"gross_amount\":\"11190000.00\",\"currency\":\"IDR\",\"order_id\":\"DT-11-20260518185124\",\"payment_type\":\"bank_transfer\",\"signature_key\":\"873e6eac458c81748b01a0ecb2770d41593d5617c302aa486dfe6d21eecc3d8e1d8ac943f5df4335a6971bd54c4e4c2923fea6da7c961fc108809079b89f4ecd\",\"transaction_status\":\"settlement\",\"fraud_status\":\"accept\",\"status_message\":\"Success, transaction is found\",\"merchant_id\":\"G110926955\",\"va_numbers\":[{\"bank\":\"bca\",\"va_number\":\"26955431067460901105451\"}],\"payment_amounts\":[],\"transaction_time\":\"2026-05-18 18:51:32\",\"settlement_time\":\"2026-05-18 18:51:36\",\"expiry_time\":\"2026-05-19 18:51:32\"}', '2026-05-18 18:51:28', '2026-05-18 18:51:43'),
+(12, 12, 'midtrans', 'DT-12-20260518185343', 'a6065224-63e4-4bd8-a0a2-c25b1ff568c8', '7af94f30-8912-48d5-be4c-2646653211fd', 'https://app.sandbox.midtrans.com/snap/v4/redirection/7af94f30-8912-48d5-be4c-2646653211fd', 5890000, 'IDR', 'bank_transfer', 'bca', '26955611408971056691835', NULL, NULL, NULL, NULL, 'settlement', 'accept', '200', 'Success, transaction is found', 'paid', '2026-05-18 18:53:59', NULL, NULL, '{\"status_code\":\"200\",\"transaction_id\":\"a6065224-63e4-4bd8-a0a2-c25b1ff568c8\",\"gross_amount\":\"5890000.00\",\"currency\":\"IDR\",\"order_id\":\"DT-12-20260518185343\",\"payment_type\":\"bank_transfer\",\"signature_key\":\"e594eb4fa6c9b05e55413f7cb2d09fb096f41e026abe332b0c190cd3b0c9028840f5a1949d811e072d19ad8195786b2d988977a1a65690d78e0594114593684a\",\"transaction_status\":\"settlement\",\"fraud_status\":\"accept\",\"status_message\":\"Success, transaction is found\",\"merchant_id\":\"G110926955\",\"va_numbers\":[{\"bank\":\"bca\",\"va_number\":\"26955611408971056691835\"}],\"payment_amounts\":[],\"transaction_time\":\"2026-05-18 18:53:47\",\"settlement_time\":\"2026-05-18 18:53:53\",\"expiry_time\":\"2026-05-19 18:53:47\"}', '2026-05-18 18:53:46', '2026-05-18 18:53:59'),
+(13, 13, 'midtrans', 'DT-13-20260530134744', '02dd5ae3-751c-422d-864e-7acd625f460f', 'e5e597ec-d1e9-4d7c-9bb3-41cecbc11d15', 'https://app.sandbox.midtrans.com/snap/v4/redirection/e5e597ec-d1e9-4d7c-9bb3-41cecbc11d15', 9200000, 'IDR', 'bank_transfer', 'bca', '26955286105867464361246', NULL, NULL, NULL, NULL, 'settlement', 'accept', '200', 'Success, transaction is found', 'paid', '2026-05-30 13:48:25', NULL, NULL, '{\"status_code\":\"200\",\"transaction_id\":\"02dd5ae3-751c-422d-864e-7acd625f460f\",\"gross_amount\":\"9200000.00\",\"currency\":\"IDR\",\"order_id\":\"DT-13-20260530134744\",\"payment_type\":\"bank_transfer\",\"signature_key\":\"972a4c4b2bd5e7c9d84a7437f1233240ea0f627944f1a91e67a8b033cf74b8165591c62703b4f8fcbac53dc36f878ad42b034e8bb3e2c17b026925b71ddc5f87\",\"transaction_status\":\"settlement\",\"fraud_status\":\"accept\",\"status_message\":\"Success, transaction is found\",\"merchant_id\":\"G110926955\",\"va_numbers\":[{\"bank\":\"bca\",\"va_number\":\"26955286105867464361246\"}],\"payment_amounts\":[],\"transaction_time\":\"2026-05-30 13:48:02\",\"settlement_time\":\"2026-05-30 13:48:17\",\"expiry_time\":\"2026-05-31 13:48:02\"}', '2026-05-30 13:47:47', '2026-05-30 13:48:25'),
+(14, 14, 'midtrans', 'DT-14-20260603142739', '37d4db30-1ebc-49f9-9b0f-0f09dfbfa079', 'deafbb22-77cf-43b1-89b4-ad16a51702e2', 'https://app.sandbox.midtrans.com/snap/v4/redirection/deafbb22-77cf-43b1-89b4-ad16a51702e2', 10095000, 'IDR', 'bank_transfer', 'bca', '26955645615898863979768', NULL, NULL, NULL, NULL, 'settlement', 'accept', '200', 'Success, transaction is found', 'paid', '2026-06-03 14:28:38', NULL, NULL, '{\"status_code\":\"200\",\"transaction_id\":\"37d4db30-1ebc-49f9-9b0f-0f09dfbfa079\",\"gross_amount\":\"10095000.00\",\"currency\":\"IDR\",\"order_id\":\"DT-14-20260603142739\",\"payment_type\":\"bank_transfer\",\"signature_key\":\"1a85957753a908eb56eb65bc0fc6ee2b32484c2ca019145493821472aa831ea5ce784f9b409eb1b9f571ccdd6a5b613f70513adcdcf97c97649bff03dc25a422\",\"transaction_status\":\"settlement\",\"fraud_status\":\"accept\",\"status_message\":\"Success, transaction is found\",\"merchant_id\":\"G110926955\",\"va_numbers\":[{\"bank\":\"bca\",\"va_number\":\"26955645615898863979768\"}],\"payment_amounts\":[],\"transaction_time\":\"2026-06-03 14:27:42\",\"settlement_time\":\"2026-06-03 14:28:27\",\"expiry_time\":\"2026-06-04 14:27:42\"}', '2026-06-03 14:27:40', '2026-06-03 14:28:38'),
+(15, 15, 'midtrans', 'DT-15-20260603143805', '73c88b71-c01a-417b-b99d-8eb2a6db14b5', '9bf842cf-2e3d-427f-9e2d-417a3bf981db', 'https://app.sandbox.midtrans.com/snap/v4/redirection/9bf842cf-2e3d-427f-9e2d-417a3bf981db', 10700000, 'IDR', 'bank_transfer', 'bca', '26955033814800123373869', NULL, NULL, NULL, NULL, 'settlement', 'accept', '200', 'Success, transaction is found', 'paid', '2026-06-03 14:38:34', NULL, NULL, '{\"status_code\":\"200\",\"transaction_id\":\"73c88b71-c01a-417b-b99d-8eb2a6db14b5\",\"gross_amount\":\"10700000.00\",\"currency\":\"IDR\",\"order_id\":\"DT-15-20260603143805\",\"payment_type\":\"bank_transfer\",\"signature_key\":\"2fad3e8185aab986e17bc479c3941f286ab2d24b81f90867388a3e39930c0ffccb175cca43a9426718b9e2a2a3ea2cdf4e8d51258712d4cbeb6c39ddbf3ac156\",\"transaction_status\":\"settlement\",\"fraud_status\":\"accept\",\"status_message\":\"Success, transaction is found\",\"merchant_id\":\"G110926955\",\"va_numbers\":[{\"bank\":\"bca\",\"va_number\":\"26955033814800123373869\"}],\"payment_amounts\":[],\"transaction_time\":\"2026-06-03 14:38:13\",\"settlement_time\":\"2026-06-03 14:38:25\",\"expiry_time\":\"2026-06-04 14:38:13\"}', '2026-06-03 14:38:05', '2026-06-03 14:38:34'),
+(16, 16, 'midtrans', 'DT-16-20260610110220', 'f6c20891-97a7-4961-83ef-dd4012e30885', 'f20cd715-3b49-4533-8bed-5f00ed2f5b68', 'https://app.sandbox.midtrans.com/snap/v4/redirection/f20cd715-3b49-4533-8bed-5f00ed2f5b68', 3640000, 'IDR', 'bank_transfer', 'bca', '26955637246151970607633', NULL, NULL, NULL, NULL, 'settlement', 'accept', '200', 'Success, transaction is found', 'paid', '2026-06-10 11:03:12', NULL, NULL, '{\"status_code\":\"200\",\"transaction_id\":\"f6c20891-97a7-4961-83ef-dd4012e30885\",\"gross_amount\":\"3640000.00\",\"currency\":\"IDR\",\"order_id\":\"DT-16-20260610110220\",\"payment_type\":\"bank_transfer\",\"signature_key\":\"d0eacaec89e8bc746493b803e51406726bbf8906897f4cf989647b936262d7d35134300c4c9d19ab7ef26f89dd5d9f9eb78238651fb36af1b2f83aa6b280ddd2\",\"transaction_status\":\"settlement\",\"fraud_status\":\"accept\",\"status_message\":\"Success, transaction is found\",\"merchant_id\":\"G110926955\",\"va_numbers\":[{\"bank\":\"bca\",\"va_number\":\"26955637246151970607633\"}],\"payment_amounts\":[],\"transaction_time\":\"2026-06-10 11:02:26\",\"settlement_time\":\"2026-06-10 11:02:53\",\"expiry_time\":\"2026-06-11 11:02:25\"}', '2026-06-10 11:02:21', '2026-06-10 11:03:12'),
+(17, 17, 'midtrans', 'DT-17-20260614183436', '3e6f8491-fa28-4480-9918-4636517869b1', '047f3756-4c8b-4430-9b78-9da20d1570cd', 'https://app.sandbox.midtrans.com/snap/v4/redirection/047f3756-4c8b-4430-9b78-9da20d1570cd', 8700000, 'IDR', 'bank_transfer', 'bca', '26955695637293094774070', NULL, NULL, NULL, NULL, 'settlement', 'accept', '200', 'Success, transaction is found', 'paid', '2026-06-14 18:34:48', NULL, NULL, '{\"status_code\":\"200\",\"transaction_id\":\"3e6f8491-fa28-4480-9918-4636517869b1\",\"gross_amount\":\"8700000.00\",\"currency\":\"IDR\",\"order_id\":\"DT-17-20260614183436\",\"payment_type\":\"bank_transfer\",\"signature_key\":\"e8841dac8b55148f8c4a1c35e89659b03183c37fee9916124b0b4b893103d68310bb24c75906b76006dc82e9792daae1f1923e957c7b67b03ab68a6f11afbbbc\",\"transaction_status\":\"settlement\",\"fraud_status\":\"accept\",\"status_message\":\"Success, transaction is found\",\"merchant_id\":\"G110926955\",\"va_numbers\":[{\"bank\":\"bca\",\"va_number\":\"26955695637293094774070\"}],\"payment_amounts\":[],\"transaction_time\":\"2026-06-14 18:34:39\",\"settlement_time\":\"2026-06-14 18:34:43\",\"expiry_time\":\"2026-06-15 18:34:39\"}', '2026-06-14 18:34:38', '2026-06-14 18:34:48');
+
+-- ----------------------------
+-- Table structure for permissions
+-- ----------------------------
+DROP TABLE IF EXISTS `permissions`;
+CREATE TABLE `permissions` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `guard_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `permissions_name_guard_name_unique` (`name`,`guard_name`)
+) ENGINE=InnoDB AUTO_INCREMENT=74 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ----------------------------
+-- Records of permissions
+-- ----------------------------
+INSERT INTO `permissions` (`id`, `name`, `guard_name`, `created_at`, `updated_at`) VALUES
+(1, 'ViewAny:User', 'web', '2026-05-01 23:11:05', '2026-05-01 23:11:05'),
+(2, 'View:User', 'web', '2026-05-01 23:11:05', '2026-05-01 23:11:05'),
+(3, 'Create:User', 'web', '2026-05-01 23:11:05', '2026-05-01 23:11:05'),
+(4, 'Update:User', 'web', '2026-05-01 23:11:05', '2026-05-01 23:11:05'),
+(5, 'Delete:User', 'web', '2026-05-01 23:11:05', '2026-05-01 23:11:05'),
+(6, 'ViewAny:Role', 'web', '2026-05-01 23:11:05', '2026-05-01 23:11:05'),
+(7, 'View:Role', 'web', '2026-05-01 23:11:05', '2026-05-01 23:11:05'),
+(8, 'Create:Role', 'web', '2026-05-01 23:11:05', '2026-05-01 23:11:05'),
+(9, 'Update:Role', 'web', '2026-05-01 23:11:05', '2026-05-01 23:11:05'),
+(10, 'Delete:Role', 'web', '2026-05-01 23:11:05', '2026-05-01 23:11:05'),
+(11, 'ViewAny:Activity', 'web', '2026-05-01 23:11:05', '2026-05-01 23:11:05'),
+(12, 'View:Activity', 'web', '2026-05-01 23:11:05', '2026-05-01 23:11:05'),
+(13, 'Create:Activity', 'web', '2026-05-01 23:11:05', '2026-05-01 23:11:05'),
+(14, 'Update:Activity', 'web', '2026-05-01 23:11:05', '2026-05-01 23:11:05'),
+(15, 'Delete:Activity', 'web', '2026-05-01 23:11:05', '2026-05-01 23:11:05'),
+(16, 'View:MyProfilePage', 'web', '2026-05-01 23:11:06', '2026-05-01 23:11:06'),
+(17, 'View:OverlookWidget', 'web', '2026-05-01 23:11:06', '2026-05-01 23:11:06'),
+(18, 'View:LatestAccessLogs', 'web', '2026-05-01 23:11:06', '2026-05-01 23:11:06'),
+(19, 'ViewAny:Addon', 'web', '2026-05-02 02:32:27', '2026-05-02 02:32:27'),
+(20, 'View:Addon', 'web', '2026-05-02 02:32:27', '2026-05-02 02:32:27'),
+(21, 'Create:Addon', 'web', '2026-05-02 02:32:27', '2026-05-02 02:32:27'),
+(22, 'Update:Addon', 'web', '2026-05-02 02:32:27', '2026-05-02 02:32:27'),
+(23, 'Delete:Addon', 'web', '2026-05-02 02:32:27', '2026-05-02 02:32:27'),
+(24, 'ViewAny:CustomItem', 'web', '2026-05-02 02:32:28', '2026-05-02 02:32:28'),
+(25, 'View:CustomItem', 'web', '2026-05-02 02:32:28', '2026-05-02 02:32:28'),
+(26, 'Create:CustomItem', 'web', '2026-05-02 02:32:28', '2026-05-02 02:32:28'),
+(27, 'Update:CustomItem', 'web', '2026-05-02 02:32:28', '2026-05-02 02:32:28'),
+(28, 'Delete:CustomItem', 'web', '2026-05-02 02:32:28', '2026-05-02 02:32:28'),
+(29, 'ViewAny:PackageItem', 'web', '2026-05-02 02:32:28', '2026-05-02 02:32:28'),
+(30, 'View:PackageItem', 'web', '2026-05-02 02:32:28', '2026-05-02 02:32:28'),
+(31, 'Create:PackageItem', 'web', '2026-05-02 02:32:28', '2026-05-02 02:32:28'),
+(32, 'Update:PackageItem', 'web', '2026-05-02 02:32:28', '2026-05-02 02:32:28'),
+(33, 'Delete:PackageItem', 'web', '2026-05-02 02:32:28', '2026-05-02 02:32:28'),
+(34, 'ViewAny:Package', 'web', '2026-05-02 02:32:28', '2026-05-02 02:32:28'),
+(35, 'View:Package', 'web', '2026-05-02 02:32:28', '2026-05-02 02:32:28'),
+(36, 'Create:Package', 'web', '2026-05-02 02:32:28', '2026-05-02 02:32:28'),
+(37, 'Update:Package', 'web', '2026-05-02 02:32:28', '2026-05-02 02:32:28'),
+(38, 'Delete:Package', 'web', '2026-05-02 02:32:28', '2026-05-02 02:32:28'),
+(39, 'ViewAny:Beranda', 'web', '2026-05-02 04:38:22', '2026-05-02 04:38:22'),
+(40, 'View:Beranda', 'web', '2026-05-02 04:38:22', '2026-05-02 04:38:22'),
+(41, 'Create:Beranda', 'web', '2026-05-02 04:38:22', '2026-05-02 04:38:22'),
+(42, 'Update:Beranda', 'web', '2026-05-02 04:38:22', '2026-05-02 04:38:22'),
+(43, 'Delete:Beranda', 'web', '2026-05-02 04:38:22', '2026-05-02 04:38:22'),
+(44, 'ViewAny:OrderAddon', 'web', '2026-05-02 04:38:22', '2026-05-02 04:38:22'),
+(45, 'View:OrderAddon', 'web', '2026-05-02 04:38:22', '2026-05-02 04:38:22'),
+(46, 'Create:OrderAddon', 'web', '2026-05-02 04:38:22', '2026-05-02 04:38:22'),
+(47, 'Update:OrderAddon', 'web', '2026-05-02 04:38:22', '2026-05-02 04:38:22'),
+(48, 'Delete:OrderAddon', 'web', '2026-05-02 04:38:22', '2026-05-02 04:38:22'),
+(49, 'ViewAny:OrderItem', 'web', '2026-05-02 04:38:22', '2026-05-02 04:38:22'),
+(50, 'View:OrderItem', 'web', '2026-05-02 04:38:22', '2026-05-02 04:38:22'),
+(51, 'Create:OrderItem', 'web', '2026-05-02 04:38:22', '2026-05-02 04:38:22'),
+(52, 'Update:OrderItem', 'web', '2026-05-02 04:38:22', '2026-05-02 04:38:22'),
+(53, 'Delete:OrderItem', 'web', '2026-05-02 04:38:22', '2026-05-02 04:38:22'),
+(54, 'ViewAny:Order', 'web', '2026-05-02 04:38:23', '2026-05-02 04:38:23'),
+(55, 'View:Order', 'web', '2026-05-02 04:38:23', '2026-05-02 04:38:23'),
+(56, 'Create:Order', 'web', '2026-05-02 04:38:23', '2026-05-02 04:38:23'),
+(57, 'Update:Order', 'web', '2026-05-02 04:38:23', '2026-05-02 04:38:23'),
+(58, 'Delete:Order', 'web', '2026-05-02 04:38:23', '2026-05-02 04:38:23'),
+(59, 'ViewAny:Galery', 'web', '2026-05-02 04:56:48', '2026-05-02 04:56:48'),
+(60, 'View:Galery', 'web', '2026-05-02 04:56:48', '2026-05-02 04:56:48'),
+(61, 'Create:Galery', 'web', '2026-05-02 04:56:48', '2026-05-02 04:56:48'),
+(62, 'Update:Galery', 'web', '2026-05-02 04:56:48', '2026-05-02 04:56:48'),
+(63, 'Delete:Galery', 'web', '2026-05-02 04:56:48', '2026-05-02 04:56:48'),
+(64, 'ViewAny:Footer', 'web', '2026-05-02 05:18:34', '2026-05-02 05:18:34'),
+(65, 'View:Footer', 'web', '2026-05-02 05:18:34', '2026-05-02 05:18:34'),
+(66, 'Create:Footer', 'web', '2026-05-02 05:18:34', '2026-05-02 05:18:34'),
+(67, 'Update:Footer', 'web', '2026-05-02 05:18:34', '2026-05-02 05:18:34'),
+(68, 'Delete:Footer', 'web', '2026-05-02 05:18:34', '2026-05-02 05:18:34'),
+(69, 'ViewAny:SosialMedia', 'web', '2026-05-02 05:25:54', '2026-05-02 05:25:54'),
+(70, 'View:SosialMedia', 'web', '2026-05-02 05:25:54', '2026-05-02 05:25:54'),
+(71, 'Create:SosialMedia', 'web', '2026-05-02 05:25:54', '2026-05-02 05:25:54'),
+(72, 'Update:SosialMedia', 'web', '2026-05-02 05:25:54', '2026-05-02 05:25:54'),
+(73, 'Delete:SosialMedia', 'web', '2026-05-02 05:25:54', '2026-05-02 05:25:54');
+
+-- ----------------------------
+-- Table structure for reviews
+-- ----------------------------
+DROP TABLE IF EXISTS `reviews`;
+CREATE TABLE `reviews` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `order_id` bigint(20) unsigned NOT NULL,
+  `user_id` bigint(20) unsigned DEFAULT NULL,
+  `rating` tinyint(3) unsigned NOT NULL,
+  `review` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `is_visible` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `reviews_order_id_unique` (`order_id`),
+  KEY `reviews_user_id_foreign` (`user_id`),
+  KEY `reviews_rating_is_visible_index` (`rating`,`is_visible`),
+  CONSTRAINT `reviews_order_id_foreign` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `reviews_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ----------------------------
+-- Records of reviews
+-- ----------------------------
+-- ----------------------------
+-- Table structure for role_has_permissions
+-- ----------------------------
+DROP TABLE IF EXISTS `role_has_permissions`;
+CREATE TABLE `role_has_permissions` (
+  `permission_id` bigint(20) unsigned NOT NULL,
+  `role_id` bigint(20) unsigned NOT NULL,
+  PRIMARY KEY (`permission_id`,`role_id`),
+  KEY `role_has_permissions_role_id_foreign` (`role_id`),
+  CONSTRAINT `role_has_permissions_permission_id_foreign` FOREIGN KEY (`permission_id`) REFERENCES `permissions` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `role_has_permissions_role_id_foreign` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ----------------------------
+-- Records of role_has_permissions
+-- ----------------------------
+INSERT INTO `role_has_permissions` (`permission_id`, `role_id`) VALUES
+(1, 1),
+(2, 1),
+(3, 1),
+(4, 1),
+(5, 1),
+(6, 1),
+(7, 1),
+(8, 1),
+(9, 1),
+(10, 1),
+(11, 1),
+(12, 1),
+(13, 1),
+(14, 1),
+(15, 1),
+(16, 1),
+(17, 1),
+(18, 1),
+(19, 1),
+(20, 1),
+(21, 1),
+(22, 1),
+(23, 1),
+(24, 1),
+(25, 1),
+(26, 1),
+(27, 1),
+(28, 1),
+(29, 1),
+(30, 1),
+(31, 1),
+(32, 1),
+(33, 1),
+(34, 1),
+(35, 1),
+(36, 1),
+(37, 1),
+(38, 1),
+(39, 1),
+(40, 1),
+(41, 1),
+(42, 1),
+(43, 1),
+(44, 1),
+(45, 1),
+(46, 1),
+(47, 1),
+(48, 1),
+(49, 1),
+(50, 1),
+(51, 1),
+(52, 1),
+(53, 1),
+(54, 1),
+(55, 1),
+(56, 1),
+(57, 1),
+(58, 1),
+(59, 1),
+(60, 1),
+(61, 1),
+(62, 1),
+(63, 1),
+(64, 1),
+(65, 1),
+(66, 1),
+(67, 1),
+(68, 1),
+(69, 1),
+(70, 1),
+(71, 1),
+(72, 1),
+(73, 1);
+
+-- ----------------------------
+-- Table structure for roles
+-- ----------------------------
+DROP TABLE IF EXISTS `roles`;
+CREATE TABLE `roles` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `guard_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `roles_name_guard_name_unique` (`name`,`guard_name`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ----------------------------
+-- Records of roles
+-- ----------------------------
+INSERT INTO `roles` (`id`, `name`, `guard_name`, `created_at`, `updated_at`) VALUES
+(1, 'super_admin', 'web', '2026-05-01 23:11:05', '2026-05-01 23:11:05');
+
+-- ----------------------------
+-- Table structure for sessions
+-- ----------------------------
+DROP TABLE IF EXISTS `sessions`;
+CREATE TABLE `sessions` (
+  `id` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `user_id` bigint(20) unsigned DEFAULT NULL,
+  `ip_address` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `user_agent` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `payload` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `last_activity` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `sessions_user_id_index` (`user_id`),
+  KEY `sessions_last_activity_index` (`last_activity`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ----------------------------
+-- Records of sessions
+-- ----------------------------
+INSERT INTO `sessions` (`id`, `user_id`, `ip_address`, `user_agent`, `payload`, `last_activity`) VALUES
+('KpbMAXZyU3leYhjQefys5NoI6syu866Bp31GWFop', 3, '192.168.64.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36', 'ZXlKcGRpSTZJakIwWkdSTksxcEtaMkpFSzBaeU0xcHpSbll6UjNjOVBTSXNJblpoYkhWbElqb2lPVFptY0RSSk5ETkVPSHBZTlRWTWMxaFJkMkZrZUZRck9VMTJVMHBWZEZkaFFVOXBNMWRJT0VRMEwzRjZVSGd6ZW5vd1JFZDJXVFZUVld3eWJDdEdiR1Y2TldrM1NERldNekJETUhrcmNtVnVXWEE0U2pOc1FVNXVSbFVyZGxVd1ozaDBWVU5FUW1OTVNqVlFNREp5VVRnNWNHTkRSa0ZRVW5sV2NrSjFiWFJXYjFsb1draFpiVXR5TkVSQlZtOU9la3R1ZUROaE5GQllNa2N3VFZSNGN6TTVlRGw0YkhwQlFUQlVVRFZsYVVZckszcEZaVGt2WkVkdGRYSlpRV2xuYTFWdFQyZ3pWR1JYZVRJck9VcDZkVXBqUlRNMlJ6WjNWa0p0U0RFMVZGTjVWMU5JVlZCVWFGQnZTbmcxWmxWSUsxa3hRVmRaYUV0VWJrWm1lVGhWWVVsdVpVSXJZblJNYzJVemQybEZaSFJaUjFsRFZqaFdhRGt5Y1RabVlYazBkMGhPTldRM1RFbFFPR055TjJGYVpXOVRPR1I1ZDFGdFIxbFNZbXMyV0ZaQlJIbFNaa3haVWpNeGFHMUplbUk0ZDJkc00wczFXWGR5WWtRMmRVNXlkelZYWVNzMUwybHRUME5FZFd0a2QzY3haV1psU0RWUFFrUk1MemxLV0haRmVXazBOR1JNZFZRM1IyOWpUVGR2Um5rMVZUWTVRVDA5SWl3aWJXRmpJam9pWmpCa09XVXlZamRoTkRNMU1XUTJPVEV5TVRaak5HWmhZV1E0WlRNMFlUVTNOamxpWmpFM01URXlZMk14TnpGa1pHVTFNR015T0RreU5ERXlNelV4WkNJc0luUmhaeUk2SWlKOQ==', 1781809984);
+
+-- ----------------------------
+-- Table structure for sosial_media
+-- ----------------------------
+DROP TABLE IF EXISTS `sosial_media`;
+CREATE TABLE `sosial_media` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `icon` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `link` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ----------------------------
+-- Records of sosial_media
+-- ----------------------------
+INSERT INTO `sosial_media` (`id`, `icon`, `link`, `created_at`, `updated_at`) VALUES
+(1, 'bi bi-facebook', NULL, '2026-05-02 05:27:00', '2026-05-02 05:27:00'),
+(2, 'bi bi-instagram', 'https://www.instagram.com/didin.tenda/', '2026-05-02 05:27:11', '2026-05-02 05:29:40'),
+(3, 'bi bi-whatsapp', 'https://api.whatsapp.com/send?phone=6288289258764', '2026-05-02 05:27:20', '2026-06-01 19:53:07'),
+(4, 'bi bi-youtube', NULL, '2026-05-02 05:27:28', '2026-05-02 05:27:28');
+
+-- ----------------------------
+-- Table structure for users
+-- ----------------------------
+DROP TABLE IF EXISTS `users`;
+CREATE TABLE `users` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `avatar_url` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email_verified_at` timestamp NULL DEFAULT NULL,
+  `password` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `phone` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `whatsapp` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `kota` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `kode_pos` bigint(20) DEFAULT NULL,
+  `alamat` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `remember_token` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `users_email_unique` (`email`)
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ----------------------------
+-- Records of users
+-- ----------------------------
+INSERT INTO `users` (`id`, `avatar_url`, `name`, `email`, `email_verified_at`, `password`, `phone`, `whatsapp`, `kota`, `kode_pos`, `alamat`, `remember_token`, `created_at`, `updated_at`) VALUES
+(1, '01KQJANM6R4H578PKDXTHH3SXA.jpg', 'Admin', 'admin@admin.com', '2026-05-01 23:11:06', '$2y$12$j2YlAbstHqQcW8JJYNEHLOh4.95WKprKZGT4XoTJ3r0BKxyPuBvgC', NULL, NULL, NULL, NULL, NULL, 'FKygXv8Njdx0xp798OowGRcdTt9FwiswlfrxVrGkLxhe3a85ezKSG5u1BX30', '2026-05-01 23:11:06', '2026-05-02 00:51:33'),
+(2, NULL, 'ARHAN MALIK ALRASYID', 'arhanmali96@gmail.com', NULL, '$2y$12$j2YlAbstHqQcW8JJYNEHLOh4.95WKprKZGT4XoTJ3r0BKxyPuBvgC', '082112123333', '082112123333', NULL, NULL, NULL, NULL, '2026-05-01 23:12:08', '2026-05-01 23:12:08'),
+(3, NULL, 'arhan malik ', 'arhanmcz@gmail.com', NULL, '$2y$12$j2YlAbstHqQcW8JJYNEHLOh4.95WKprKZGT4XoTJ3r0BKxyPuBvgC', NULL, NULL, NULL, NULL, NULL, 'YMlrSr7bBonxX0hj8xlyKKqfKEDnvEt05wz7HO2MadSvN5h70wCuhZmgcALn', NULL, '2026-05-03 18:06:07'),
+(4, NULL, 'test', 'rasyidmalik456@gmail.com', NULL, '$2y$12$pTKu6GNZPOO9DtFkScRnLOZEvs9pw9o2t3B8amH7G7CAy3NIielKu', '082122222222', '082122222222', NULL, NULL, NULL, NULL, '2026-05-02 05:45:03', '2026-05-02 05:45:03'),
+(5, NULL, 'djncloud', 'djncloud@gmail.com', NULL, '$2y$12$m/rYaENJHgw4kHRNRhLlXuzHOexAkqKiUb2f0MQq3Yc0wNBm89aIu', '082222222222', '082222222222', NULL, NULL, NULL, NULL, '2026-05-15 12:17:34', '2026-05-15 12:17:34'),
+(6, NULL, 'Muhamad Darlan', 'muhamaddarlan76@gmail.com', NULL, '$2y$12$yu0WdJeYh3yu0Z/05IkhCuB3sDoWJp8ZC1DG2PUJHjsmTJEEOc0fa', '088289258764', '088289258764', NULL, NULL, NULL, NULL, '2026-05-15 13:56:43', '2026-05-15 13:56:43'),
+(7, NULL, 'Athar Arya', 'tar123@gmail.com', NULL, '$2y$12$aIBNej/h/VHuSegCQP9qtedCxJEa9FLm13iAPmdejEog..IWakDBm', '000000000000000', '000000000000000', NULL, NULL, NULL, NULL, '2026-05-24 23:21:43', '2026-05-24 23:21:43'),
+(8, NULL, 'gyt', 'tar1234@gmail.com', NULL, '$2y$12$8o/Cdt0I9Ps5CaMpsIsZ4.tA66.B5poI118fUF3CVTOkf6mvnu28W', '444444444232', '444444444232', NULL, NULL, NULL, NULL, '2026-05-25 10:52:17', '2026-05-25 10:52:17'),
+(9, NULL, 'abcdef', 'didintendaa@gmail.com', NULL, '$2y$12$sEdNWIYVgxa57eGcoF194.bsFUw5r.CBj7kWhx/n7pknWCIkNcjQu', '088289258764', '088289258764', NULL, NULL, NULL, NULL, '2026-06-03 14:35:53', '2026-06-03 14:35:53');
+
+SET FOREIGN_KEY_CHECKS = 1;
