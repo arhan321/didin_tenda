@@ -1,7 +1,7 @@
 -- --------------------------------------------------
 -- AUTO DATABASE BACKUP
 -- Database : didin_tendav2
--- Dibuat   : 2026-06-26 17:19:01
+-- Dibuat   : 2026-06-26 17:31:08
 -- --------------------------------------------------
 
 SET NAMES utf8mb4;
@@ -1359,7 +1359,7 @@ CREATE TABLE `users` (
 -- ----------------------------
 INSERT INTO `users` (`id`, `avatar_url`, `name`, `email`, `email_verified_at`, `password`, `phone`, `whatsapp`, `kota`, `kode_pos`, `alamat`, `remember_token`, `created_at`, `updated_at`) VALUES
 (1, '01KQJANM6R4H578PKDXTHH3SXA.jpg', 'Admin', 'admin@admin.com', '2026-05-01 23:11:06', '$2y$12$j2YlAbstHqQcW8JJYNEHLOh4.95WKprKZGT4XoTJ3r0BKxyPuBvgC', NULL, NULL, NULL, NULL, NULL, 'FKygXv8Njdx0xp798OowGRcdTt9FwiswlfrxVrGkLxhe3a85ezKSG5u1BX30', '2026-05-01 23:11:06', '2026-05-02 00:51:33'),
-(2, NULL, 'ARHAN MALIK ALRASYID', 'arhanmali96@gmail.com', NULL, '$2y$12$j2YlAbstHqQcW8JJYNEHLOh4.95WKprKZGT4XoTJ3r0BKxyPuBvgC', '082112123333', '082112123333', NULL, NULL, NULL, NULL, '2026-05-01 23:12:08', '2026-05-01 23:12:08'),
+(2, NULL, 'ARHAN MALIK', 'arhanmali96@gmail.com', NULL, '$2y$12$j2YlAbstHqQcW8JJYNEHLOh4.95WKprKZGT4XoTJ3r0BKxyPuBvgC', '082112123333', '082112123333', NULL, NULL, NULL, NULL, '2026-05-01 23:12:08', '2026-05-01 23:12:08'),
 (3, NULL, 'arhan malik ', 'arhanmcz@gmail.com', NULL, '$2y$12$j2YlAbstHqQcW8JJYNEHLOh4.95WKprKZGT4XoTJ3r0BKxyPuBvgC', NULL, NULL, NULL, NULL, NULL, 'YMlrSr7bBonxX0hj8xlyKKqfKEDnvEt05wz7HO2MadSvN5h70wCuhZmgcALn', NULL, '2026-05-03 18:06:07'),
 (4, NULL, 'test', 'rasyidmalik456@gmail.com', NULL, '$2y$12$pTKu6GNZPOO9DtFkScRnLOZEvs9pw9o2t3B8amH7G7CAy3NIielKu', '082122222222', '082122222222', NULL, NULL, NULL, NULL, '2026-05-02 05:45:03', '2026-05-02 05:45:03'),
 (5, NULL, 'djncloud', 'djncloud@gmail.com', NULL, '$2y$12$m/rYaENJHgw4kHRNRhLlXuzHOexAkqKiUb2f0MQq3Yc0wNBm89aIu', '082222222222', '082222222222', NULL, NULL, NULL, NULL, '2026-05-15 12:17:34', '2026-05-15 12:17:34'),
