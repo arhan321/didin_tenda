@@ -35,3 +35,48 @@ php artisan view:clear
 php artisan route:clear
 php artisan cache:clear
 ```
+```
+cd /home/backend/didin_tenda
+
+echo "=================================================="
+echo "1. CEK FILE LOG AUTO COMMIT"
+echo "=================================================="
+ls -lah /home/backend/.auto_git_didin_tenda/ 2>/dev/null || true
+
+echo ""
+echo "=================================================="
+echo "2. ISI LOG AUTO COMMIT TERAKHIR"
+echo "=================================================="
+tail -n 200 /home/backend/.auto_git_didin_tenda/auto_git_commit.log 2>/dev/null || true
+
+echo ""
+echo "=================================================="
+echo "3. CEK LOG CRON RUNNER"
+echo "=================================================="
+tail -n 120 /home/backend/didin_tenda/cron_git_runner.log 2>/dev/null || true
+
+echo ""
+echo "=================================================="
+echo "4. CEK CRON USER BACKEND"
+echo "=================================================="
+crontab -l 2>/dev/null || true
+
+echo ""
+echo "=================================================="
+echo "5. CEK STATUS GIT SAAT INI"
+echo "=================================================="
+git status --short
+
+echo ""
+echo "=================================================="
+echo "6. CEK BRANCH DAN REMOTE"
+echo "=================================================="
+git branch --show-current
+git remote -v
+
+echo ""
+echo "=================================================="
+echo "7. CEK PESAN ERROR PENTING DI LOG"
+echo "=================================================="
+grep -iE "error|fatal|gagal|failed|denied|permission|fetch|rebase|push|commit|tidak ada perubahan|no changes|nothing" /home/backend/.auto_git_didin_tenda/auto_git_commit.log 2>/dev/null | tail -n 80 || true
+```
