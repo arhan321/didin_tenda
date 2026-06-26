@@ -17,21 +17,19 @@ RUNTIME_DIR="/home/backend/.auto_git_didin_tenda"
 LOG_FILE="$RUNTIME_DIR/auto_git_commit.log"
 LOCK_FILE="$RUNTIME_DIR/auto_git_commit.lock"
 
-# Sesuai kebutuhan bro: .env dan backup database tetap ikut GitHub sebagai sarana backup.
-# Catatan: pastikan repository GitHub kamu private kalau file ini berisi credential/database asli.
+# Sesuai kebutuhan bro:
+# - .env ikut GitHub sebagai backup.
+# - file backup .sql ikut GitHub walaupun kena .gitignore.
+# - raw database folder ikut GitHub kalau foldernya ada.
+#
+# PENTING:
+# Script versi ini TIDAK AKAN stop/start container MySQL/MariaDB sama sekali.
+# Jadi koneksi Navicat tidak akan ke-kill karena auto commit.
+# Catatan: commit raw database engine files saat database masih hidup bisa tidak konsisten.
+# Backup yang paling aman tetap file dump .sql dari folder backup_database.
 INCLUDE_ENV_FILE="true"
 INCLUDE_BACKUP_SQL="true"
 INCLUDE_RAW_DB_DATA="true"
-
-# Kalau auto-detect service database kurang cocok, isi manual.
-# Contoh:
-# DB_SERVICES_MANUAL="db"
-# DB_SERVICES_MANUAL="mysql"
-# DB_SERVICES_MANUAL="mariadb"
-DB_SERVICES_MANUAL=""
-
-DB_SERVICES_STOPPED="false"
-DB_SERVICES=""
 
 # Folder backup SQL yang biasa dipakai di project ini.
 BACKUP_SQL_DIRS=(
@@ -40,6 +38,7 @@ BACKUP_SQL_DIRS=(
 )
 
 # Folder raw database engine files. Folder akan di-force add hanya kalau benar-benar ada.
+# Script TIDAK akan mematikan container database sebelum stage folder ini.
 RAW_DB_DIRS=(
     "db/data"
     "database/data"
@@ -71,128 +70,6 @@ is_file_in_use() {
     fi
 
     return 1
-}
-
-docker_compose_cmd() {
-    if command -v docker >/dev/null 2>&1 && docker compose version >/dev/null 2>&1; then
-        echo "docker compose"
-        return 0
-    fi
-
-    if command -v docker-compose >/dev/null 2>&1; then
-        echo "docker-compose"
-        return 0
-    fi
-
-    return 1
-}
-
-raw_db_dir_exists() {
-    local dir
-
-    for dir in "${RAW_DB_DIRS[@]}"; do
-        if [ -d "$PROJECT_DIR/$dir" ]; then
-            return 0
-        fi
-    done
-
-    return 1
-}
-
-detect_db_services() {
-    cd "$PROJECT_DIR"
-
-    if [ -n "$DB_SERVICES_MANUAL" ]; then
-        DB_SERVICES="$DB_SERVICES_MANUAL"
-        return 0
-    fi
-
-    local dc
-    dc="$(docker_compose_cmd || true)"
-
-    if [ -z "$dc" ]; then
-        DB_SERVICES=""
-        return 0
-    fi
-
-    DB_SERVICES="$($dc config --services 2>/dev/null | grep -Ei '^(db|database|mysql|mariadb)$|mysql|mariadb' || true)"
-}
-
-stop_database_services() {
-    if [ "$INCLUDE_RAW_DB_DATA" != "true" ]; then
-        return 0
-    fi
-
-    if ! raw_db_dir_exists; then
-        log "Raw db engine dir tidak ditemukan. Database service tidak perlu distop."
-        return 0
-    fi
-
-    cd "$PROJECT_DIR"
-
-    detect_db_services
-
-    if [ -z "$DB_SERVICES" ]; then
-        log "WARNING: Service database tidak terdeteksi otomatis."
-        log "Raw database akan tetap di-commit, tapi database mungkin masih hidup."
-        log "Kalau mau aman, isi DB_SERVICES_MANUAL di script, contoh: DB_SERVICES_MANUAL=\"db\""
-        return 0
-    fi
-
-    local dc
-    dc="$(docker_compose_cmd || true)"
-
-    if [ -z "$dc" ]; then
-        log "WARNING: docker compose/docker-compose tidak ditemukan. Database tidak bisa distop otomatis."
-        return 0
-    fi
-
-    log "Stop service database sebelum commit raw database:"
-    echo "$DB_SERVICES"
-
-    # shellcheck disable=SC2086
-    $dc stop $DB_SERVICES
-
-    DB_SERVICES_STOPPED="true"
-}
-
-start_database_services() {
-    if [ "$DB_SERVICES_STOPPED" != "true" ]; then
-        return 0
-    fi
-
-    if [ -z "$DB_SERVICES" ]; then
-        return 0
-    fi
-
-    cd "$PROJECT_DIR"
-
-    local dc
-    dc="$(docker_compose_cmd || true)"
-
-    if [ -z "$dc" ]; then
-        log "WARNING: docker compose/docker-compose tidak ditemukan. Database tidak bisa distart otomatis."
-        return 0
-    fi
-
-    log "Start ulang service database:"
-    echo "$DB_SERVICES"
-
-    # shellcheck disable=SC2086
-    $dc start $DB_SERVICES
-
-    DB_SERVICES_STOPPED="false"
-}
-
-on_exit() {
-    local exit_code=$?
-
-    if [ "$DB_SERVICES_STOPPED" = "true" ]; then
-        log "Script selesai/gagal. Menyalakan ulang database..."
-        start_database_services || true
-    fi
-
-    exit "$exit_code"
 }
 
 cleanup_old_git_locks() {
@@ -466,13 +343,18 @@ stage_raw_db_dirs() {
 
     local dir
 
+    log "INCLUDE_RAW_DB_DATA=true, tetapi container database TIDAK akan distop."
+
     for dir in "${RAW_DB_DIRS[@]}"; do
         if [ ! -d "$PROJECT_DIR/$dir" ]; then
             continue
         fi
 
-        log "Force stage raw database dir: $dir"
-        git add -f "$dir" 2>/dev/null || true
+        log "Force stage raw database dir tanpa stop container: $dir"
+        git add -f "$dir" 2>/dev/null || {
+            log "WARNING: Gagal stage sebagian/seluruh raw database dir: $dir"
+            log "Kemungkinan ada file sedang berubah/permission tidak cukup. Script tetap lanjut."
+        }
     done
 }
 
@@ -553,8 +435,6 @@ commit_and_push() {
         exit 0
     }
 
-    trap on_exit EXIT
-
     echo "=================================================="
     log "Mulai auto commit didin_tenda..."
 
@@ -574,13 +454,9 @@ commit_and_push() {
     log "Cek koneksi SSH GitHub dengan key yang benar..."
     ssh -i "$SSH_KEY" -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -T git@github.com || true
 
-    stop_database_services
-
     sync_with_remote_before_commit
     stage_changes
     commit_and_push
-
-    start_database_services
 
     log "Selesai."
 
