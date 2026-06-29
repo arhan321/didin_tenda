@@ -1,21 +1,23 @@
 version: '3'
+
 services:
   php_tenda:
     build: ./php
-    image: php:latest
+    image: php_tenda:latest
     container_name: php_tenda
     hostname: "php"
+    restart: always
     volumes:
       - ./src_new:/var/www/html
       - ./php/www.conf:/usr/local/etc/php-fpm.d/www.conf
     working_dir: /var/www/html
-    depends_on: 
+    depends_on:
       - mysql_tenda
 
   mysql_tenda:
     image: mariadb:10.2
     container_name: mysql_tenda
-    restart: unless-stopped
+    restart: always
     tty: true
     ports:
       - "32346:3306"
@@ -28,14 +30,15 @@ services:
       MYSQL_ROOT_PASSWORD: 123
       TZ: Asia/Jakarta
       SERVICE_TAGS: dev
-      SERVICE_NAME: mysql  
+      SERVICE_NAME: mysql
     read_only: false
 
   nginx_tenda:
     build: ./nginx
-    image: nginx:latest
+    image: nginx_tenda:latest
     container_name: nginx_tenda
     hostname: "nginx"
+    restart: always
     ports:
       - "45:80"
     volumes:
