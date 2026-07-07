@@ -2,8 +2,34 @@
 
 set -Eeuo pipefail
 
+# ==================================================
+# AUTO GIT BACKUP - DIDIN TENDA
+# Root/Super User Mode + Auto Repair .git
+# ==================================================
+#
+# Fitur:
+# - Wajib jalan sebagai root/super user.
+# - Kalau dijalankan manual oleh user biasa, otomatis relaunch pakai sudo.
+# - Tetap backup .env, file .sql, dan raw database folder.
+# - Kalau .git corrupt / HEAD rusak / object kosong, script otomatis repair
+#   dengan mengambil .git bersih dari GitHub tanpa mengubah isi folder project.
+# - Tidak stop/start container database.
+#
+# Catatan:
+# - Commit raw database saat database hidup bisa tidak konsisten.
+# - Backup paling aman tetap file dump .sql, tapi raw DB tetap ikut di-force add
+#   sesuai kebutuhan backup server.
+
+# --------------------------------------------------
+# Jalankan sebagai root
+# --------------------------------------------------
+if [ "$(id -u)" -ne 0 ]; then
+    echo "[INFO] Script butuh root/super user. Menjalankan ulang dengan sudo..."
+    exec sudo -E /bin/bash "$0" "$@"
+fi
+
 export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-export HOME=/home/backend
+export HOME=/root
 
 PROJECT_DIR="/home/backend/didin_tenda"
 BRANCH="master"
@@ -13,20 +39,21 @@ REMOTE_URL="git@github.com:arhan321/didin_tenda.git"
 SSH_KEY="/etc/ssh/github_keys/id_ed25519_github"
 export GIT_SSH_COMMAND="ssh -i $SSH_KEY -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new"
 
+# Log tetap di folder lama agar mudah dicek seperti biasa
 RUNTIME_DIR="/home/backend/.auto_git_didin_tenda"
 LOG_FILE="$RUNTIME_DIR/auto_git_commit.log"
-LOCK_FILE="$RUNTIME_DIR/auto_git_commit.lock"
 
-# Sesuai kebutuhan bro:
+# Lock root mode agar cron tiap menit tidak menumpuk
+LOCK_FILE="/var/lock/auto_git_didin_tenda.lock"
+
+# Identitas commit
+GIT_USER_NAME="Didin Tenda Auto Backup"
+GIT_USER_EMAIL="arhanmali96@gmail.com"
+
+# Sesuai kebutuhan:
 # - .env ikut GitHub sebagai backup.
 # - file backup .sql ikut GitHub walaupun kena .gitignore.
 # - raw database folder ikut GitHub kalau foldernya ada.
-#
-# PENTING:
-# Script versi ini TIDAK AKAN stop/start container MySQL/MariaDB sama sekali.
-# Jadi koneksi Navicat tidak akan ke-kill karena auto commit.
-# Catatan: commit raw database engine files saat database masih hidup bisa tidak konsisten.
-# Backup yang paling aman tetap file dump .sql dari folder backup_database.
 INCLUDE_ENV_FILE="true"
 INCLUDE_BACKUP_SQL="true"
 INCLUDE_RAW_DB_DATA="true"
@@ -35,10 +62,12 @@ INCLUDE_RAW_DB_DATA="true"
 BACKUP_SQL_DIRS=(
     "backup_database/src/uploads/backup"
     "backup_database/src/upload/uploads/backup"
+    "backup_database/src/upload/backup"
+    "backup_database/src/uploads/backup"
 )
 
-# Folder raw database engine files. Folder akan di-force add hanya kalau benar-benar ada.
-# Script TIDAK akan mematikan container database sebelum stage folder ini.
+# Folder raw database engine files.
+# Folder akan di-force add hanya kalau benar-benar ada.
 RAW_DB_DIRS=(
     "db/data"
     "database/data"
@@ -47,6 +76,7 @@ RAW_DB_DIRS=(
 )
 
 mkdir -p "$RUNTIME_DIR"
+touch "$LOG_FILE" 2>/dev/null || true
 
 timestamp() {
     date '+%Y-%m-%d %H:%M:%S'
@@ -70,6 +100,40 @@ is_file_in_use() {
     fi
 
     return 1
+}
+
+run_git() {
+    GIT_SSH_COMMAND="$GIT_SSH_COMMAND" git "$@"
+}
+
+check_requirements() {
+    if [ ! -d "$PROJECT_DIR" ]; then
+        log "ERROR: Project directory tidak ditemukan: $PROJECT_DIR"
+        exit 1
+    fi
+
+    if [ ! -f "$SSH_KEY" ]; then
+        log "ERROR: SSH key tidak ditemukan: $SSH_KEY"
+        exit 1
+    fi
+
+    chmod 700 "$(dirname "$SSH_KEY")" 2>/dev/null || true
+    chmod 600 "$SSH_KEY" 2>/dev/null || true
+    chmod 644 "$SSH_KEY.pub" 2>/dev/null || true
+
+    if [ ! -r "$SSH_KEY" ]; then
+        log "ERROR: SSH key tidak bisa dibaca oleh root: $SSH_KEY"
+        exit 1
+    fi
+}
+
+setup_git_identity_and_safe_dir() {
+    run_git config --global user.name "$GIT_USER_NAME" 2>/dev/null || true
+    run_git config --global user.email "$GIT_USER_EMAIL" 2>/dev/null || true
+
+    if ! run_git config --global --get-all safe.directory | grep -Fx "$PROJECT_DIR" >/dev/null 2>&1; then
+        run_git config --global --add safe.directory "$PROJECT_DIR" 2>/dev/null || true
+    fi
 }
 
 cleanup_old_git_locks() {
@@ -104,24 +168,47 @@ cleanup_old_git_locks() {
     done
 }
 
-check_requirements() {
-    if [ ! -d "$PROJECT_DIR" ]; then
-        log "ERROR: Project directory tidak ditemukan: $PROJECT_DIR"
+repair_git_metadata_from_remote() {
+    log "Mulai repair metadata .git tanpa backup folder project..."
+
+    cd "$PROJECT_DIR"
+
+    local ts
+    local tmp_clone
+    local corrupt_git_dir
+
+    ts="$(date +%F_%H%M%S)"
+    tmp_clone="/tmp/didin_tenda_clean_$ts"
+    corrupt_git_dir="/tmp/didin_tenda_git_corrupt_$ts"
+
+    if [ -d "$PROJECT_DIR/.git" ]; then
+        log "Memindahkan .git rusak ke: $corrupt_git_dir"
+        mv "$PROJECT_DIR/.git" "$corrupt_git_dir"
+    fi
+
+    rm -rf "$tmp_clone"
+
+    log "Clone repository bersih dari GitHub ke temporary folder..."
+    if ! run_git clone -b "$BRANCH" "$REMOTE_URL" "$tmp_clone"; then
+        log "ERROR: Gagal clone repository dari GitHub."
+        log "Cek SSH key, akses repo, atau koneksi internet."
         exit 1
     fi
 
-    if [ ! -f "$SSH_KEY" ]; then
-        log "ERROR: SSH key tidak ditemukan: $SSH_KEY"
-        exit 1
-    fi
+    log "Menyalin .git bersih ke project lama..."
+    cp -a "$tmp_clone/.git" "$PROJECT_DIR/.git"
+    rm -rf "$tmp_clone"
 
-    if [ ! -r "$SSH_KEY" ]; then
-        log "ERROR: SSH key tidak bisa dibaca oleh user $(whoami): $SSH_KEY"
-        log "Jalankan:"
-        log "sudo chown -R backend:backend /etc/ssh/github_keys"
-        log "sudo chmod 700 /etc/ssh/github_keys"
-        log "sudo chmod 600 /etc/ssh/github_keys/id_ed25519_github"
-        log "sudo chmod 644 /etc/ssh/github_keys/id_ed25519_github.pub"
+    chmod -R u+rwX "$PROJECT_DIR/.git" 2>/dev/null || true
+
+    setup_git_identity_and_safe_dir
+
+    cd "$PROJECT_DIR"
+
+    if run_git rev-parse --verify HEAD >/dev/null 2>&1; then
+        log "Repair .git berhasil. File project tetap di folder lama."
+    else
+        log "ERROR: Repair .git gagal. HEAD masih tidak valid."
         exit 1
     fi
 }
@@ -130,24 +217,25 @@ init_git_if_needed() {
     cd "$PROJECT_DIR"
 
     if [ ! -d "$PROJECT_DIR/.git" ]; then
-        log "Git belum di-init. Menjalankan git init..."
-        git init
-        git branch -M "$BRANCH" 2>/dev/null || true
+        log ".git tidak ditemukan. Akan repair dari remote GitHub."
+        repair_git_metadata_from_remote
     fi
 }
 
-check_git_integrity() {
+check_git_integrity_or_repair() {
     cd "$PROJECT_DIR"
 
-    if ! git rev-parse --git-dir >/dev/null 2>&1; then
-        log "ERROR: Repository Git tidak valid."
-        exit 1
+    if ! run_git rev-parse --git-dir >/dev/null 2>&1; then
+        log "Repository Git tidak valid. Akan repair .git."
+        repair_git_metadata_from_remote
+        return 0
     fi
 
     chmod -R u+rwX "$PROJECT_DIR/.git" 2>/dev/null || true
 
-    if ! git rev-parse --verify HEAD >/dev/null 2>&1; then
-        log "HEAD belum punya commit. Lanjut sebagai initial commit."
+    if ! run_git rev-parse --verify HEAD >/dev/null 2>&1; then
+        log "HEAD Git rusak/belum valid. Akan repair .git dari remote."
+        repair_git_metadata_from_remote
         return 0
     fi
 
@@ -155,101 +243,99 @@ check_git_integrity() {
     empty_objects="$(find "$PROJECT_DIR/.git/objects" -type f -empty 2>/dev/null || true)"
 
     if [ -n "$empty_objects" ]; then
-        log "ERROR: Ditemukan object Git kosong/rusak:"
+        log "Ditemukan object Git kosong/rusak:"
         echo "$empty_objects"
-        log "Auto commit dihentikan supaya repository tidak makin rusak."
-        exit 1
+        log "Akan repair .git otomatis dari remote."
+        repair_git_metadata_from_remote
+        return 0
     fi
 
-    if ! git fsck --connectivity-only --no-dangling >/dev/null 2>&1; then
-        log "ERROR: Git fsck gagal. Repository kemungkinan masih bermasalah."
-        log "Auto commit dihentikan."
-        exit 1
+    if ! run_git fsck --connectivity-only --no-dangling >/dev/null 2>&1; then
+        log "Git fsck gagal. Repository kemungkinan bermasalah."
+        log "Akan repair .git otomatis dari remote."
+        repair_git_metadata_from_remote
+        return 0
     fi
+
+    log "Git integrity OK."
 }
 
 check_git_state() {
     cd "$PROJECT_DIR"
 
     if [ -d "$PROJECT_DIR/.git/rebase-merge" ] || [ -d "$PROJECT_DIR/.git/rebase-apply" ]; then
-        log "ERROR: Ada proses rebase Git yang belum selesai."
-        log "Cek manual: cd $PROJECT_DIR && git status"
-        log "Jika ingin batalkan: cd $PROJECT_DIR && git rebase --abort"
-        exit 1
+        log "Ada proses rebase Git yang belum selesai. Membatalkan rebase..."
+        run_git rebase --abort || true
     fi
 
     if [ -f "$PROJECT_DIR/.git/MERGE_HEAD" ]; then
-        log "ERROR: Ada proses merge Git yang belum selesai."
-        log "Cek manual: cd $PROJECT_DIR && git status"
-        log "Jika ingin batalkan: cd $PROJECT_DIR && git merge --abort"
-        exit 1
+        log "Ada proses merge Git yang belum selesai. Membatalkan merge..."
+        run_git merge --abort || true
     fi
 }
 
 setup_git_repo() {
     cd "$PROJECT_DIR"
 
-    chmod 700 /home/backend/.ssh 2>/dev/null || true
-    chmod 700 /etc/ssh/github_keys 2>/dev/null || true
-    chmod 600 "$SSH_KEY" 2>/dev/null || true
-    chmod 644 "$SSH_KEY.pub" 2>/dev/null || true
+    setup_git_identity_and_safe_dir
 
-    if ! git config --global --get-all safe.directory | grep -Fx "$PROJECT_DIR" >/dev/null 2>&1; then
-        git config --global --add safe.directory "$PROJECT_DIR" 2>/dev/null || true
-    fi
-
-    git config core.fileMode false 2>/dev/null || true
+    run_git config core.fileMode false 2>/dev/null || true
 
     local current_remote
-    current_remote="$(git remote get-url origin 2>/dev/null || true)"
+    current_remote="$(run_git remote get-url origin 2>/dev/null || true)"
 
     if [ -z "$current_remote" ]; then
         log "Remote origin belum ada. Menambahkan origin..."
-        git remote add origin "$REMOTE_URL"
+        run_git remote add origin "$REMOTE_URL"
     elif [ "$current_remote" != "$REMOTE_URL" ]; then
         log "Remote origin berbeda. Mengubah remote origin..."
         log "Remote lama: $current_remote"
         log "Remote baru: $REMOTE_URL"
-        git remote set-url origin "$REMOTE_URL"
+        run_git remote set-url origin "$REMOTE_URL"
     fi
 
     local active_branch
-    active_branch="$(git branch --show-current || true)"
+    active_branch="$(run_git branch --show-current || true)"
 
     if [ -z "$active_branch" ]; then
         log "Branch aktif kosong. Membuat/memakai branch $BRANCH..."
-        git checkout -B "$BRANCH"
+        run_git checkout -B "$BRANCH"
         active_branch="$BRANCH"
     elif [ "$active_branch" != "$BRANCH" ]; then
         log "Branch aktif bukan $BRANCH. Mencoba checkout ke $BRANCH..."
 
-        if git show-ref --verify --quiet "refs/heads/$BRANCH"; then
-            git checkout "$BRANCH"
+        if run_git show-ref --verify --quiet "refs/heads/$BRANCH"; then
+            run_git checkout "$BRANCH"
         else
-            git checkout -B "$BRANCH"
+            run_git checkout -B "$BRANCH"
         fi
 
-        active_branch="$(git branch --show-current || true)"
+        active_branch="$(run_git branch --show-current || true)"
     fi
 
+    log "User aktif: $(whoami)"
     log "Project dir: $PROJECT_DIR"
     log "Branch target: $BRANCH"
     log "Branch aktif: ${active_branch:-unknown}"
+    log "Remote URL: $REMOTE_URL"
     log "SSH key aktif: $SSH_KEY"
 }
 
 sync_with_remote_before_commit() {
     cd "$PROJECT_DIR"
 
-    log "Fetch remote terbaru tanpa mengandalkan FETCH_HEAD..."
-    git fetch origin "$BRANCH" --prune
+    log "Fetch remote terbaru..."
+    if ! run_git fetch origin "$BRANCH" --prune; then
+        log "WARNING: Fetch remote gagal. Lanjut commit lokal dulu."
+        return 0
+    fi
 
-    if ! git rev-parse --verify "origin/$BRANCH" >/dev/null 2>&1; then
+    if ! run_git rev-parse --verify "origin/$BRANCH" >/dev/null 2>&1; then
         log "origin/$BRANCH belum ada. Lanjut commit lalu push branch baru."
         return 0
     fi
 
-    if ! git rev-parse --verify HEAD >/dev/null 2>&1; then
+    if ! run_git rev-parse --verify HEAD >/dev/null 2>&1; then
         log "Local HEAD belum ada. Skip sync remote sebelum initial commit."
         return 0
     fi
@@ -258,9 +344,9 @@ sync_with_remote_before_commit() {
     local remote_sha
     local base_sha
 
-    local_sha="$(git rev-parse HEAD)"
-    remote_sha="$(git rev-parse "origin/$BRANCH")"
-    base_sha="$(git merge-base HEAD "origin/$BRANCH")"
+    local_sha="$(run_git rev-parse HEAD)"
+    remote_sha="$(run_git rev-parse "origin/$BRANCH")"
+    base_sha="$(run_git merge-base HEAD "origin/$BRANCH" || true)"
 
     if [ "$local_sha" = "$remote_sha" ]; then
         log "Branch lokal sudah sama dengan origin/$BRANCH."
@@ -269,7 +355,10 @@ sync_with_remote_before_commit() {
 
     if [ "$local_sha" = "$base_sha" ]; then
         log "Branch lokal tertinggal dari origin/$BRANCH. Menjalankan pull rebase..."
-        git pull --rebase --autostash origin "$BRANCH"
+        if ! run_git pull --rebase --autostash origin "$BRANCH"; then
+            log "WARNING: Pull rebase gagal. Membatalkan rebase jika ada, lanjut commit lokal."
+            run_git rebase --abort || true
+        fi
         return 0
     fi
 
@@ -279,7 +368,10 @@ sync_with_remote_before_commit() {
     fi
 
     log "Branch lokal dan remote berbeda/diverged. Mencoba pull rebase dengan autostash..."
-    git pull --rebase --autostash origin "$BRANCH"
+    if ! run_git pull --rebase --autostash origin "$BRANCH"; then
+        log "WARNING: Pull rebase diverged gagal. Membatalkan rebase jika ada."
+        run_git rebase --abort || true
+    fi
 }
 
 stage_backup_sql_files() {
@@ -311,39 +403,39 @@ stage_backup_sql_files() {
             fi
 
             log "Force stage backup SQL: $rel_path"
-            git add -f "$rel_path" 2>/dev/null || true
+            run_git add -f "$rel_path" 2>/dev/null || true
         done
     done
 }
 
 stage_env_file() {
+    cd "$PROJECT_DIR"
+
     if [ "$INCLUDE_ENV_FILE" != "true" ]; then
-        git restore --staged -- .env 2>/dev/null || true
+        run_git restore --staged -- .env 2>/dev/null || true
         return 0
     fi
 
-    cd "$PROJECT_DIR"
-
     if [ -f "$PROJECT_DIR/.env" ]; then
         log "Force stage .env sesuai kebutuhan backup."
-        git add -f .env 2>/dev/null || true
+        run_git add -f .env 2>/dev/null || true
     fi
 }
 
 stage_raw_db_dirs() {
+    cd "$PROJECT_DIR"
+
     if [ "$INCLUDE_RAW_DB_DATA" != "true" ]; then
         local dir
         for dir in "${RAW_DB_DIRS[@]}"; do
-            git restore --staged -- "$dir" 2>/dev/null || true
+            run_git restore --staged -- "$dir" 2>/dev/null || true
         done
         return 0
     fi
 
-    cd "$PROJECT_DIR"
-
     local dir
 
-    log "INCLUDE_RAW_DB_DATA=true, tetapi container database TIDAK akan distop."
+    log "INCLUDE_RAW_DB_DATA=true, container database TIDAK akan distop."
 
     for dir in "${RAW_DB_DIRS[@]}"; do
         if [ ! -d "$PROJECT_DIR/$dir" ]; then
@@ -351,9 +443,9 @@ stage_raw_db_dirs() {
         fi
 
         log "Force stage raw database dir tanpa stop container: $dir"
-        git add -f "$dir" 2>/dev/null || {
+        run_git add -f "$dir" 2>/dev/null || {
             log "WARNING: Gagal stage sebagian/seluruh raw database dir: $dir"
-            log "Kemungkinan ada file sedang berubah/permission tidak cukup. Script tetap lanjut."
+            log "Kemungkinan file sedang berubah/permission tidak cukup. Script tetap lanjut."
         }
     done
 }
@@ -361,18 +453,19 @@ stage_raw_db_dirs() {
 unstage_runtime_and_lock_files() {
     cd "$PROJECT_DIR"
 
-    git restore --staged -- auto_git_commit.log 2>/dev/null || true
-    git restore --staged -- cron_git_runner.log 2>/dev/null || true
-    git restore --staged -- .gitignore.lock 2>/dev/null || true
+    run_git restore --staged -- auto_git_commit.log 2>/dev/null || true
+    run_git restore --staged -- cron_git_runner.log 2>/dev/null || true
+    run_git restore --staged -- .gitignore.lock 2>/dev/null || true
+    run_git restore --staged -- "$LOG_FILE" 2>/dev/null || true
 
     local lock_files
-    lock_files="$(git diff --cached --name-only | grep -E '(^|/).*\.lock$' || true)"
+    lock_files="$(run_git diff --cached --name-only | grep -E '(^|/).*\.lock$' || true)"
 
     if [ -n "$lock_files" ]; then
         echo "$lock_files" | while read -r lock_path; do
             if [ -n "$lock_path" ]; then
                 log "Unstage lock file: $lock_path"
-                git restore --staged -- "$lock_path" 2>/dev/null || true
+                run_git restore --staged -- "$lock_path" 2>/dev/null || true
             fi
         done
     fi
@@ -382,10 +475,10 @@ stage_changes() {
     cd "$PROJECT_DIR"
 
     log "Status perubahan sebelum add:"
-    git status --short
+    run_git status --short || true
 
     log "Menambahkan perubahan umum ke staging..."
-    git add -A
+    run_git add -A
 
     stage_env_file
     stage_backup_sql_files
@@ -393,63 +486,66 @@ stage_changes() {
     unstage_runtime_and_lock_files
 
     log "Status perubahan setelah staging:"
-    git status --short
+    run_git status --short || true
 }
 
 commit_and_push() {
     cd "$PROJECT_DIR"
 
-    if git diff --cached --quiet; then
+    if run_git diff --cached --quiet; then
         log "Tidak ada perubahan untuk di-commit."
     else
         local commit_message
         commit_message="auto commit didin_tenda: $(timestamp)"
         log "Membuat commit: $commit_message"
-        git commit -m "$commit_message"
+        run_git commit -m "$commit_message"
     fi
 
     log "Push ke GitHub..."
 
-    if git push origin "HEAD:$BRANCH"; then
+    if run_git push origin "HEAD:$BRANCH"; then
         log "Auto commit dan push berhasil."
+        return 0
+    fi
+
+    log "Push gagal. Mencoba fetch + pull rebase lalu push ulang..."
+
+    run_git fetch origin "$BRANCH" --prune || true
+
+    if run_git pull --rebase --autostash origin "$BRANCH"; then
+        log "Pull rebase berhasil. Mencoba push ulang..."
+        run_git push origin "HEAD:$BRANCH"
+        log "Auto commit dan push berhasil setelah rebase."
     else
-        log "Push gagal. Mencoba fetch + pull rebase lalu push ulang..."
-
-        git fetch origin "$BRANCH" --prune
-
-        if git pull --rebase --autostash origin "$BRANCH"; then
-            log "Pull rebase berhasil. Mencoba push ulang..."
-            git push origin "HEAD:$BRANCH"
-            log "Auto commit dan push berhasil setelah rebase."
-        else
-            log "ERROR: Pull rebase gagal."
-            log "Cek manual: cd $PROJECT_DIR && git status"
-            exit 1
-        fi
+        log "ERROR: Pull rebase gagal."
+        run_git rebase --abort || true
+        log "Cek manual: cd $PROJECT_DIR && git status"
+        exit 1
     fi
 }
 
-{
+main() {
     flock -n 9 || {
         log "Script masih berjalan, skip."
         exit 0
     }
 
     echo "=================================================="
-    log "Mulai auto commit didin_tenda..."
+    log "Mulai auto commit didin_tenda ROOT mode..."
 
     check_requirements
 
     cd "$PROJECT_DIR"
 
+    setup_git_identity_and_safe_dir
     init_git_if_needed
     cleanup_old_git_locks
-    check_git_integrity
+    check_git_integrity_or_repair
     check_git_state
     setup_git_repo
 
     log "Remote aktif:"
-    git remote -v
+    run_git remote -v || true
 
     log "Cek koneksi SSH GitHub dengan key yang benar..."
     ssh -i "$SSH_KEY" -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -T git@github.com || true
@@ -459,5 +555,6 @@ commit_and_push() {
     commit_and_push
 
     log "Selesai."
+}
 
-} 9>"$LOCK_FILE" >> "$LOG_FILE" 2>&1
+main 9>"$LOCK_FILE" >> "$LOG_FILE" 2>&1
