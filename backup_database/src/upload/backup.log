@@ -561136,3 +561136,12 @@ Error response from daemon: container 634472b0746d510a36546901c216c05c03f7c0436a
     "rows": 688,
     "size_bytes": 280202
 }
+{
+    "status": "success",
+    "message": "Backup database berhasil dibuat.",
+    "file_name": "backup_didin_tendav2_didin_tendav2_2026-07-17_21-37-02.sql",
+    "file_path": "/var/www/html/upload/uploads/backup/backup_didin_tendav2_didin_tendav2_2026-07-17_21-37-02.sql",
+    "tables": 29,
+    "rows": 688,
+    "size_bytes": 280202
+}
