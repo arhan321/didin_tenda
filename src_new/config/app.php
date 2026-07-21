@@ -54,7 +54,7 @@ return [
     |
     */
 
-    'url' => env('APP_URL', 'https://tenda.djncloud.my.id'),
+    'url' => env('APP_URL', 'https://didintenda.my.id'),
 
     /*
     |--------------------------------------------------------------------------
